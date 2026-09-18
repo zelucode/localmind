@@ -124,7 +124,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     addItem({
       id: 'page-dashboard',
       type: 'page',
-      title: 'AI Nexus Command Center',
+      title: 'LocalMind Command Center',
       subtitle: 'Browse AI catalog, manage zero-cost models, OmniRoute proxy & filters',
       categoryLabel: 'Navigation',
       icon: <LayoutDashboard className="w-4 h-4 text-sky-400" />,
@@ -247,7 +247,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       id: 'action-replay-loading-screen',
       type: 'action',
       title: 'Replay Boot Loading Animation',
-      subtitle: 'Preview the animated AI Nexus orbital core pulse and telemetry boot sequence',
+      subtitle: 'Preview the animated LocalMind orbital core pulse and telemetry boot sequence',
       categoryLabel: 'General',
       icon: <Cpu className="w-4 h-4 text-indigo-400" />,
       action: () => {
@@ -718,7 +718,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           </div>
 
           <div className="flex items-center gap-1 font-medium">
-            <span>AI Nexus Spotlight</span>
+            <span>LocalMind Spotlight</span>
           </div>
         </div>
       </div>

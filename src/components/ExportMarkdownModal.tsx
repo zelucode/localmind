@@ -23,7 +23,7 @@ export const ExportMarkdownModal: React.FC<ExportMarkdownModalProps> = ({
     const timestamp = new Date().toISOString().split('T')[0];
     const header = [
       `# Curated Free Online Tools & Utilities (${bookmarks.length} Tools)`,
-      `> Sourced from AI Nexus & FckSignups Registry • Exported on ${timestamp}`,
+      `> Sourced from LocalMind & FckSignups Registry • Exported on ${timestamp}`,
       `> Scope: ${activeCategoryName} • 100% Free & No Account Required`,
       '',
     ];
@@ -41,7 +41,7 @@ export const ExportMarkdownModal: React.FC<ExportMarkdownModalProps> = ({
           return `| ${titleMd} | ${b.category} | ${typeText} | ${licText} | ${starsText} | ${cleanDesc} | [Open Tool](${b.url}) |`;
         }),
       ];
-      return [...header, ...tableRows, '', '---', '*Generated with [AI Nexus](https://github.com)*'].join('\n');
+      return [...header, ...tableRows, '', '---', '*Generated with [LocalMind](https://github.com)*'].join('\n');
     } else {
       const listItems = bookmarks.map((b) => {
         const lines = [
@@ -60,7 +60,7 @@ export const ExportMarkdownModal: React.FC<ExportMarkdownModalProps> = ({
         return lines.join('\n');
       });
 
-      return [...header, listItems.join('\n\n'), '', '---', '*Generated with [AI Nexus](https://github.com)*'].join('\n');
+      return [...header, listItems.join('\n\n'), '', '---', '*Generated with [LocalMind](https://github.com)*'].join('\n');
     }
   }, [bookmarks, format, activeCategoryName]);
 

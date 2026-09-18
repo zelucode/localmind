@@ -30,7 +30,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
   totalBookmarks = 270,
 }) => {
   const [progress, setProgress] = useState(0);
-  const [currentStatus, setCurrentStatus] = useState('Initializing AI Nexus runtime...');
+  const [currentStatus, setCurrentStatus] = useState('Initializing LocalMind runtime...');
   const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
@@ -127,7 +127,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
           />
 
           <div className="relative z-10 w-full max-w-md flex flex-col items-center text-center">
-            {/* Animated AI Nexus Core Orb */}
+            {/* Animated LocalMind Core Orb */}
             <div className="relative w-28 h-28 mb-8 flex items-center justify-center">
               {/* Outer Pulsing Glow */}
               <motion.div
@@ -211,7 +211,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight" style={{ color: 'var(--theme-text)' }}>
-                AI NEXUS
+                LocalMind
               </h1>
               <p className="text-xs tracking-wider uppercase font-medium" style={{ color: 'var(--theme-text-muted)' }}>
                 Desktop AI Command & Multi-Provider Engine

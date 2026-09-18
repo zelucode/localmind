@@ -1084,7 +1084,7 @@ export default function App() {
         >
           <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
             <span>
-              AI Nexus Command Center • Active Theme:{' '}
+              LocalMind Command Center • Active Theme:{' '}
               <strong style={{ color: 'var(--theme-text)' }}>{activeThemePreset.name}</strong>
             </span>
             <div className="flex items-center gap-4 text-[11px] opacity-80">

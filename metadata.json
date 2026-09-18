@@ -1,5 +1,5 @@
 {
-  "name": "AI Nexus - Desktop AI Dashboard",
+  "name": "LocalMind - Desktop AI Dashboard",
   "description": "Unified command center for AI tools, LLMs, coding agents, free tool bookmarks, OmniRoute detection, and API key management.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

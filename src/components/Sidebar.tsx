@@ -72,7 +72,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <button
             id="sidebar-btn-brand"
             onClick={() => onNavigate('dashboard')}
-            title="AI Nexus Dashboard"
+            title="LocalMind Dashboard"
             className="p-2.5 rounded-xl shadow-md transition-transform hover:scale-105 active:scale-95 cursor-pointer"
             style={{
               backgroundColor: 'var(--theme-primary)',

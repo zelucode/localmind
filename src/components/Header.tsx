@@ -61,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
                   style={{ color: 'var(--theme-text)' }}
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>AI Nexus</span>
+                  <span>LocalMind</span>
                 </button>
                 <ChevronRight className="w-3.5 h-3.5 opacity-40" />
                 <span
@@ -80,7 +80,7 @@ export const Header: React.FC<HeaderProps> = ({
                   style={{ color: 'var(--theme-text)' }}
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">AI Nexus</span>
+                  <span className="hidden sm:inline">LocalMind</span>
                 </button>
                 <ChevronRight className="w-3.5 h-3.5 opacity-40 hidden sm:inline" />
                 <div>
@@ -102,7 +102,7 @@ export const Header: React.FC<HeaderProps> = ({
                   className="text-sm sm:text-base font-bold tracking-tight"
                   style={{ color: 'var(--theme-text)' }}
                 >
-                  AI Nexus
+                  LocalMind
                 </h1>
                 <div
                   className="flex items-center gap-2 text-[11px] mt-0.5"

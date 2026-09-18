@@ -105,7 +105,7 @@ export const StartupWelcomeModal: React.FC<StartupWelcomeModalProps> = ({
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-              AI Nexus & Developer Tools Hub
+              LocalMind & Developer Tools Hub
             </h1>
 
             <p className="text-xs sm:text-sm leading-relaxed opacity-80">
@@ -167,7 +167,7 @@ export const StartupWelcomeModal: React.FC<StartupWelcomeModalProps> = ({
 
               <div>
                 <h3 className="font-bold text-sm flex items-center gap-1.5 group-hover:text-[var(--theme-primary)] transition-colors">
-                  <span>AI Nexus Command Center</span>
+                  <span>LocalMind Command Center</span>
                   <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                 </h3>
                 <p className="text-xs opacity-75 mt-1 leading-relaxed">

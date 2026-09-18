@@ -68,7 +68,7 @@ export const ExportImportBookmarksModal: React.FC<ExportImportBookmarksModalProp
   const exportContent = useMemo(() => {
     if (exportFormat === 'json') {
       const payload = {
-        app: 'AI Nexus & Developer Tools Hub',
+        app: 'LocalMind & Developer Tools Hub',
         version: 1,
         exportedAt: new Date().toISOString(),
         totalCount: exportItems.length,
@@ -85,10 +85,10 @@ export const ExportImportBookmarksModal: React.FC<ExportImportBookmarksModalProp
      It will be read and overwritten.
      DO NOT EDIT! -->
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
-<TITLE>Bookmarks - AI Nexus</TITLE>
+<TITLE>Bookmarks - LocalMind</TITLE>
 <H1>Bookmarks</H1>
 <DL><p>
-    <DT><H3 ADD_DATE="${now}" LAST_MODIFIED="${now}">AI Nexus & Developer Tools</H3>
+    <DT><H3 ADD_DATE="${now}" LAST_MODIFIED="${now}">LocalMind & Developer Tools</H3>
     <DL><p>
 `;
       exportItems.forEach((b) => {
@@ -104,7 +104,7 @@ export const ExportImportBookmarksModal: React.FC<ExportImportBookmarksModalProp
     }
 
     if (exportFormat === 'markdown') {
-      let md = `# AI Nexus Bookmarks (${exportItems.length} tools)\n\n`;
+      let md = `# LocalMind Bookmarks (${exportItems.length} tools)\n\n`;
       md += `*Exported on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}*\n\n`;
       
       const byCategory: Record<string, ToolBookmark[]> = {};

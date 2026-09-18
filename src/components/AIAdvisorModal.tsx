@@ -90,7 +90,7 @@ export const AIAdvisorModal: React.FC<AIAdvisorModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-semibold" style={{ color: 'var(--theme-text)' }}>
-                AI Nexus Free Tier Advisor
+                LocalMind Free Tier Advisor
               </h2>
               <p className="text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
                 Ask how to solve any task using 100% free AI tools, local agents, or OmniRoute.

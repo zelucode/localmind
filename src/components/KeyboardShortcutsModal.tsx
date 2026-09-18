@@ -15,7 +15,7 @@ interface ShortcutItem {
 const SHORTCUTS: ShortcutItem[] = [
   // Navigation & Search
   { keys: ['⌘K / Ctrl+K'], description: 'Open Global Search Command Palette (Find pages, tools, bookmarks & actions)', category: 'navigation' },
-  { keys: ['1'], description: 'Switch to AI Nexus Hub & Tools Catalog', category: 'navigation' },
+  { keys: ['1'], description: 'Switch to LocalMind Hub & Tools Catalog', category: 'navigation' },
   { keys: ['2'], description: 'Switch to Free Online Tool Bookmarks', category: 'navigation' },
   { keys: ['3'], description: 'Switch to Workspace Settings & Themes', category: 'navigation' },
   { keys: ['/'], description: 'Quick-focus search bar on active page', category: 'navigation' },

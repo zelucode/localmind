@@ -708,7 +708,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   )}
                 </div>
                 <span className="text-xs block mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>
-                  Presents the animated orbital AI Nexus core, subsystem telemetry tracker, and progress bar while loading resources.
+                  Presents the animated orbital LocalMind core, subsystem telemetry tracker, and progress bar while loading resources.
                 </span>
               </div>
               {onToggleShowLoadingAnimation && (

@@ -1,6 +1,6 @@
-# AI Nexus — Free-Tier AI Developer Catalog & Command Center
+# LocalMind — Free-Tier AI Developer Catalog & Command Center
 
-AI Nexus is a professional developer hub designed to aggregate, organize, and navigate the modern ecosystem of **free-tier AI platforms**, **local coding agents**, **open-source LLM runtimes**, and **unified API routers (like OmniRoute)**.
+LocalMind is a professional developer hub designed to aggregate, organize, and navigate the modern ecosystem of **free-tier AI platforms**, **local coding agents**, **open-source LLM runtimes**, and **unified API routers (like OmniRoute)**.
 
 ---
 
@@ -79,7 +79,7 @@ These are concepts and enhancements considered during the design and architectur
 - [ ] **Model Comparison Matrix (Benchmark vs. Cost)**: Integrated visual benchmark matrix (HumanEval, MATH, SWE-bench) filtered strictly by whether the model has a free API or local weight availability.
 - [ ] **Prompt Library & System Prompt Presets**: Curated prompt templates optimized for specific free models (e.g. Gemini 2.5 Flash, DeepSeek R1, Llama 3.3 70B) to maximize reasoning and tool use.
 - [ ] **Local Model Performance Profiler**: Measure tokens-per-second (TPS) and VRAM footprint when connected to Ollama or LM Studio on the user's hardware.
-- [ ] **PWA / Desktop Menubar Utility**: Convert AI Nexus into a lightweight tray/menubar app (Tauri/Electron) for quick global shortcut access (`Cmd+Shift+Space`).
+- [ ] **PWA / Desktop Menubar Utility**: Convert LocalMind into a lightweight tray/menubar app (Tauri/Electron) for quick global shortcut access (`Cmd+Shift+Space`).
 
 ---
 
@@ -117,7 +117,7 @@ GEMINI_API_KEY=your_gemini_api_key_here
 # Start local development server (Express + Vite)
 npm run dev
 
-# Open http://localhost:3000 in your browser
+# Open http://localhost:3002 in your browser
 ```
 
 ### Production Build

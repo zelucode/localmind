@@ -1,6 +1,6 @@
-# AI Nexus Product Backlog & Roadmap
+# LocalMind Product Backlog & Roadmap
 
-This document outlines the high-value community-researched features and tasks prioritized for AI Nexus.
+This document outlines the high-value community-researched features and tasks prioritized for LocalMind.
 
 ---
 
