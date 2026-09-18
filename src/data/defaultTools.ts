@@ -1,0 +1,650 @@
+import { AITool, LocalServiceInfo } from '../types';
+
+export const INITIAL_AI_TOOLS: AITool[] = [
+  // 1. Web LLMs & Search
+  {
+    id: 'perplexity',
+    name: 'Perplexity AI',
+    category: 'web-llm',
+    url: 'https://www.perplexity.ai',
+    logo: 'Search',
+    badge: 'Best for Web Search',
+    description: 'Real-time conversational search engine providing grounded sources and direct answers with up-to-date web browsing.',
+    scope: 'web-only',
+    quickSearchUrlTemplate: 'https://www.perplexity.ai/search?q={query}',
+    tags: ['search', 'citations', 'free-tier', 'academic'],
+    freeTier: {
+      summary: 'Unlimited basic searches with real-time web sources + 5 Pro Searches per 4 hours free.',
+      hasWebSearch: true,
+      creditCardRequired: false,
+      allowCustomApiKey: false,
+      limits: 'Unlimited standard searches, 5 Pro searches / 4h',
+      freeCreditValue: 'Free permanent tier',
+      resetCycle: 'Pro quota resets every 4 hours'
+    },
+    highlight: true,
+  },
+  {
+    id: 'chatgpt',
+    name: 'ChatGPT',
+    category: 'web-llm',
+    url: 'https://chatgpt.com',
+    logo: 'Bot',
+    badge: 'Industry Standard',
+    description: 'OpenAI flagship conversational AI offering multimodal reasoning, custom GPTs, file analysis, and web browsing.',
+    scope: 'web-only',
+    quickSearchUrlTemplate: 'https://chatgpt.com/?q={query}',
+    tags: ['general', 'gpt-4o', 'reasoning', 'writing'],
+    freeTier: {
+      summary: 'Free access to GPT-4o mini unlimited and periodic access to full GPT-4o capabilities.',
+      hasWebSearch: true,
+      creditCardRequired: false,
+      allowCustomApiKey: false,
+      limits: 'GPT-4o mini unlimited; GPT-4o dynamic daily message pool',
+      freeCreditValue: 'Free tier with login',
+      resetCycle: 'Dynamic daily quota'
+    },
+    highlight: true,
+  },
+  {
+    id: 'claude',
+    name: 'Claude by Anthropic',
+    category: 'web-llm',
+    url: 'https://claude.ai',
+    logo: 'Sparkles',
+    badge: 'Artifacts UI',
+    description: 'Anthropic AI known for natural nuance, large context reasoning, coding, and real-time interactive Artifact previews.',
+    scope: 'web-only',
+    tags: ['artifacts', 'coding', 'long-context', 'writing'],
+    freeTier: {
+      summary: 'Free access to Claude 3.5 / 3.7 Sonnet models with interactive Artifacts canvas window.',
+      hasWebSearch: false,
+      creditCardRequired: false,
+      allowCustomApiKey: false,
+      limits: '~25-45 messages per 5-hour window depending on server load',
+      freeCreditValue: 'Free recurring quota',
+      resetCycle: 'Resets every 5 hours'
+    },
+    highlight: true,
+  },
+  {
+    id: 'deepseek',
+    name: 'DeepSeek Web',
+    category: 'web-llm',
+    url: 'https://chat.deepseek.com',
+    logo: 'Brain',
+    badge: 'Free Reasoning R1',
+    description: 'High-performance open-weights frontier model offering both DeepSeek-V3 and DeepSeek-R1 deep chain-of-thought reasoning completely free.',
+    scope: 'web-only',
+    tags: ['reasoning', 'r1', 'math', 'coding', 'free'],
+    freeTier: {
+      summary: '100% free web chat with both DeepSeek-V3 and DeepSeek-R1 reasoning models, including web search toggle.',
+      hasWebSearch: true,
+      creditCardRequired: false,
+      allowCustomApiKey: false,
+      limits: 'Generous free daily requests with optional deep reasoning mode',
+      freeCreditValue: '100% Free Web Tier',
+      resetCycle: 'Daily refresh'
+    },
+    highlight: true,
+  },
+  {
+    id: 'google-ai-studio',
+    name: 'Google AI Studio',
+    category: 'coding-agent',
+    url: 'https://aistudio.google.com',
+    logo: 'Code2',
+    badge: 'Build Apps Free',
+    description: 'Google prototype environment and app builder. Get free API keys and build interactive applications with Gemini 2.5 and Flash.',
+    scope: 'cloud-builder',
+    quickSearchUrlTemplate: 'https://aistudio.google.com/prompts/new_chat',
+    tags: ['gemini', 'app-builder', 'free-api-key', '15-rpm'],
+    freeTier: {
+      summary: '15 Requests Per Minute (RPM), 1 Million Tokens Per Minute (TPM), 1,500 Requests Per Day totally free on Gemini 2.5 Flash.',
+      hasWebSearch: true,
+      creditCardRequired: false,
+      allowCustomApiKey: true,
+      limits: '15 RPM / 1,500 RPD free forever without billing',
+      freeCreditValue: 'No credit card needed',
+      resetCycle: 'Daily quota reset'
+    },
+    highlight: true,
+  },
+  {
+    id: 'mistral-le-chat',
+    name: 'Mistral Le Chat',
+    category: 'web-llm',
+    url: 'https://chat.mistral.ai',
+    logo: 'Cpu',
+    badge: 'European Frontier',
+    description: 'Mistral AI assistant featuring Mistral Large 2, Pixtral vision, web search, and Code Canvas generation.',
+    scope: 'web-only',
+    tags: ['open-weights', 'multilingual', 'canvas', 'free'],
+    freeTier: {
+      summary: 'Generous free tier with web search, Canvas code execution preview, and file upload capabilities.',
+      hasWebSearch: true,
+      creditCardRequired: false,
+      allowCustomApiKey: false,
+      limits: 'Free tier with periodic refresh',
+      freeCreditValue: 'Free tier included',
+      resetCycle: 'Refreshes continuously'
+    }
+  },
+  {
+    id: 'grok',
+    name: 'Grok by xAI',
+    category: 'web-llm',
+    url: 'https://x.ai',
+    logo: 'Zap',
+    badge: 'Real-time X Data',
+    description: 'Frontier model with real-time access to public discussion, news analysis, deep search, and image generation.',
+    scope: 'web-only',
+    tags: ['real-time', 'x-posts', 'grok-3', 'uncensored'],
+    freeTier: {
+      summary: 'Free tier on web and X platform with limited queries every 2 hours on Grok 2 & Grok 3 mini.',
+      hasWebSearch: true,
+      creditCardRequired: false,
+      allowCustomApiKey: false,
+      limits: '10-20 queries per 2 hours on free tier',
+      freeCreditValue: 'Free with X/email account',
+      resetCycle: 'Resets every 2 hours'
+    }
+  },
+  {
+    id: 'huggingchat',
+    name: 'HuggingChat',
+    category: 'web-llm',
+    url: 'https://huggingface.co/chat',
+    logo: 'Smile',
+    badge: 'Open Source Hub',
+    description: 'Hugging Face official web portal for testing leading open models (Llama 3.3, Qwen 2.5, DeepSeek R1) with web search toggle.',
+    scope: 'web-only',
+    tags: ['open-source', 'llama3', 'qwen', 'no-paywall'],
+    freeTier: {
+      summary: '100% free web chat with switchable open-weights models and web search tools.',
+      hasWebSearch: true,
+      creditCardRequired: false,
+      allowCustomApiKey: true,
+      limits: 'Community rate limits, virtually unlimited for standard usage',
+      freeCreditValue: '100% Free',
+      resetCycle: 'Continuous'
+    }
+  },
+
+  // 2. Coding Agents & IDEs (Can Modify Local Files)
+  {
+    id: 'cursor',
+    name: 'Cursor IDE',
+    category: 'coding-agent',
+    url: 'https://www.cursor.com',
+    downloadUrl: 'https://www.cursor.com/download',
+    logo: 'Terminal',
+    badge: 'Top AI Code Editor',
+    description: 'AI-first code editor built on VSCode. Features Agent mode, multi-file codebase indexing, Composer, and direct local file editing.',
+    scope: 'local-agent',
+    tags: ['ide', 'agent-mode', 'local-files', 'composer'],
+    freeTier: {
+      summary: '14-day Pro trial with 500 fast requests. Free plan continues forever with 2,000 completions and 50 slow agent requests/month.',
+      hasWebSearch: true,
+      creditCardRequired: false,
+      allowCustomApiKey: true,
+      limits: '50 slow premium requests/mo + 2,000 completions/mo free forever',
+      freeCreditValue: '14-Day Pro Trial + Free Base Tier',
+      resetCycle: 'Monthly renewal'
+    },
+    highlight: true,
+  },
+  {
+    id: 'antigravity',
+    name: 'Antigravity / AI Studio Builder',
+    category: 'coding-agent',
+    url: 'https://ai.studio/build',
+    logo: 'Laptop',
+    badge: 'Agentic App Engine',
+    description: 'Google DeepMind agentic web development platform. Builds full-stack applications with preview, server-side Gemini, and live deploys.',
+    scope: 'cloud-builder',
+    tags: ['google', 'full-stack', 'cloud-run', 'agentic'],
+    freeTier: {
+      summary: 'Free cloud container development workspace with automatic Gemini API injection and preview host.',
+      hasWebSearch: true,
+      creditCardRequired: false,
+      allowCustomApiKey: true,
+      limits: 'Free cloud workspace preview and development',
+      freeCreditValue: 'Free tier sandbox',
+      resetCycle: 'Active session'
+    },
+    highlight: true,
+  },
+  {
+    id: 'vscode-copilot',
+    name: 'GitHub Copilot (VSCode)',
+    category: 'coding-agent',
+    url: 'https://code.visualstudio.com',
+    downloadUrl: 'https://code.visualstudio.com/download',
+    logo: 'Code2',
+    badge: 'Free in VS Code',
+    description: 'Microsoft Copilot Free Plan integrated directly into Visual Studio Code. Autocompletes code and answers questions about your project.',
+    scope: 'ide-plugin',
+    tags: ['vscode', 'completions', 'free-plan', 'microsoft'],
+    freeTier: {
+      summary: 'Copilot Free Plan provides 2,000 code completions per month and 50 chat messages per month using Claude 3.5 Sonnet & GPT-4o.',
+      hasWebSearch: false,
+      creditCardRequired: false,
+      allowCustomApiKey: false,
+      limits: '2,000 completions & 50 chats per calendar month',
+      freeCreditValue: '2,000 completions/mo',
+      resetCycle: 'Monthly 1st'
+    },
+    highlight: true,
+  },
+  {
+    id: 'kilo-code',
+    name: 'Kilo Code / Kiro',
+    category: 'coding-agent',
+    url: 'https://github.com',
+    downloadUrl: 'https://github.com/topics/ai-code-editor',
+    logo: 'Binary',
+    badge: 'Open Source Agent',
+    description: 'Open-source coding companions and CLI agents that connect to local models (Ollama) or free API keys to refactor your local files.',
+    scope: 'local-agent',
+    tags: ['open-source', 'cli', 'local-files', 'free-api'],
+    freeTier: {
+      summary: '100% free open-source software. Pair with free Google Gemini API key or local Ollama for zero-cost unlimited coding.',
+      hasWebSearch: false,
+      creditCardRequired: false,
+      allowCustomApiKey: true,
+      limits: 'Unlimited when powered by local models or free API tiers',
+      freeCreditValue: 'Free Software',
+      resetCycle: 'Permanent'
+    }
+  },
+  {
+    id: 'opencode',
+    name: 'OpenCode / Codex CLI',
+    category: 'coding-agent',
+    url: 'https://github.com',
+    downloadUrl: 'https://github.com',
+    logo: 'Command',
+    badge: 'Terminal Local Agent',
+    description: 'Autonomous coding agents for the command line. Inspects Git repos, reads errors, edits files, and executes terminal commands directly.',
+    scope: 'local-agent',
+    tags: ['terminal', 'git', 'cli', 'autonomous'],
+    freeTier: {
+      summary: 'Free open tooling. Can use free Gemini 2.5 Flash API (15 RPM free) or Groq free tier for instantaneous local terminal assistance.',
+      hasWebSearch: true,
+      creditCardRequired: false,
+      allowCustomApiKey: true,
+      limits: 'Dependent on API key provider',
+      freeCreditValue: '100% Free Open Source',
+      resetCycle: 'None'
+    }
+  },
+  {
+    id: 'aider',
+    name: 'Aider AI CLI',
+    category: 'coding-agent',
+    url: 'https://aider.chat',
+    downloadUrl: 'https://aider.chat/docs/install.html',
+    logo: 'FileCode2',
+    badge: 'Top CLI Benchmark',
+    description: 'Leaderboard-topping AI pair programming CLI that edits local code, writes Git commits automatically, and tracks project context.',
+    scope: 'local-agent',
+    tags: ['git-commits', 'cli', 'python', 'benchmarks'],
+    freeTier: {
+      summary: 'Free tool (`pip install aider-chat`). Works out-of-the-box with free Google Gemini 2.5 Flash API keys and local Ollama.',
+      hasWebSearch: true,
+      creditCardRequired: false,
+      allowCustomApiKey: true,
+      limits: 'Zero cost with free Gemini or local Ollama backend',
+      freeCreditValue: 'Free Open Source Tool',
+      resetCycle: 'Unlimited'
+    }
+  },
+  {
+    id: 'windsurf',
+    name: 'Windsurf by Codeium',
+    category: 'coding-agent',
+    url: 'https://codeium.com/windsurf',
+    downloadUrl: 'https://codeium.com/windsurf/download',
+    logo: 'Flame',
+    badge: 'Fast Autocomplete',
+    description: 'Next-generation AI IDE powered by the Cascade collaborative flow. Keeps track of your edits, terminals, and codebase architecture.',
+    scope: 'local-agent',
+    tags: ['cascade', 'autocomplete', 'ide', 'codeium'],
+    freeTier: {
+      summary: 'Free Individual tier includes unlimited fast code completion, in-editor chat, and free monthly Cascade agent prompts.',
+      hasWebSearch: true,
+      creditCardRequired: false,
+      allowCustomApiKey: false,
+      limits: 'Unlimited autocomplete + generous free monthly chat quota',
+      freeCreditValue: 'Free Forever Plan',
+      resetCycle: 'Monthly renewal'
+    }
+  },
+
+  // 3. Design, UI/UX & Media
+  {
+    id: 'google-stitch',
+    name: 'Google Stitch',
+    category: 'design-media',
+    url: 'https://stitch.withgoogle.com',
+    logo: 'Palette',
+    badge: 'Google AI Design',
+    description: 'Experimental UI/UX design synthesis tool from Google. Creates interactive prototypes, layouts, and component themes using AI.',
+    scope: 'web-only',
+    tags: ['google', 'ui-ux', 'prototypes', 'design'],
+    freeTier: {
+      summary: 'Free experimental access via Google Labs for creating user interfaces and design wireframes.',
+      hasWebSearch: false,
+      creditCardRequired: false,
+      allowCustomApiKey: false,
+      limits: 'Free experimental access',
+      freeCreditValue: 'Google Labs Free',
+      resetCycle: 'Active'
+    },
+    highlight: true,
+  },
+  {
+    id: 'canva-magic',
+    name: 'Canva Magic Studio',
+    category: 'design-media',
+    url: 'https://www.canva.com/magic-studio',
+    logo: 'Image',
+    badge: 'Logos & Graphics',
+    description: 'AI-assisted design studio for creating brand assets, marketing graphics, vector logos, and AI-generated image backgrounds.',
+    scope: 'web-only',
+    tags: ['logos', 'posters', 'canvas', 'design', 'social'],
+    freeTier: {
+      summary: 'Free Canva account includes 50 lifetime Magic Media image generation credits + extensive free vector and template libraries.',
+      hasWebSearch: false,
+      creditCardRequired: false,
+      allowCustomApiKey: false,
+      limits: '50 free AI generation queries + free standard design suite',
+      freeCreditValue: '50 Free AI credits',
+      resetCycle: 'Standard free access'
+    },
+    highlight: true,
+  },
+  {
+    id: 'v0-vercel',
+    name: 'v0 by Vercel',
+    category: 'design-media',
+    url: 'https://v0.dev',
+    logo: 'Layers',
+    badge: 'React & Tailwind UI',
+    description: 'Generative UI system by Vercel that turns natural language descriptions into clean React components with Tailwind CSS styling.',
+    scope: 'web-only',
+    tags: ['react', 'tailwind', 'shadcn', 'frontend'],
+    freeTier: {
+      summary: 'Free tier grants 200 monthly credits to generate and iterate on responsive React & Tailwind components.',
+      hasWebSearch: false,
+      creditCardRequired: false,
+      allowCustomApiKey: false,
+      limits: '200 free credits per month',
+      freeCreditValue: '200 credits / mo',
+      resetCycle: 'Monthly 1st'
+    }
+  },
+  {
+    id: 'bolt-new',
+    name: 'Bolt.new by StackBlitz',
+    category: 'design-media',
+    url: 'https://bolt.new',
+    logo: 'Boxes',
+    badge: 'In-Browser Fullstack',
+    description: 'AI-powered WebContainer environment in browser. Prompts, installs npm packages, runs Node servers, and previews full web apps.',
+    scope: 'cloud-builder',
+    tags: ['webcontainer', 'fullstack', 'instant-deploy', 'vite'],
+    freeTier: {
+      summary: 'Daily free token quota allowing creation and prototyping of full-stack web applications without local install.',
+      hasWebSearch: true,
+      creditCardRequired: false,
+      allowCustomApiKey: false,
+      limits: 'Daily token allowance for prompt iterations',
+      freeCreditValue: 'Free daily tokens',
+      resetCycle: 'Daily reset'
+    }
+  },
+  {
+    id: 'recraft',
+    name: 'Recraft AI',
+    category: 'design-media',
+    url: 'https://www.recraft.ai',
+    logo: 'PenTool',
+    badge: 'Vector & 3D Icons',
+    description: 'Professional design generator for clean SVG vector art, 3D icons, illustration sets, and brand graphics.',
+    scope: 'web-only',
+    tags: ['svg', 'vector', 'icons', 'brand'],
+    freeTier: {
+      summary: '50 free generation credits renewed daily on the community tier with vector SVG downloads.',
+      hasWebSearch: false,
+      creditCardRequired: false,
+      allowCustomApiKey: false,
+      limits: '50 daily credits with public showcase',
+      freeCreditValue: '50 daily credits',
+      resetCycle: 'Daily midnight'
+    }
+  },
+
+  // 4. Uniform Platforms & Local Model Runners
+  {
+    id: 'omniroute',
+    name: 'OmniRoute Gateway',
+    category: 'uniform-proxy',
+    url: 'https://github.com/topics/llm-router',
+    logo: 'Network',
+    badge: 'Unified Free Proxy',
+    description: 'Unified AI routing proxy that connects free tier accounts, local Ollama models, and free API keys into a single OpenAI-compatible API endpoint.',
+    scope: 'local-runner',
+    tags: ['proxy', 'routing', 'load-balancer', 'fallback'],
+    freeTier: {
+      summary: '100% free open-source gateway. Routes prompts between free providers (Gemini, Groq, local Ollama) with zero subscription fees.',
+      hasWebSearch: false,
+      creditCardRequired: false,
+      allowCustomApiKey: true,
+      limits: 'Unlimited local execution; binds to localhost:8000',
+      freeCreditValue: '100% Free Open Source',
+      resetCycle: 'Permanent'
+    },
+    highlight: true,
+  },
+  {
+    id: 'ollama',
+    name: 'Ollama',
+    category: 'uniform-proxy',
+    url: 'https://ollama.com',
+    downloadUrl: 'https://ollama.com/download',
+    logo: 'HardDrive',
+    badge: '100% Offline & Free',
+    description: 'Get up and running with large language models locally. Run DeepSeek-R1, Llama 3.3, Mistral, and Qwen 2.5 on your own hardware.',
+    scope: 'local-runner',
+    tags: ['offline', 'privacy', 'gpu', 'localhost-11434'],
+    freeTier: {
+      summary: '100% free and open-source. Runs entirely on your CPU/GPU with no API keys, no internet required, and complete privacy.',
+      hasWebSearch: false,
+      creditCardRequired: false,
+      allowCustomApiKey: false,
+      limits: 'Zero limits — runs directly on your computer hardware',
+      freeCreditValue: '100% Free Forever',
+      resetCycle: 'None (Local)'
+    },
+    highlight: true,
+  },
+  {
+    id: 'openrouter',
+    name: 'OpenRouter',
+    category: 'uniform-proxy',
+    url: 'https://openrouter.ai',
+    logo: 'Workflow',
+    badge: 'Free Model Pool',
+    description: 'Unified API aggregating 200+ AI models under one key. Features permanent free models (:free suffix) like DeepSeek R1 and Llama 3.',
+    scope: 'uniform-proxy',
+    tags: ['free-models', 'unified-api', 'deepseek-free', 'failover'],
+    freeTier: {
+      summary: 'Offers permanent free models (e.g. `deepseek/deepseek-r1:free`, `meta-llama/llama-3.3-70b-instruct:free`) with no credit card required.',
+      hasWebSearch: false,
+      creditCardRequired: false,
+      allowCustomApiKey: true,
+      limits: 'Free tier models rate limited to ~20 requests per minute',
+      freeCreditValue: 'Free tier catalog',
+      resetCycle: 'Continuous rate limit'
+    },
+    highlight: true,
+  },
+  {
+    id: 'lm-studio',
+    name: 'LM Studio',
+    category: 'uniform-proxy',
+    url: 'https://lmstudio.ai',
+    downloadUrl: 'https://lmstudio.ai/download',
+    logo: 'Monitor',
+    badge: 'Desktop Local GUI',
+    description: 'Discover, download, and run local GGUF models on your Mac, Windows, or Linux machine with a local OpenAI-compatible HTTP server.',
+    scope: 'local-runner',
+    tags: ['gguf', 'gui', 'offline', 'localhost-1234'],
+    freeTier: {
+      summary: 'Free desktop application for running any Hugging Face model locally with full GPU acceleration.',
+      hasWebSearch: false,
+      creditCardRequired: false,
+      allowCustomApiKey: false,
+      limits: 'Unlimited local execution; binds to localhost:1234',
+      freeCreditValue: 'Free Desktop App',
+      resetCycle: 'None (Local)'
+    }
+  },
+  {
+    id: 'jan-ai',
+    name: 'Jan.ai',
+    category: 'uniform-proxy',
+    url: 'https://jan.ai',
+    downloadUrl: 'https://jan.ai/download',
+    logo: 'ShieldCheck',
+    badge: 'Open Source Offline',
+    description: 'Open-source alternative to ChatGPT that runs 100% offline on your device, keeping conversations completely private.',
+    scope: 'local-runner',
+    tags: ['offline', 'privacy', 'open-source', 'localhost-1337'],
+    freeTier: {
+      summary: '100% free open-source desktop app. Run Cortex local engine on port 1337 or connect external API keys.',
+      hasWebSearch: false,
+      creditCardRequired: false,
+      allowCustomApiKey: true,
+      limits: 'Unlimited local running',
+      freeCreditValue: '100% Free Open Source',
+      resetCycle: 'None (Local)'
+    }
+  }
+];
+
+export const POPULAR_LOCAL_SERVICES: LocalServiceInfo[] = [
+  {
+    id: 'omniroute',
+    name: 'OmniRoute Gateway',
+    category: 'router',
+    port: 8000,
+    defaultUrl: 'http://localhost:8000',
+    healthEndpoint: '/health',
+    status: 'checking',
+    description: 'Unified AI routing proxy that pools free tier providers and local engines under a standard OpenAI API port.',
+    commandToStart: 'omniroute start --port 8000',
+    installCommand: 'npm install -g omniroute',
+    docsUrl: 'https://github.com/topics/llm-router'
+  },
+  {
+    id: 'ollama',
+    name: 'Ollama Daemon',
+    category: 'runner',
+    port: 11434,
+    defaultUrl: 'http://localhost:11434',
+    healthEndpoint: '/api/tags',
+    status: 'checking',
+    description: 'Local model engine running DeepSeek-R1, Llama 3, and Qwen offline on your computer.',
+    commandToStart: 'ollama serve',
+    installCommand: 'curl -fsSL https://ollama.com/install.sh | sh',
+    docsUrl: 'https://ollama.com'
+  },
+  {
+    id: 'lm-studio',
+    name: 'LM Studio Server',
+    category: 'runner',
+    port: 1234,
+    defaultUrl: 'http://localhost:1234',
+    healthEndpoint: '/v1/models',
+    status: 'checking',
+    description: 'Local desktop inference server serving quantized GGUF weights via OpenAI compatible endpoints.',
+    commandToStart: 'Launch LM Studio -> Start Local Server',
+    installCommand: 'Download installer from lmstudio.ai',
+    docsUrl: 'https://lmstudio.ai'
+  },
+  {
+    id: 'jan',
+    name: 'Jan.ai Cortex Server',
+    category: 'runner',
+    port: 1337,
+    defaultUrl: 'http://localhost:1337',
+    healthEndpoint: '/v1/models',
+    status: 'checking',
+    description: 'Open source offline engine server for Jan desktop.',
+    commandToStart: 'jan --server',
+    installCommand: 'Download from jan.ai',
+    docsUrl: 'https://jan.ai'
+  }
+];
+
+export const POPULAR_API_PROVIDERS = [
+  {
+    provider: 'gemini' as const,
+    name: 'Google Gemini',
+    getKeyUrl: 'https://aistudio.google.com/app/apikey',
+    freeQuota: '15 RPM / 1M TPM / 1,500 RPD free forever on Gemini 2.5 Flash',
+    isFree: true,
+    setupGuide: 'Open Google AI Studio -> Click "Get API key" -> Create key in 1 click without entering a credit card.'
+  },
+  {
+    provider: 'groq' as const,
+    name: 'Groq Cloud',
+    getKeyUrl: 'https://console.groq.com/keys',
+    freeQuota: 'Ultra-fast inference: 30 RPM and thousands of free tokens/day on Llama 3.3 and DeepSeek R1',
+    isFree: true,
+    setupGuide: 'Sign up at console.groq.com with GitHub/Google -> Generate instant free API key.'
+  },
+  {
+    provider: 'openrouter' as const,
+    name: 'OpenRouter',
+    getKeyUrl: 'https://openrouter.ai/keys',
+    freeQuota: 'Free tier models (models ending in :free) can be queried at no charge',
+    isFree: true,
+    setupGuide: 'Visit openrouter.ai/keys -> Sign in -> Create key. Use models like deepseek/deepseek-r1:free.'
+  },
+  {
+    provider: 'deepseek' as const,
+    name: 'DeepSeek API',
+    getKeyUrl: 'https://platform.deepseek.com/api_keys',
+    freeQuota: '5M initial free tokens for new accounts; extremely low pricing thereafter ($0.14/M tokens)',
+    isFree: true,
+    setupGuide: 'Register at platform.deepseek.com -> Claim welcome bonus tokens -> Create API key.'
+  },
+  {
+    provider: 'mistral' as const,
+    name: 'Mistral La Plateforme',
+    getKeyUrl: 'https://console.mistral.ai/api-keys',
+    freeQuota: 'Experimentation tier with free trial credits for Mistral Small, Large, and Codestral',
+    isFree: true,
+    setupGuide: 'Sign in to console.mistral.ai -> Go to API keys -> Generate key for development.'
+  },
+  {
+    provider: 'openai' as const,
+    name: 'OpenAI API',
+    getKeyUrl: 'https://platform.openai.com/api-keys',
+    freeQuota: 'Pay-as-you-go; some new student or promotion accounts receive initial trial credits',
+    isFree: false,
+    setupGuide: 'Sign in to platform.openai.com -> API keys -> Requires payment method for ongoing usage.'
+  },
+  {
+    provider: 'anthropic' as const,
+    name: 'Anthropic Claude API',
+    getKeyUrl: 'https://console.anthropic.com/settings/keys',
+    freeQuota: '$5 free trial credit on initial sign-up for eligible new phone-verified accounts',
+    isFree: true,
+    setupGuide: 'Console.anthropic.com -> Phone verification grants initial credits -> Generate key.'
+  }
+];

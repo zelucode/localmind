@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+:root {
+  --theme-primary: #e0a8c5;
+  --theme-primary-hover: #eec2da;
+  --theme-primary-foreground: #000000;
+  --theme-primary-rgb: 224, 168, 197;
+  --theme-bg: #1e1e2e;
+  --theme-card: #282838;
+  --theme-raised: #343446;
+  --theme-border: #43435a;
+  --theme-border-strong: #5a5a75;
+  --theme-text: #d8dbe8;
+  --theme-text-secondary: #9da3b8;
+  --theme-text-muted: #6e7488;
+}
+
+body {
+  background-color: var(--theme-bg, #09090b);
+  color: var(--theme-text, #f4f4f5);
+  transition: background-color 0.15s ease, color 0.15s ease;
+  min-height: 100vh;
+}
+
+html.light-mode {
+  color-scheme: light;
+}
+
+html:not(.light-mode) {
+  color-scheme: dark;
+}
+
+/* Reusable Theme Classes */
+.theme-card {
+  background-color: var(--theme-card);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+
+.theme-raised {
+  background-color: var(--theme-raised);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+
+.theme-input {
+  background-color: var(--theme-raised);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
+}
+.theme-input::placeholder {
+  color: var(--theme-text-muted);
+}
+.theme-input:focus {
+  border-color: var(--theme-primary);
+  outline: none;
+}
+
+.theme-text {
+  color: var(--theme-text);
+}
+
+.theme-text-secondary {
+  color: var(--theme-text-secondary);
+}
+
+.theme-text-muted {
+  color: var(--theme-text-muted);
+}
+
+.theme-border {
+  border-color: var(--theme-border);
+}
+
+.theme-border-strong {
+  border-color: var(--theme-border-strong);
+}
+
+/* Custom scrollbar matching theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--theme-border, #334155);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-border-strong, #475569);
+}
