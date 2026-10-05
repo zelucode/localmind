@@ -41,7 +41,7 @@ LocalMind puts the catalog, the local runtimes and the keys in one desktop windo
 
 ### Design principles
 
-- **Privacy first.** API keys and all user data live in the webview's `localStorage` on your machine. Nothing is sent anywhere unless you explicitly test a key or call a provider.
+- **Privacy first.** Your data lives on your machine. API keys are encrypted with a key held in your operating system's credential store. Nothing is sent anywhere unless you explicitly test a key against its provider.
 - **Scope clarity.** Every tool is badged with what it can really do: `web-only`, `local-agent`, `ide-plugin`, `local-runner`, `uniform-proxy`, `cloud-builder`.
 - **No "AI slop" aesthetics.** No neon glows, purple gradients or marketing copy. The look is drafting-table and stationery inspired: calm, tactile, ergonomic.
 - **Fully themeable.** The UI is styled through CSS variables (`--theme-*`), so palettes can be swapped or edited live.
@@ -50,21 +50,22 @@ LocalMind puts the catalog, the local runtimes and the keys in one desktop windo
 
 ## Features
 
-### Free-tier tool catalog (Dashboard)
+### Free-tier tool catalog (AI Tools)
 - 25+ curated tools across web LLMs, coding agents, design/media, local runners and routers (e.g. Perplexity, DeepSeek, Google AI Studio, Mistral Le Chat, Cursor, Aider, Windsurf, v0, Bolt.new, OmniRoute, Ollama, OpenRouter, LM Studio, Jan).
 - Each card shows the free-tier summary, limits, reset cycle, whether web search is included, whether a credit card is required, and whether a custom API key is allowed.
-- Filter by category (web LLM, coding agent, design/media, uniform proxy, custom) and by capability scope.
+- Filter by category and capability from a left rail, search, sort, and switch between a compact **list** and a card **grid**.
 - Favorites, add-your-own tools, and an in-app explainer for the scope badges.
 - Quick-launch: type a prompt once and open it in the chosen platform.
 
-### Local daemon monitor
-- Probes localhost for AI runtimes: **OmniRoute** (`8000`), **Ollama** (`11434`), **LM Studio** (`1234`), **Jan.ai Cortex** (`1337`), plus a custom port probe.
+### Runtimes (local daemon monitor)
+- Probes localhost (from Rust) for AI runtimes: **OmniRoute** (`8000`), **Ollama** (`11434`), **LM Studio** (`1234`), **Jan.ai Cortex** (`1337`), plus a custom port probe.
 - Copy-ready install/start commands per runtime.
 - Guidance for fronting free Gemini, Groq and Mistral keys with OmniRoute's OpenAI-compatible endpoint (`http://localhost:8000/v1`).
 
 ### API key vault
 - Store and label keys for Gemini, Groq, Mistral, Hugging Face, OpenRouter and GitHub Models.
-- Mask/reveal, one-click copy, direct links to each provider's key console, live connection test.
+- Keys are **encrypted at rest** (AES-256-GCM, master key in the OS credential store) and are only plaintext in memory.
+- Mask/reveal, one-click copy, direct links to each provider's key console, and a **live test** against Gemini, OpenRouter, Groq, OpenAI, DeepSeek, Mistral and Anthropic.
 
 ### IDE & agent config exporter
 - Pick a target (Cline, Continue.dev, Cursor, Aider, Windsurf, Python/TS SDK) and a provider, and get a copyable config snippet with the right base URL, env var names and model IDs.
@@ -72,11 +73,11 @@ LocalMind puts the catalog, the local runtimes and the keys in one desktop windo
 ### Rate-limit & rotation matrix
 - Side-by-side RPM / TPM / daily-cap / context-window comparison for free tiers, plus a 4-tier rotation strategy for zero-cost daily coding.
 
-### AI architecture advisor
-- Describe a task and get a recommended free-tier stack, with rule-based fallback advice when no AI backend is available.
+### AI architecture advisor (built, hidden for now)
+- Describe a task and get a recommended free-tier stack from Gemini, using your own key. Hidden behind `FEATURES.advisor` until the provider choice is settled; see [docs/features/advisor.md](docs/features/advisor.md).
 
 ### Bookmarks library
-- ~270 curated bookmarks in 9 categories (developer, design, productivity, utilities, converters, media, education, security, AI utilities), with search, favorites, click counts and custom entries.
+- ~270 curated bookmarks in 9 categories (developer, design, productivity, utilities, converters, media, education, security, AI utilities), with a category rail, search, favorites, click counts, custom entries, and list/grid views.
 - Export/import bookmarks and export the catalog as Markdown.
 
 ### Productivity
@@ -167,11 +168,14 @@ pnpm tauri dev      # desktop app (Vite on port 1420 + Rust shell; first Rust bu
 |---|---|
 | `pnpm tauri dev` | Run the desktop app with hot reload |
 | `pnpm tauri build` | Build a production installer/bundle |
-| `pnpm dev` | Frontend only in a browser (no Tauri APIs; `/api/*` calls fail) |
+| `pnpm dev` | Frontend only in a browser (no Tauri APIs: port scanning, key verification and key encryption need the desktop app) |
 | `pnpm build` | Build the frontend to `dist/` |
-| `pnpm lint` | Type-check with `tsc --noEmit` (has pre-existing errors; they don't block running) |
+| `pnpm lint` | Type-check with `tsc --noEmit` |
+| `pnpm test` | Frontend tests (Vitest + React Testing Library) |
+| `pnpm test:rust` | Rust tests (`cargo test`) |
+| `pnpm test:all` | Type-check, frontend tests and Rust tests |
 
-There is no automated test suite yet.
+See [docs/features/testing.md](docs/features/testing.md). A Rust debug build takes several GB; set `CARGO_TARGET_DIR` to another drive if yours is short on space.
 
 ### Building an installer
 
@@ -190,19 +194,21 @@ No configuration is required to run. `.env.example` is a leftover from the AI St
 
 ```
 ├── src/                     React frontend
-│   ├── App.tsx              Central state: routing, theme, tools, keys, modals, filters
-│   ├── components/          Pages and modals (Sidebar, ToolCard, ApiKeyVaultModal, ...)
+│   ├── App.tsx              App-wide state: view, theme, tools, keys, bookmarks, modals
+│   ├── components/          Pages and modals (Sidebar, Header, ToolsPage, BookmarksPage, ...)
+│   ├── config/features.ts   Feature flags (hidden, unfinished features)
 │   ├── data/                Seed catalogs (defaultTools.ts, defaultBookmarks.ts)
-│   ├── lib/errorLog.ts      Shared logger
+│   ├── lib/                 backend.ts / tauri.ts (Rust access), secureKeys.ts, errorLog.ts
+│   ├── test/setup.ts        Vitest setup
 │   ├── theme.ts             Theme presets -> CSS variables
 │   └── types.ts             Data model
 ├── src-tauri/               Rust shell
-│   ├── src/lib.rs           Tauri builder and commands
+│   ├── src/                 lib.rs plus probe.rs, keys.rs, secrets.rs, advisor.rs
 │   ├── capabilities/        Tauri permission sets
 │   ├── icons/               App icons (LocalMind brand kit)
 │   └── tauri.conf.json      Window, bundle and build config
 ├── branding/                LocalMind brand kit (icons, logos, favicons, social, tokens)
-├── docs/                    Architecture, build, backlog, assets
+├── docs/                    Architecture, feature docs, build, backlog, assets
 └── public/                  Favicons and web manifest
 ```
 
@@ -210,20 +216,21 @@ No configuration is required to run. `.env.example` is a leftover from the AI St
 
 ## Tech stack
 
-- **Shell:** Tauri 2 (Rust), `tauri-plugin-opener`
+- **Shell:** Tauri 2 (Rust), `tauri-plugin-opener`, `reqwest`, `aes-gcm`, `keyring`
 - **Frontend:** React 19, TypeScript 5.8, Vite 6, Tailwind CSS 4, Motion, Lucide icons
-- **Persistence:** `localStorage` with JSON export/import
-- **Tooling:** pnpm
+- **Persistence:** `localStorage` with JSON export/import (API keys encrypted)
+- **Tooling:** pnpm, Vitest, React Testing Library
 
 ---
 
 ## Current status & known limitations
 
-The frontend was generated in Google AI Studio and then wrapped in Tauri. The original Express backend was removed, so some features are not yet wired up:
+The frontend was generated in Google AI Studio and then wrapped in Tauri. The original Express backend was replaced by Rust commands (port probing, key verification, key encryption, Advisor). What is still open:
 
-- **AI Advisor** (`/api/ai/advisor`) and **Gemini key verification** (`/api/verify-gemini-key`) have no backend and fall back to local behavior. They need to be reimplemented as Rust commands or direct Gemini calls.
-- **Daemon probing** (`/api/local-daemons/*`) likewise has no backend. Probing is best done in Rust, since webview `fetch` to `127.0.0.1` is subject to CORS.
-- The Rust side is still the Tauri scaffold (`greet` command and opener plugin).
+- **Advisor** is built but hidden until we choose which providers it supports.
+- **Documentation** and **Report a Problem** in the Help menu are placeholders; **Check for Updates** doesn't exist yet.
+- **Backups** contain API keys in plaintext (the encryption key is per device). Treat backup files as secrets.
+- Remaining features (config exporter output, rate-limit data, export/import, settings) still need an audit pass.
 - No system tray yet; tray icon assets are ready in the brand kit.
 
 Planned work is tracked in [docs/BACKLOG.md](docs/BACKLOG.md).
@@ -233,6 +240,7 @@ Planned work is tracked in [docs/BACKLOG.md](docs/BACKLOG.md).
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md): state, data model, storage, theming, Rust/Tauri notes
+- [Feature docs](docs/features/README.md): one page per feature (navigation, AI Tools, Bookmarks, Runtimes, Key Vault, Advisor, startup, testing)
 - [Build & release](docs/BUILD.md): producing installers, versioning, icons, signing
 - [Backlog & roadmap](docs/BACKLOG.md): completed and planned features
 - [CLAUDE.md](CLAUDE.md): guidance for AI coding sessions
