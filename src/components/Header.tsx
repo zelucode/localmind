@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
 import { BrandMark } from './BrandMark';
-import { Plus, ArrowLeft, ChevronRight, Bookmark, Search } from 'lucide-react';
+import { Plus, ArrowLeft, ChevronRight, Search } from 'lucide-react';
 import { ActiveView } from '../types';
+import { TitleBarDragRegion, WindowControls } from './WindowControls';
 
 interface HeaderProps {
   activeView: ActiveView;
@@ -32,26 +33,32 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header
       id="app-top-header"
-      className="border-b sticky top-0 z-30 transition-colors backdrop-blur-md"
+      className="fixed top-0 inset-x-0 h-11 z-50 flex items-stretch border-b select-none transition-colors"
       style={{
         backgroundColor: 'var(--theme-card)',
         borderColor: 'var(--theme-border)',
         color: 'var(--theme-text)',
       }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-2 sm:gap-4">
-        {/* Left: Dynamic Context & Breadcrumbs */}
-        <div className="flex items-center gap-2.5 min-w-0 shrink-0">
-          <div
-            className="p-2 rounded-xl shadow-sm transition-transform hover:scale-105 shrink-0 hidden sm:flex"
-            style={{
-              backgroundColor: 'var(--theme-primary)',
-              color: 'var(--theme-primary-foreground, #000000)',
-            }}
-          >
-            {activeView === 'bookmarks' ? <Bookmark className="w-4 h-4" /> : <BrandMark className="w-4 h-4" />}
-          </div>
+      {/* Brand column: same width as the sidebar so its vertical edge continues under the title bar */}
+      <div className="w-16 shrink-0 flex items-center justify-center">
+        <button
+          id="header-btn-brand"
+          onClick={() => onNavigate('dashboard')}
+          title="LocalMind Dashboard"
+          className="p-1.5 rounded-lg shadow-sm transition-transform hover:scale-105 active:scale-95 cursor-pointer"
+          style={{
+            backgroundColor: 'var(--theme-primary)',
+            color: 'var(--theme-primary-foreground, #000000)',
+          }}
+        >
+          <BrandMark className="w-5 h-5" />
+        </button>
+      </div>
 
+      <div className="flex-1 min-w-0 grid grid-cols-[1fr_auto_1fr] items-center gap-4 pl-4">
+        {/* Left: page title / breadcrumbs (drag region) */}
+        <TitleBarDragRegion className="flex items-center min-w-0 h-full">
           <div className="min-w-0">
             {activeView === 'settings' ? (
               <div className="flex items-center gap-2 flex-wrap">
@@ -105,26 +112,18 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   LocalMind
                 </h1>
-                <div
-                  className="flex items-center gap-2 text-[11px] mt-0.5"
-                  style={{ color: 'var(--theme-text-secondary)' }}
-                >
-                  <span className="hidden sm:inline">Directory</span>
-                  <span className="opacity-40 hidden sm:inline">•</span>
-                  <span>{totalTools} AI Platforms</span>
-                </div>
               </div>
             )}
           </div>
-        </div>
+        </TitleBarDragRegion>
 
         {/* Center: Global Search Trigger Bar */}
-        {onOpenGlobalSearch && (
-          <div className="flex-1 max-w-md mx-2">
+        {onOpenGlobalSearch ? (
+          <div className="w-64 lg:w-96 justify-self-center hidden sm:block">
             <button
               id="header-btn-global-search"
               onClick={onOpenGlobalSearch}
-              className="w-full px-3 py-1.5 rounded-xl border flex items-center justify-between text-xs transition-all shadow-2xs group cursor-pointer hover:opacity-90 active:scale-[0.99]"
+              className="w-full h-7 px-3 rounded-lg border flex items-center justify-between text-xs transition-all shadow-2xs group cursor-pointer hover:opacity-90 active:scale-[0.99]"
               style={{
                 backgroundColor: 'var(--theme-raised)',
                 borderColor: 'var(--theme-border)',
@@ -143,7 +142,7 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
               <div className="flex items-center gap-1 shrink-0 ml-1.5">
                 <kbd
-                  className="px-1.5 py-0.5 rounded-md border text-[10px] font-mono font-semibold shadow-2xs"
+                  className="px-1.5 py-px rounded border text-[10px] leading-4 font-mono font-semibold shadow-2xs"
                   style={{
                     backgroundColor: 'var(--theme-card)',
                     borderColor: 'var(--theme-border)',
@@ -155,10 +154,14 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </button>
           </div>
+        ) : (
+          <div />
         )}
 
-        {/* Right: Dynamic Primary Action */}
-        <div className="flex items-center gap-2 shrink-0">
+        {/* Right: drag filler, primary action, window controls */}
+        <div className="flex items-center h-full min-w-0">
+        <TitleBarDragRegion className="flex-1 h-full min-w-0" />
+        <div className="flex items-center gap-2 shrink-0 pr-2">
           {activeView === 'settings' ? (
             <button
               id="header-btn-back-hub"
@@ -215,6 +218,8 @@ export const Header: React.FC<HeaderProps> = ({
               <span>Add Tool</span>
             </button>
           )}
+        </div>
+        <WindowControls />
         </div>
       </div>
     </header>

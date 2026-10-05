@@ -409,6 +409,22 @@ export function applyThemeToDocument(
   document.body.style.backgroundColor = tokens.canvas;
   document.body.style.color = tokens.text;
 
+  // Remembered so the static boot splash in index.html can paint in the active theme
+  try {
+    localStorage.setItem(
+      'localmind_boot_theme_v1',
+      JSON.stringify({
+        bg: tokens.canvas,
+        text: tokens.text,
+        primary: tokens.primary,
+        muted: tokens.textMuted,
+        border: tokens.border,
+      })
+    );
+  } catch {
+    // storage unavailable; splash falls back to defaults
+  }
+
   // Set dynamic CSS variables
   root.style.setProperty('--theme-primary', tokens.primary);
   root.style.setProperty('--theme-primary-hover', tokens.primaryHover);

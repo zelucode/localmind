@@ -15,7 +15,6 @@ import {
   Search,
   Compass,
 } from 'lucide-react';
-import { BrandMark } from './BrandMark';
 import { ThemePreset } from '../theme';
 import { ActiveView } from '../types';
 
@@ -61,54 +60,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Desktop Fixed Left Icon Sidebar */}
       <aside
         id="app-left-sidebar"
-        className="hidden md:flex fixed top-0 left-0 bottom-0 w-16 flex-col items-center justify-between py-4 border-r z-40 transition-colors"
+        className="hidden md:flex fixed top-11 left-0 bottom-0 w-16 flex-col items-center justify-between py-4 border-r z-40 transition-colors"
         style={{
           backgroundColor: 'var(--theme-card)',
           borderColor: 'var(--theme-border)',
         }}
       >
-        {/* Top: Brand Logo / Home */}
         <div className="flex flex-col items-center gap-6">
-          <button
-            id="sidebar-btn-brand"
-            onClick={() => onNavigate('dashboard')}
-            title="LocalMind Dashboard"
-            className="p-2.5 rounded-xl shadow-md transition-transform hover:scale-105 active:scale-95 cursor-pointer"
-            style={{
-              backgroundColor: 'var(--theme-primary)',
-              color: 'var(--theme-primary-foreground, #000000)',
-            }}
-          >
-            <BrandMark className="w-5 h-5" />
-          </button>
-
           {/* Navigation Icons */}
           <nav className="flex flex-col items-center gap-2">
-            {/* Global Search Spotlight */}
-            {onOpenGlobalSearch && (
-              <div className="relative group">
-                <button
-                  id="sidebar-nav-search"
-                  onClick={onOpenGlobalSearch}
-                  className="p-2.5 rounded-xl transition-all cursor-pointer opacity-70 hover:opacity-100"
-                  style={{ color: 'var(--theme-text)' }}
-                  title="Global Search (⌘K / Ctrl+K)"
-                >
-                  <Search className="w-5 h-5" />
-                </button>
-                <div
-                  className="absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded-md shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 border"
-                  style={{
-                    backgroundColor: 'var(--theme-card)',
-                    borderColor: 'var(--theme-border)',
-                    color: 'var(--theme-text)',
-                  }}
-                >
-                  Global Search (⌘K)
-                </div>
-              </div>
-            )}
-
             {/* Dashboard / Catalog */}
             <div className="relative group">
               <button

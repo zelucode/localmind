@@ -798,7 +798,7 @@ export default function App() {
 
   return (
     <div
-      className="min-h-screen flex flex-col font-sans transition-colors duration-150"
+      className="h-screen overflow-hidden flex flex-col font-sans transition-colors duration-150"
       style={{
         backgroundColor: 'var(--theme-bg)',
         color: 'var(--theme-text)',
@@ -824,7 +824,7 @@ export default function App() {
       />
 
       {/* Main Workspace Frame (offset for md:sidebar and mobile bottom nav) */}
-      <div className="md:pl-16 pb-16 md:pb-0 flex-1 flex flex-col min-w-0">
+      <div className="mt-11 md:ml-16 pb-16 md:pb-0 flex-1 min-h-0 overflow-y-auto flex flex-col min-w-0">
         {/* Top Application Header (streamlined without sidebar duplicates) */}
         <Header
           activeView={activeView}
@@ -1067,7 +1067,7 @@ export default function App() {
         {isLoading && (
           <LoadingScreen
             onFinish={handleLoadingFinish}
-            durationMs={1400}
+            durationMs={1200}
             totalTools={tools.length}
             totalBookmarks={bookmarks.length}
           />
