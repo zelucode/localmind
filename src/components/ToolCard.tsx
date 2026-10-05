@@ -46,7 +46,7 @@ interface ToolCardProps {
   onOpenRateLimitMatrix?: () => void;
 }
 
-const getIconComponent = (logo: string) => {
+export const getIconComponent = (logo: string) => {
   switch (logo) {
     case 'Search': return Search;
     case 'Bot': return Bot;
@@ -76,7 +76,7 @@ const getIconComponent = (logo: string) => {
   }
 };
 
-const getScopeBadgeConfig = (scope: AITool['scope']) => {
+export const getScopeBadgeConfig = (scope: AITool['scope']) => {
   switch (scope) {
     case 'local-agent':
       return {
@@ -117,6 +117,12 @@ const getScopeBadgeConfig = (scope: AITool['scope']) => {
       };
   }
 };
+
+/** Tools that can generate an IDE / agent config snippet. */
+export const canExportConfig = (tool: AITool): boolean =>
+  tool.freeTier.allowCustomApiKey ||
+  tool.category === 'coding-agent' ||
+  ['gemini', 'groq', 'openrouter', 'mistral', 'ollama', 'cline', 'continue', 'aider', 'cursor', 'windsurf'].includes(tool.id);
 
 export const ToolCard: React.FC<ToolCardProps> = ({
   tool,
@@ -371,7 +377,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
             </a>
           )}
 
-          {(tool.freeTier.allowCustomApiKey || tool.category === 'code-agent' || ['gemini', 'groq', 'openrouter', 'mistral', 'ollama', 'cline', 'continue', 'aider', 'cursor', 'windsurf'].includes(tool.id)) && onOpenConfigExporter && (
+          {canExportConfig(tool) && onOpenConfigExporter && (
             <button
               id={`btn-config-exporter-${tool.id}`}
               onClick={() => onOpenConfigExporter(tool.id)}

@@ -10,8 +10,7 @@ import { Sidebar, ActiveView, SIDEBAR_WIDTH, SIDEBAR_WIDTH_COLLAPSED } from './c
 import { HomePage } from './components/HomePage';
 import { AboutModal } from './components/AboutModal';
 import { OmniRouteWidget } from './components/OmniRouteWidget';
-import { ToolFilterBar } from './components/ToolFilterBar';
-import { ToolCard } from './components/ToolCard';
+import { ToolsPage } from './components/ToolsPage';
 import { SettingsPage } from './components/SettingsPage';
 import { AddToolModal } from './components/AddToolModal';
 import { ApiKeyVaultModal } from './components/ApiKeyVaultModal';
@@ -28,7 +27,7 @@ import { StartupWelcomeModal } from './components/StartupWelcomeModal';
 import { LoadingScreen } from './components/LoadingScreen';
 import { INITIAL_AI_TOOLS } from './data/defaultTools';
 import { DEFAULT_BOOKMARKS } from './data/defaultBookmarks';
-import { AITool, StoredApiKey, ToolCategory, ToolBookmark } from './types';
+import { AITool, StoredApiKey, ToolBookmark } from './types';
 import {
   defaultThemePresets,
   ThemePreset,
@@ -163,13 +162,6 @@ export default function App() {
       return [];
     }
   });
-
-  const [activeCategory, setActiveCategory] = useState<ToolCategory | 'favorites'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterCanEditFiles, setFilterCanEditFiles] = useState(false);
-  const [filterHasWebSearch, setFilterHasWebSearch] = useState(false);
-  const [filterNoCreditCard, setFilterNoCreditCard] = useState(false);
-  const [filterFreeKey, setFilterFreeKey] = useState(false);
 
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -745,61 +737,6 @@ export default function App() {
     setIsAdvisorOpen(true);
   };
 
-  // Filtered tools
-  const filteredTools = useMemo(() => {
-    return tools.filter((tool) => {
-      // Category filter
-      if (activeCategory === 'favorites') {
-        if (!tool.isFavorite) return false;
-      } else if (activeCategory !== 'all') {
-        if (tool.category !== activeCategory) return false;
-      }
-
-      // Capability filters
-      if (filterCanEditFiles) {
-        if (tool.scope !== 'local-agent' && tool.scope !== 'ide-plugin') {
-          return false;
-        }
-      }
-
-      if (filterHasWebSearch) {
-        if (!tool.freeTier.hasWebSearch) return false;
-      }
-
-      if (filterNoCreditCard) {
-        if (tool.freeTier.creditCardRequired) return false;
-      }
-
-      if (filterFreeKey) {
-        if (!tool.freeTier.allowCustomApiKey) return false;
-      }
-
-      // Search Query
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
-        const matchName = tool.name.toLowerCase().includes(q);
-        const matchDesc = tool.description.toLowerCase().includes(q);
-        const matchSummary = tool.freeTier.summary.toLowerCase().includes(q);
-        const matchTags = tool.tags.some((t) => t.toLowerCase().includes(q));
-        if (!matchName && !matchDesc && !matchSummary && !matchTags) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }, [
-    tools,
-    activeCategory,
-    searchQuery,
-    filterCanEditFiles,
-    filterHasWebSearch,
-    filterNoCreditCard,
-    filterFreeKey,
-  ]);
-
-  const favoritesCount = useMemo(() => tools.filter((t) => t.isFavorite).length, [tools]);
-
   return (
     <div
       className="h-screen overflow-hidden flex flex-col font-sans transition-colors duration-150"
@@ -956,75 +893,16 @@ export default function App() {
           </main>
         ) : (
           <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            {/* Tool Filter Bar */}
-            <ToolFilterBar
-              activeCategory={activeCategory}
-              onSelectCategory={setActiveCategory}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              filterCanEditFiles={filterCanEditFiles}
-              onToggleCanEditFiles={() => setFilterCanEditFiles(!filterCanEditFiles)}
-              filterHasWebSearch={filterHasWebSearch}
-              onToggleHasWebSearch={() => setFilterHasWebSearch(!filterHasWebSearch)}
-              filterNoCreditCard={filterNoCreditCard}
-              onToggleNoCreditCard={() => setFilterNoCreditCard(!filterNoCreditCard)}
-              filterFreeKey={filterFreeKey}
-              onToggleFreeKey={() => setFilterFreeKey(!filterFreeKey)}
-              totalCount={tools.length}
-              filteredCount={filteredTools.length}
-              favoritesCount={favoritesCount}
+            <ToolsPage
+              tools={tools}
+              defaultLaunchSearch={defaultLaunchSearch}
+              onToggleFavorite={toggleFavorite}
+              onDeleteCustom={handleDeleteCustom}
+              onLaunchQuickSearch={(t) => setQuickSearchTool(t)}
+              onOpenConfigExporter={(provId) => handleOpenConfigExporter(provId)}
+              onOpenRateLimitMatrix={handleOpenRateLimitMatrix}
+              onOpenAddModal={() => setIsAddModalOpen(true)}
             />
-
-            {/* Tools Grid */}
-            {filteredTools.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {filteredTools.map((tool) => (
-                  <ToolCard
-                    key={tool.id}
-                    tool={tool}
-                    onToggleFavorite={toggleFavorite}
-                    onDeleteCustom={handleDeleteCustom}
-                    onLaunchQuickSearch={(t) => setQuickSearchTool(t)}
-                    defaultLaunchSearch={defaultLaunchSearch}
-                    onOpenConfigExporter={(provId) => handleOpenConfigExporter(provId)}
-                    onOpenRateLimitMatrix={handleOpenRateLimitMatrix}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div
-                className="py-16 text-center rounded-2xl border border-dashed"
-                style={{
-                  backgroundColor: 'var(--theme-card)',
-                  borderColor: 'var(--theme-border)',
-                }}
-              >
-                <p className="text-sm font-medium" style={{ color: 'var(--theme-text)' }}>
-                  No AI platforms match your search criteria.
-                </p>
-                <p className="text-xs mt-1" style={{ color: 'var(--theme-text-muted)' }}>
-                  Try adjusting your filters or add a new custom AI platform.
-                </p>
-                <button
-                  onClick={() => {
-                    setActiveCategory('all');
-                    setSearchQuery('');
-                    setFilterCanEditFiles(false);
-                    setFilterHasWebSearch(false);
-                    setFilterNoCreditCard(false);
-                    setFilterFreeKey(false);
-                  }}
-                  className="mt-4 px-4 py-2 text-xs font-semibold rounded-lg border transition-colors cursor-pointer"
-                  style={{
-                    backgroundColor: 'var(--theme-raised)',
-                    borderColor: 'var(--theme-border)',
-                    color: 'var(--theme-text)',
-                  }}
-                >
-                  Reset All Filters
-                </button>
-              </div>
-            )}
           </main>
         )}
 

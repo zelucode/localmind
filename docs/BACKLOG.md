@@ -65,10 +65,10 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 - **Solution**: Walk every page and tag each feature as working / UI-only / broken, then implement the logic with tests (Rust unit tests; Vitest + React Testing Library). Known gaps: `/api/ai/advisor`, `/api/verify-gemini-key`, `/api/local-daemons/*` (need Rust commands or direct calls). Also check: external links via `window.open` inside Tauri (may need the opener plugin), and wording that claims keys are "AES-GCM encrypted" in the global search while they are stored as plain JSON in localStorage.
 - **Status**: Planned. No test setup exists in the repo yet.
 
-### [ ] Task 10: AI Tools list view and denser cards
-- **Problem**: Cards are tall (about 4 visible at once); comparing free tiers is slow.
-- **Solution**: Add a list/table view with a grid toggle, a left filter rail, and one search (merge the Omnibar and the filter box behavior).
-- **Status**: Planned (structure is done; density is next).
+### [x] Task 10: AI Tools list view and denser cards
+- **Problem**: Cards were tall (about 4 visible at once); comparing free tiers was slow.
+- **Solution**: Left filter rail with counts, one search, sort (recommended / name / most starred), and a list/grid toggle (list by default, remembered).
+- **Status**: Completed (`ToolsPage.tsx`). Also fixed the `'code-agent'` category typo so coding agents get the Config button. Follow-up: the Omnibar on Home and Ctrl+K still overlap this search; revisit when the command palette is reworked.
 
 ### [ ] Task 11: Bookmarks list view with favicons
 - **Problem**: 270 bookmarks in tall cards, 24 per page, all with the same wrench icon.
