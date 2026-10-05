@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Sparkles } from 'lucide-react';
 import { Header } from './components/Header';
 import { Sidebar, ActiveView, SIDEBAR_WIDTH, SIDEBAR_WIDTH_COLLAPSED } from './components/Sidebar';
@@ -15,6 +15,8 @@ import { SettingsPage } from './components/SettingsPage';
 import { AddToolModal } from './components/AddToolModal';
 import { ApiKeyVaultModal } from './components/ApiKeyVaultModal';
 import { AIAdvisorModal } from './components/AIAdvisorModal';
+import { FEATURES } from './config/features';
+import { parseStoredKeys, unlockKeys, serializeKeys, keysForBackup } from './lib/secureKeys';
 import { QuickSearchModal } from './components/QuickSearchModal';
 import { IDEConfigExporterModal } from './components/IDEConfigExporterModal';
 import { RateLimitMatrixModal } from './components/RateLimitMatrixModal';
@@ -154,14 +156,53 @@ export default function App() {
     }
   });
 
+  // Keys are encrypted at rest (see lib/secureKeys.ts). They load locked and unlock on mount.
   const [keys, setKeys] = useState<StoredApiKey[]>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS_KEY);
-      return saved ? JSON.parse(saved) : [];
+      return parseStoredKeys(localStorage.getItem(STORAGE_KEYS_KEY));
     } catch {
       return [];
     }
   });
+  const [keyStorageError, setKeyStorageError] = useState<string | null>(null);
+  const keyWrites = useRef<Promise<void>>(Promise.resolve());
+
+  /** Save keys encrypted. Writes are queued so the last change always wins. */
+  const persistKeys = (next: StoredApiKey[]) => {
+    keyWrites.current = keyWrites.current.then(async () => {
+      try {
+        localStorage.setItem(STORAGE_KEYS_KEY, await serializeKeys(next));
+        setKeyStorageError(null);
+      } catch (err) {
+        setKeyStorageError(
+          `Your keys could not be saved securely and will be lost when the app closes. ${
+            err instanceof Error ? err.message : ''
+          }`.trim()
+        );
+      }
+    });
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    unlockKeys(keys)
+      .then(({ keys: unlocked, needsSave }) => {
+        if (cancelled) return;
+        const byId = new Map(unlocked.map((k) => [k.id, k]));
+        setKeys((prev) => prev.map((k) => byId.get(k.id) ?? k));
+        if (needsSave) persistKeys(unlocked);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setKeyStorageError(`Your saved keys could not be unlocked. ${err instanceof Error ? err.message : ''}`.trim());
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+    // Run once on mount: later changes go through the handlers below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -509,7 +550,7 @@ export default function App() {
         handleOpenRateLimitMatrix();
         return;
       }
-      if (e.key === 'a' || e.key === 'A') {
+      if (FEATURES.advisor && (e.key === 'a' || e.key === 'A')) {
         e.preventDefault();
         handleOpenAdvisor();
         return;
@@ -585,11 +626,7 @@ export default function App() {
   const handleAddKey = (newKey: StoredApiKey) => {
     setKeys((prev) => {
       const next = [newKey, ...prev];
-      try {
-        localStorage.setItem(STORAGE_KEYS_KEY, JSON.stringify(next));
-      } catch {
-        // Ignored
-      }
+      persistKeys(next);
       return next;
     });
   };
@@ -597,11 +634,7 @@ export default function App() {
   const handleKeyTested = (id: string, status: 'valid' | 'invalid' | 'unknown') => {
     setKeys((prev) => {
       const next = prev.map((k) => (k.id === id ? { ...k, lastTestedStatus: status } : k));
-      try {
-        localStorage.setItem(STORAGE_KEYS_KEY, JSON.stringify(next));
-      } catch {
-        // Ignored
-      }
+      persistKeys(next);
       return next;
     });
   };
@@ -609,11 +642,7 @@ export default function App() {
   const handleDeleteKey = (id: string) => {
     setKeys((prev) => {
       const next = prev.filter((k) => k.id !== id);
-      try {
-        localStorage.setItem(STORAGE_KEYS_KEY, JSON.stringify(next));
-      } catch {
-        // Ignored
-      }
+      persistKeys(next);
       return next;
     });
   };
@@ -637,7 +666,7 @@ export default function App() {
       version: 1,
       exportedAt: new Date().toISOString(),
       customTools,
-      keys,
+      keys: keysForBackup(keys),
       favIds,
       themeId,
       customAccentColor,
@@ -674,8 +703,10 @@ export default function App() {
       }
 
       if (parsed.keys && Array.isArray(parsed.keys)) {
-        localStorage.setItem(STORAGE_KEYS_KEY, JSON.stringify(parsed.keys));
-        setKeys(parsed.keys);
+        // Backups hold plaintext keys; drop any per-device encryption data and re-encrypt on save.
+        const imported = (parsed.keys as StoredApiKey[]).map(({ blob: _blob, undecryptable: _u, ...k }) => k);
+        setKeys(imported);
+        persistKeys(imported);
       }
 
       if (parsed.themeId && typeof parsed.themeId === 'string') {
@@ -745,7 +776,7 @@ export default function App() {
 
   // The Advisor runs on the user's own Gemini key; prefer one that was verified.
   const advisorGeminiKey = useMemo(() => {
-    const gemini = keys.filter((k) => k.provider === 'gemini');
+    const gemini = keys.filter((k) => k.provider === 'gemini' && k.key);
     return (gemini.find((k) => k.lastTestedStatus === 'valid') || gemini[0])?.key;
   }, [keys]);
 
@@ -845,7 +876,7 @@ export default function App() {
               keys={keys}
               showScopeExplainer={showScopeExplainer}
               onNavigate={setActiveView}
-              onOpenAdvisor={handleOpenAdvisor}
+              onOpenAdvisor={FEATURES.advisor ? handleOpenAdvisor : undefined}
             />
           </main>
         ) : activeView === 'runtimes' ? (
@@ -908,6 +939,7 @@ export default function App() {
               onDeleteKey={handleDeleteKey}
               onOpenConfigExporter={(provId) => handleOpenConfigExporter(provId)}
               onKeyTested={handleKeyTested}
+              storageError={keyStorageError}
             />
           </main>
         ) : (
@@ -932,12 +964,14 @@ export default function App() {
           onAddTool={handleAddTool}
         />
 
+        {FEATURES.advisor && (
         <AIAdvisorModal
           isOpen={isAdvisorOpen}
           onClose={() => setIsAdvisorOpen(false)}
           initialPrompt={advisorPrompt}
           geminiKey={advisorGeminiKey}
         />
+        )}
 
         <QuickSearchModal
           tool={quickSearchTool}
@@ -969,7 +1003,7 @@ export default function App() {
           onOpenKeyVault={() => setActiveView('vault')}
           onOpenConfigExporter={(provId) => handleOpenConfigExporter(provId)}
           onOpenRateLimitMatrix={handleOpenRateLimitMatrix}
-          onOpenAdvisor={(prompt) => handleOpenAdvisor(prompt)}
+          onOpenAdvisor={FEATURES.advisor ? (prompt) => handleOpenAdvisor(prompt) : undefined}
           onOpenAddModal={() => setIsAddModalOpen(true)}
           onOpenAddBookmarkModal={handleOpenAddBookmarkModal}
           onToggleLightDark={handleToggleLightDark}
@@ -1013,7 +1047,8 @@ export default function App() {
         <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
       </div>
 
-      {/* Advisor: a floating action rather than a sidebar page */}
+      {/* Advisor: a floating action rather than a sidebar page (hidden by FEATURES.advisor) */}
+      {FEATURES.advisor && (
       <button
         id="btn-open-advisor"
         onClick={() => handleOpenAdvisor()}
@@ -1027,6 +1062,7 @@ export default function App() {
         <Sparkles className="w-4 h-4" />
         Ask Advisor
       </button>
+      )}
     </div>
   );
 }

@@ -4,7 +4,7 @@ const invokeMock = vi.fn();
 vi.mock('@tauri-apps/api/core', () => ({ invoke: (...a: unknown[]) => invokeMock(...a) }));
 vi.mock('@tauri-apps/plugin-opener', () => ({ openUrl: vi.fn() }));
 
-import { askAdvisor, indexProbeResults, probePorts, verifyApiKey } from './backend';
+import { askAdvisor, decryptSecrets, encryptSecrets, indexProbeResults, probePorts, verifyApiKey } from './backend';
 
 afterEach(() => {
   delete (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__;
@@ -37,10 +37,22 @@ describe('backend wrappers send the shapes the Rust commands expect', () => {
     expect(invokeMock).toHaveBeenCalledWith('ask_advisor', { request: { query: 'how?', apiKey: 'KEY' } });
   });
 
+  it('encryptSecrets and decryptSecrets pass plain arrays', async () => {
+    inTauri();
+    invokeMock.mockResolvedValue(['enc:v1:abc']);
+    await expect(encryptSecrets(['k'])).resolves.toEqual(['enc:v1:abc']);
+    expect(invokeMock).toHaveBeenCalledWith('encrypt_secrets', { values: ['k'] });
+    invokeMock.mockResolvedValue([{ value: 'k', error: null }]);
+    await decryptSecrets(['enc:v1:abc']);
+    expect(invokeMock).toHaveBeenLastCalledWith('decrypt_secrets', { tokens: ['enc:v1:abc'] });
+  });
+
   it('every wrapper refuses to run in a plain browser', async () => {
     await expect(probePorts([1])).rejects.toThrow(/desktop app/);
     await expect(verifyApiKey('groq', 'k')).rejects.toThrow(/desktop app/);
     await expect(askAdvisor('q', 'k')).rejects.toThrow(/desktop app/);
+    await expect(encryptSecrets(['k'])).rejects.toThrow(/desktop app/);
+    await expect(decryptSecrets(['t'])).rejects.toThrow(/desktop app/);
     expect(invokeMock).not.toHaveBeenCalled();
   });
 });

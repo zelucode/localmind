@@ -88,6 +88,10 @@ export interface StoredApiKey {
   getKeyUrl: string;
   lastTestedStatus?: 'valid' | 'invalid' | 'unknown';
   lastTestedMessage?: string;
+  /** In-memory only: the encrypted token this key was stored as (see lib/secureKeys.ts). */
+  blob?: string;
+  /** In-memory only: the stored token could not be decrypted on this device. */
+  undecryptable?: boolean;
 }
 
 export interface LocalServiceInfo {

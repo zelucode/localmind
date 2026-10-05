@@ -28,6 +28,21 @@ export function askAdvisor(query: string, apiKey: string): Promise<string> {
   return callBackend<string>('ask_advisor', { request: { query, apiKey } }, 'The Advisor');
 }
 
+export interface DecryptResult {
+  value: string | null;
+  error: string | null;
+}
+
+/** Encrypt secrets with the master key held in the OS credential store. Returns `enc:v1:` tokens. */
+export function encryptSecrets(values: string[]): Promise<string[]> {
+  return callBackend<string[]>('encrypt_secrets', { values }, 'Encrypting keys');
+}
+
+/** Decrypt `enc:v1:` tokens. A token that can't be decrypted comes back with `value: null`. */
+export function decryptSecrets(tokens: string[]): Promise<DecryptResult[]> {
+  return callBackend<DecryptResult[]>('decrypt_secrets', { tokens }, 'Unlocking keys');
+}
+
 /** Port-probe results keyed by port, for merging into a service list. */
 export function indexProbeResults(results: ProbeResult[]): Map<number, ProbeResult> {
   return new Map(results.map((r) => [r.port, r]));

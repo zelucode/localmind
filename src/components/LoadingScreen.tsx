@@ -17,6 +17,9 @@ const STATUS_STEPS: { until: number; label: string }[] = [
 ];
 
 /**
+ * The screen starts below the 44px title bar (top-11) so the window controls and drag
+ * region stay usable even if startup hangs. The static splash in index.html uses the same offset.
+ *
  * Layout note: the mark + wordmark block is centered exactly like the static boot
  * splash in index.html, so the handoff from splash to this screen is invisible.
  * Everything else fades in around it.
@@ -83,7 +86,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onFinish, duration
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: reduceMotion ? 0 : 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed inset-0 z-[9999] select-none cursor-default"
+          className="fixed inset-x-0 bottom-0 top-11 z-[9999] select-none cursor-default"
           style={{ backgroundColor: 'var(--theme-bg)', color: 'var(--theme-text)' }}
         >
           {/* Mark + wordmark: identical position and size to the boot splash */}

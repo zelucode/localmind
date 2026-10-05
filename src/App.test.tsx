@@ -103,6 +103,18 @@ describe('App shell navigation', () => {
   });
 });
 
+describe('Advisor is hidden while its feature flag is off', () => {
+  it('has no floating button, Omnibar button or shortcut, and "a" does nothing', async () => {
+    render(<App />);
+    expect(screen.queryByRole('button', { name: /Ask Advisor/ })).not.toBeInTheDocument();
+    expect(document.getElementById('btn-omnibar-advisor')).not.toBeInTheDocument();
+    await userEvent.keyboard('a');
+    expect(document.getElementById('modal-ai-advisor')).not.toBeInTheDocument();
+    await userEvent.keyboard('?');
+    expect(screen.queryByText(/Architecture Advisor/)).not.toBeInTheDocument();
+  });
+});
+
 describe('App key flow', () => {
   it('stores a key added in the vault and reflects it on Home', async () => {
     render(<App />);

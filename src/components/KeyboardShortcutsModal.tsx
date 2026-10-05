@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Keyboard, Command, Sparkles } from 'lucide-react';
+import { FEATURES } from '../config/features';
 
 interface KeyboardShortcutsModalProps {
   isOpen: boolean;
@@ -28,7 +29,6 @@ const SHORTCUTS: ShortcutItem[] = [
   { keys: ['k'], description: 'Go to Key Vault', category: 'tools' },
   { keys: ['c'], description: 'Go to the IDE & Agent Config Exporter (.cursorrules, Continue, Cline)', category: 'tools' },
   { keys: ['l'], description: 'Go to the Rate-Limit & Rotation Matrix', category: 'tools' },
-  { keys: ['a'], description: 'Open AI Assistant & Architecture Advisor', category: 'tools' },
   { keys: ['b'], description: 'Add New Custom Tool or Bookmark', category: 'tools' },
 
   // Workspace
@@ -36,6 +36,10 @@ const SHORTCUTS: ShortcutItem[] = [
   { keys: ['t'], description: 'Toggle Theme between Light and Dark mode', category: 'workspace' },
   { keys: ['Esc'], description: 'Close any open dialog, modal, or overlay', category: 'workspace' },
 ];
+
+if (FEATURES.advisor) {
+  SHORTCUTS.push({ keys: ['a'], description: 'Open AI Assistant & Architecture Advisor', category: 'tools' });
+}
 
 export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;

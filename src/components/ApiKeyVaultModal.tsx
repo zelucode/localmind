@@ -19,6 +19,7 @@ import {
 import { StoredApiKey } from '../types';
 import { POPULAR_API_PROVIDERS } from '../data/defaultTools';
 import { verifyApiKey, VerifyStatus } from '../lib/backend';
+import { keyProblem } from '../lib/secureKeys';
 
 interface ApiKeyVaultModalProps {
   isOpen: boolean;
@@ -29,6 +30,8 @@ interface ApiKeyVaultModalProps {
   onOpenConfigExporter?: (provider?: string) => void;
   /** Called after a key was checked against its provider. */
   onKeyTested?: (id: string, status: 'valid' | 'invalid' | 'unknown') => void;
+  /** Shown when keys could not be saved securely. */
+  storageError?: string | null;
   /** Render as a normal page section (no overlay, no close button). */
   inline?: boolean;
 }
@@ -42,6 +45,7 @@ export const ApiKeyVaultModal: React.FC<ApiKeyVaultModalProps> = ({
   onDeleteKey,
   onOpenConfigExporter,
   onKeyTested,
+  storageError,
 }) => {
   const [selectedProvider, setSelectedProvider] = useState<StoredApiKey['provider']>('gemini');
   const [keyInput, setKeyInput] = useState('');
@@ -135,7 +139,7 @@ export const ApiKeyVaultModal: React.FC<ApiKeyVaultModalProps> = ({
                 API Key Vault & Free Credit Tracker
               </h2>
               <p className="text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
-                Track and store your developer keys securely in your local browser state.
+                Keys are encrypted on this device. The master key is held in your operating system's credential store.
               </p>
             </div>
           </div>
@@ -151,6 +155,15 @@ export const ApiKeyVaultModal: React.FC<ApiKeyVaultModalProps> = ({
 
         {/* Modal Body */}
         <div className="p-6 overflow-y-auto space-y-6">
+          {storageError && (
+            <div
+              role="alert"
+              className="text-xs px-3 py-2 rounded-lg flex items-start gap-2 font-medium border bg-rose-500/10 text-rose-500 border-rose-500/20"
+            >
+              <AlertCircle className="w-4 h-4 shrink-0 mt-px" />
+              <span>{storageError}</span>
+            </div>
+          )}
           {/* Add Key Form */}
           <div
             className="border rounded-xl p-4"
@@ -342,7 +355,7 @@ export const ApiKeyVaultModal: React.FC<ApiKeyVaultModalProps> = ({
                         <div className="flex items-center gap-1 shrink-0">
                           <button
                             onClick={() => testKey(k)}
-                            disabled={isVerifying === k.id}
+                            disabled={isVerifying === k.id || !k.key}
                             className="px-2 py-1 text-[11px] rounded border transition-colors flex items-center gap-1 cursor-pointer hover:opacity-85"
                             style={{
                               backgroundColor: 'var(--theme-card)',
@@ -434,6 +447,16 @@ export const ApiKeyVaultModal: React.FC<ApiKeyVaultModalProps> = ({
                           Added {k.createdAt}
                         </span>
                       </div>
+
+                      {keyProblem(k) && (
+                        <div
+                          role="alert"
+                          className="text-xs px-2.5 py-1 rounded flex items-center gap-1.5 font-medium border bg-amber-500/10 text-amber-500 border-amber-500/20"
+                        >
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span>{keyProblem(k)}</span>
+                        </div>
+                      )}
 
                       {/* Verification Feedback Banner */}
                       {feedback && (

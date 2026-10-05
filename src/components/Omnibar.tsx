@@ -3,7 +3,8 @@ import { Search, Compass, Bot, Code2, Gauge } from 'lucide-react';
 import { openExternal } from '../lib/tauri';
 
 interface OmnibarProps {
-  onOpenAdvisor: (initialPrompt?: string) => void;
+  /** Omit to hide the "Which Tool?" button (the Advisor is behind a feature flag). */
+  onOpenAdvisor?: (initialPrompt?: string) => void;
   onOpenConfigExporter?: () => void;
   onOpenRateLimitMatrix?: () => void;
 }
@@ -123,6 +124,7 @@ export const Omnibar: React.FC<OmnibarProps> = ({
             ChatGPT
           </button>
 
+          {onOpenAdvisor && (
           <button
             id="btn-omnibar-advisor"
             onClick={() => onOpenAdvisor(query)}
@@ -136,6 +138,7 @@ export const Omnibar: React.FC<OmnibarProps> = ({
           >
             Which Tool?
           </button>
+          )}
 
           {onOpenConfigExporter && (
             <button

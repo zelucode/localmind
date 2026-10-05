@@ -271,7 +271,7 @@ export const StartupWelcomeModal: React.FC<StartupWelcomeModalProps> = ({
                   <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                 </h3>
                 <p className="text-xs opacity-75 mt-1 leading-relaxed">
-                  Store local keys safely in browser storage, verify validity live, inspect RPM/RPD allowances, and export configs for Cursor, Continue, or Cline.
+                  Keys are encrypted on this device, verified live with each provider, inspect RPM/RPD allowances, and export configs for Cursor, Continue, or Cline.
                 </p>
               </div>
 

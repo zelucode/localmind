@@ -67,15 +67,16 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 - **Known wrong copy**: welcome screen and Ctrl+K say keys are "AES-GCM encrypted" and "v2.5", but keys are stored as plain JSON in localStorage and the app is v0.1.0. Either implement encryption (Task 13) or fix the text.
 - **Status**: In progress.
 
-### [ ] Task 13: Encrypt stored API keys
-- **Problem**: Keys sit in localStorage as plain JSON; any code in the webview can read them.
-- **Solution**: Move key storage to Rust (OS credential store via `keyring`, or an encrypted file), expose get/set/delete commands, migrate existing keys, and keep keys out of backups unless the user opts in.
-- **Status**: Planned. Needs a decision on where the master secret lives (OS keychain recommended).
+### [x] Task 13: Encrypt stored API keys
+- **Problem**: Keys sat in localStorage as plain JSON; any code in the webview could read them.
+- **Solution**: AES-256-GCM in Rust (`src-tauri/src/secrets.rs`), master key generated once and kept in the OS credential store (Windows Credential Manager / macOS Keychain / Linux keyutils). Keys are encrypted before they reach localStorage and decrypted into memory at startup. Existing plaintext keys migrate automatically on first launch. If encryption fails, keys are never written in plaintext and the Vault shows a warning. Keys that can't be decrypted (other device) are kept, flagged, and never silently dropped.
+- **Status**: Completed (see `docs/features/key-vault.md`). Known limits: see Task 17 (backups) and the note that `pnpm dev` in a plain browser stores plaintext (development only).
 
-### [ ] Task 14: Advisor key selection and offline fallback
-- **Problem**: The Advisor uses the first Gemini key in the vault (a verified one preferred). With no Gemini key it only shows a hint. The old Express server had static fallback advice.
-- **Solution**: Let the user choose the provider and key for the Advisor, and ship a small offline fallback (keyword-matched suggestions from the catalog).
-- **Status**: Open question for the product owner: which providers should the Advisor support?
+### [ ] Task 14: Advisor: re-enable and choose providers
+- **Problem**: The Free Tier Advisor is built (Rust `ask_advisor`, `AIAdvisorModal`, tests) but only supports Gemini with the user's vault key, so it is hidden.
+- **Hidden by**: `FEATURES.advisor = false` in `src/config/features.ts`. This hides the floating button, the `A` shortcut, the Ctrl+K action, the Omnibar "Which Tool?" button and its shortcut-sheet entry. Set it to `true` to bring everything back (`App.advisor.test.tsx` covers the enabled state).
+- **To decide**: which providers the Advisor should run on (Gemini, Groq, OpenRouter, local Ollama?), whether the user picks the key, and whether to ship an offline fallback (keyword-matched suggestions from the catalog, like the old Express server had).
+- **Status**: Parked until the provider decision.
 
 ### [ ] Task 15: Verify keys for more providers
 - **Problem**: Providers marked "other" cannot be verified (the UI says so, honestly).
@@ -101,3 +102,19 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 - **Problem**: Home no longer shows live runtime status because probing needs Rust (CORS blocks webview fetch to localhost).
 - **Solution**: Add a Rust command that probes the known ports, then show an online/offline dot on the Runtimes sidebar item and on Home.
 - **Status**: Blocked on the Rust probe command (see Task 9).
+
+### [ ] Task 16: Startup resilience (crash screen and hung startup)
+- **Problem**: In a frameless window, a startup hang or a React crash can leave no way to close or move the window.
+- **Done**: the loading screen and the boot splash now start below the title bar, so the window controls stay usable while they show.
+- **Still open**: add a React error boundary with a recovery screen (reload, copy error, close) that keeps the title bar, and decide whether a hung boot (JS bundle fails to load) needs a fallback close control in `index.html`. Discuss first whether the loading screen needs a visible "Skip" button in addition to Space/Enter/Esc/click.
+- **Status**: Needs a short discussion.
+
+### [ ] Task 17: Backups and exported keys
+- **Problem**: "Export backup" writes API keys to a JSON file in plaintext (needed because the encryption key is per device, so an encrypted blob would be useless elsewhere). Anyone with the file has the keys.
+- **Solution options**: exclude keys from backups by default with an opt-in checkbox, or encrypt the backup with a user-chosen passphrase (Argon2 + AES-GCM) so it can be restored on another machine. Add a clear warning in the export UI either way.
+- **Status**: Needs a decision.
+
+### [ ] Task 18: Tests that drive the real desktop app
+- **Problem**: Frontend tests mock the Rust backend, and Rust tests don't touch the UI. Nothing covers the real IPC boundary (command names, argument shapes, permissions) end to end.
+- **Solution**: add a small WebDriver (`tauri-driver`) or Playwright-against-`tauri dev` smoke suite: launch the app, scan ports against a local listener, add a key, restart, confirm it persists encrypted.
+- **Status**: Planned.

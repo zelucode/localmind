@@ -10,7 +10,7 @@ interface HomePageProps {
   keys: StoredApiKey[];
   showScopeExplainer: boolean;
   onNavigate: (view: ActiveView) => void;
-  onOpenAdvisor: (initialPrompt?: string) => void;
+  onOpenAdvisor?: (initialPrompt?: string) => void;
 }
 
 const StatusCard: React.FC<{

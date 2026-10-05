@@ -1,6 +1,7 @@
 mod advisor;
 mod keys;
 mod probe;
+mod secrets;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -10,6 +11,8 @@ pub fn run() {
             probe::probe_ports,
             keys::verify_api_key,
             advisor::ask_advisor,
+            secrets::encrypt_secrets,
+            secrets::decrypt_secrets,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -37,7 +37,8 @@ interface GlobalSearchModalProps {
   onOpenKeyVault: () => void;
   onOpenConfigExporter: (providerId?: string) => void;
   onOpenRateLimitMatrix: () => void;
-  onOpenAdvisor: (prompt?: string) => void;
+  /** Omit to hide the Advisor action. */
+  onOpenAdvisor?: (prompt?: string) => void;
   onOpenAddModal: () => void;
   onOpenAddBookmarkModal: () => void;
   onToggleLightDark: () => void;
@@ -227,7 +228,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       },
     });
 
-    addItem({
+    if (onOpenAdvisor) addItem({
       id: 'action-advisor',
       type: 'action',
       title: 'AI Architecture Advisor',
