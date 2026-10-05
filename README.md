@@ -243,4 +243,5 @@ Planned work is tracked in [docs/BACKLOG.md](docs/BACKLOG.md).
 - [Feature docs](docs/features/README.md): one page per feature (navigation, AI Tools, Bookmarks, Runtimes, Key Vault, Advisor, startup, testing)
 - [Build & release](docs/BUILD.md): producing installers, versioning, icons, signing
 - [Backlog & roadmap](docs/BACKLOG.md): completed and planned features
+- [Handoff](docs/HANDOFF.md): current state and next steps for whoever continues the work
 - [CLAUDE.md](CLAUDE.md): guidance for AI coding sessions
