@@ -9,7 +9,7 @@ pnpm test:all      # type-check, then frontend tests, then Rust tests
 | Command | What it runs |
 |---|---|
 | `pnpm lint` | `tsc --noEmit`: the type check (clean; keep it clean) |
-| `pnpm test` | Vitest + React Testing Library in jsdom (16 files, 160 tests) |
+| `pnpm test` | Vitest + React Testing Library in jsdom (18 files, 180 tests) |
 | `pnpm test:watch` | Vitest in watch mode |
 | `pnpm test:rust` | `cargo test` for `src-tauri` (31 tests, 1 opt-in) |
 | `pnpm test:all` | all of the above, in order |
@@ -26,7 +26,7 @@ pnpm test:all      # type-check, then frontend tests, then Rust tests
 
 | Area | Files |
 |---|---|
-| Shell | `Sidebar`, `Header`, `HomePage`, `LoadingScreen`, `App` |
+| Shell | `Sidebar`, `Header`, `HomePage`, `LoadingScreen`, `ErrorBoundary`, `bootWatchdog` (runs the real script from `index.html`), `App` |
 | Pages | `ToolsPage`, `BookmarksPage`, `OmniRouteWidget`, `ApiKeyVaultModal` |
 | Search and Advisor | `GlobalSearchModal`, `AIAdvisorModal`, `App.advisor` |
 | Libraries | `lib/tauri`, `lib/backend`, `lib/secureKeys` |

@@ -34,6 +34,7 @@
   </head>
   <body>
     <div id="root">
+      <div data-tauri-drag-region style="position: fixed; top: 0; left: 0; right: 0; height: 44px;"></div>
       <div id="boot-splash" style="position: fixed; inset: 44px 0 0 0; background: var(--boot-bg); color: var(--boot-text);">
         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 28px;">
           <svg width="88" height="88" viewBox="88 88 848 848" style="color: var(--boot-primary);" aria-hidden="true">
@@ -53,6 +54,49 @@
         </div>
       </div>
     </div>
+    <script id="boot-watchdog">
+      // If the app never replaces the splash (bundle failed to load, or it crashed before the first
+      // render), offer a way out. A frameless window must never be impossible to close.
+      (function () {
+        var LIMIT_MS = 10000;
+        function closeApp() {
+          try {
+            window.__TAURI_INTERNALS__.invoke('plugin:window|close', { label: 'main' });
+          } catch (e) {
+            window.close();
+          }
+        }
+        function button(label, onClick) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.textContent = label;
+          b.addEventListener('click', onClick);
+          b.style.cssText =
+            'padding:8px 16px;border-radius:8px;border:1px solid var(--boot-primary);background:transparent;' +
+            'color:var(--boot-text);font:600 12px system-ui,sans-serif;cursor:pointer;';
+          return b;
+        }
+        setTimeout(function () {
+          var splash = document.getElementById('boot-splash');
+          if (!splash || !splash.isConnected || document.getElementById('boot-stuck')) return;
+          var box = document.createElement('div');
+          box.id = 'boot-stuck';
+          box.setAttribute('role', 'alert');
+          box.style.cssText =
+            'position:absolute;left:0;right:0;bottom:48px;display:flex;flex-direction:column;align-items:center;gap:12px;' +
+            'font:12px system-ui,sans-serif;color:var(--boot-text);';
+          var msg = document.createElement('div');
+          msg.textContent = 'LocalMind is taking longer than expected to start.';
+          var row = document.createElement('div');
+          row.style.cssText = 'display:flex;gap:8px;';
+          row.appendChild(button('Reload', function () { location.reload(); }));
+          row.appendChild(button('Close', closeApp));
+          box.appendChild(msg);
+          box.appendChild(row);
+          splash.appendChild(box);
+        }, LIMIT_MS);
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

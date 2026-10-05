@@ -14,7 +14,7 @@ describe('LoadingScreen', () => {
   it('shows the tagline and a skip hint', () => {
     render(<LoadingScreen onFinish={() => {}} durationMs={5000} />);
     expect(screen.getByText('Your private AI hub, always nearby.')).toBeInTheDocument();
-    expect(screen.getByText(/Press Space to skip/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Skip/ })).toBeInTheDocument();
   });
 
   it.each([['{Escape}'], [' '], ['{Enter}']])('can be skipped with %s', async (key) => {
@@ -22,6 +22,15 @@ describe('LoadingScreen', () => {
     render(<LoadingScreen onFinish={onFinish} durationMs={5000} />);
     await userEvent.keyboard(key);
     await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1));
+  });
+
+  it('can be skipped with the Skip button, finishing only once', async () => {
+    const onFinish = vi.fn();
+    render(<LoadingScreen onFinish={onFinish} durationMs={5000} />);
+    await userEvent.click(screen.getByRole('button', { name: /Skip/ }));
+    await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1));
+    await new Promise((r) => setTimeout(r, 300));
+    expect(onFinish).toHaveBeenCalledTimes(1);
   });
 
   it('can be skipped by clicking', async () => {

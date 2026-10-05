@@ -103,11 +103,10 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 - **Solution**: Add a Rust command that probes the known ports, then show an online/offline dot on the Runtimes sidebar item and on Home.
 - **Status**: Blocked on the Rust probe command (see Task 9).
 
-### [ ] Task 16: Startup resilience (crash screen and hung startup)
-- **Problem**: In a frameless window, a startup hang or a React crash can leave no way to close or move the window.
-- **Done**: the loading screen and the boot splash now start below the title bar, so the window controls stay usable while they show.
-- **Still open**: add a React error boundary with a recovery screen (reload, copy error, close) that keeps the title bar, and decide whether a hung boot (JS bundle fails to load) needs a fallback close control in `index.html`. Discuss first whether the loading screen needs a visible "Skip" button in addition to Space/Enter/Esc/click.
-- **Status**: Needs a short discussion.
+### [x] Task 16: Startup resilience (crash screen and hung startup)
+- **Problem**: In a frameless window, a startup hang or a React crash could leave no way to close or move the window.
+- **Solution**: (1) the loading screen and boot splash start below the title bar, so the window controls stay usable; (2) `ErrorBoundary` (wraps `App` in `main.tsx`) shows a recovery screen with its own title bar and window controls, the error message, *Try again*, *Reload app*, *Copy details* and *Close app*; (3) a watchdog in `index.html` adds *Reload* and *Close* buttons to the splash if the app hasn't replaced it after 10 s (covers a bundle that fails to load), and the splash has a drag strip from the start; (4) the loading screen has a visible **Skip (Space)** button in addition to Space / Enter / Esc / click.
+- **Status**: Completed (see `docs/features/startup-and-window.md`). Not covered: errors thrown outside React rendering (event handlers, async code) are only logged to the console.
 
 ### [ ] Task 17: Backups and exported keys
 - **Problem**: "Export backup" writes API keys to a JSON file in plaintext (needed because the encryption key is per device, so an encrypted blob would be useless elsewhere). Anyone with the file has the keys.

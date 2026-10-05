@@ -135,12 +135,19 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onFinish, duration
             </motion.div>
           </div>
 
-          <p
-            className="absolute bottom-6 left-0 right-0 text-center text-[11px] tracking-wide"
-            style={{ color: 'var(--theme-text-muted)', opacity: 0.7 }}
-          >
-            Press Space to skip
-          </p>
+          <div className="absolute bottom-6 left-0 right-0 flex justify-center">
+            <button
+              id="btn-skip-loading"
+              onClick={(e) => {
+                e.stopPropagation();
+                finish(150);
+              }}
+              className="px-3 py-1.5 rounded-lg border text-[11px] tracking-wide cursor-pointer hover:opacity-100 opacity-80"
+              style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}
+            >
+              Skip <span style={{ color: 'var(--theme-text-muted)' }}>(Space)</span>
+            </button>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

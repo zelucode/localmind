@@ -10,6 +10,11 @@ async function withWindow(fn: (win: ReturnType<typeof getCurrentWindow>) => Prom
   }
 }
 
+/** Close the app window (no-op outside Tauri). */
+export function closeWindow(): Promise<void> {
+  return withWindow((win) => win.close());
+}
+
 /**
  * Draggable title-bar region. Children are click-through so the drag handle
  * stays continuous; interactive children opt back in with a `button` element.
