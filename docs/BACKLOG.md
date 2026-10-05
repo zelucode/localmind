@@ -70,10 +70,15 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 - **Solution**: Left filter rail with counts, one search, sort (recommended / name / most starred), and a list/grid toggle (list by default, remembered).
 - **Status**: Completed (`ToolsPage.tsx`). Also fixed the `'code-agent'` category typo so coding agents get the Config button. Follow-up: the Omnibar on Home and Ctrl+K still overlap this search; revisit when the command palette is reworked.
 
-### [ ] Task 11: Bookmarks list view with favicons
+### [x] Task 11: Bookmarks list view
 - **Problem**: 270 bookmarks in tall cards, 24 per page, all with the same wrench icon.
-- **Solution**: Default compact list with a category rail, optional grid, and cached favicons or letter avatars.
-- **Status**: Planned.
+- **Solution**: Category rail with counts, compact list by default with a grid option, "show more" instead of paging, letter avatars with a stable color per domain. Page-level actions moved into a Manage menu (Export & Import, Markdown, JSON, Restore defaults).
+- **Status**: Completed (`BookmarksPage.tsx`).
+
+### [ ] Task 11b: Real bookmark favicons
+- **Problem**: Letter avatars are less recognizable than favicons.
+- **Solution**: Fetch and cache favicons locally through a Rust command. Do not call a third-party favicon service from the UI, since that would leak the user's bookmark domains.
+- **Status**: Planned (needs the Rust side).
 
 ### [ ] Task 12: Runtime status in the title bar / Home
 - **Problem**: Home no longer shows live runtime status because probing needs Rust (CORS blocks webview fetch to localhost).

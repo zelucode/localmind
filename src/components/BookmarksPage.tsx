@@ -1,7 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Bookmark,
-  Plus,
   Search,
   ExternalLink,
   Copy,
@@ -10,23 +9,18 @@ import {
   Sparkles,
   Wrench,
   Tag,
-  FolderOpen,
-  Filter,
   Download,
-  Upload,
   RotateCcw,
-  SlidersHorizontal,
-  FileCode2,
+  FileText,
+  FolderInput,
   Trash2,
   Pencil,
-  Eye,
-  Info,
-  Layers,
   Github,
-  FileText,
-  ChevronLeft,
-  ChevronRight,
-  FolderInput,
+  X,
+  List,
+  LayoutGrid,
+  MoreHorizontal,
+  type LucideIcon,
 } from 'lucide-react';
 import { ToolBookmark, BookmarkCategory } from '../types';
 import { ExportMarkdownModal } from './ExportMarkdownModal';
@@ -45,6 +39,10 @@ interface BookmarksPageProps {
   onOpenExportImportModal?: () => void;
 }
 
+type TypeFilter = 'all' | 'ai' | 'non-ai' | 'favorites';
+type SortKey = 'stars' | 'clicks' | 'name' | 'recent';
+type ViewMode = 'list' | 'grid';
+
 const CATEGORY_TABS: { id: BookmarkCategory; label: string }[] = [
   { id: 'all', label: 'All Tools' },
   { id: 'developer', label: 'Developer & Code' },
@@ -58,131 +56,175 @@ const CATEGORY_TABS: { id: BookmarkCategory; label: string }[] = [
   { id: 'media', label: 'Media' },
 ];
 
+const PAGE_STEP = 60;
+const STORAGE_VIEW_KEY = 'localmind_bookmarks_view_v1';
+const STORAGE_SORT_KEY = 'localmind_bookmarks_sort_v1';
+
+function readPref<T extends string>(key: string, allowed: readonly T[], fallback: T): T {
+  try {
+    const v = localStorage.getItem(key);
+    return allowed.includes(v as T) ? (v as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function savePref(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Ignored
+  }
+}
+
+const getDomainFromUrl = (urlStr: string) => {
+  try {
+    return new URL(urlStr).hostname.replace('www.', '');
+  } catch {
+    return urlStr;
+  }
+};
+
+const formatStars = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n));
+
+/** Letter avatar with a stable hue per domain. Real favicons are tracked in the backlog (they need local caching to stay private). */
+const Avatar: React.FC<{ title: string; url: string; size?: number }> = ({ title, url, size = 32 }) => {
+  const domain = getDomainFromUrl(url);
+  let hash = 0;
+  for (let i = 0; i < domain.length; i++) hash = (hash * 31 + domain.charCodeAt(i)) % 360;
+  return (
+    <span
+      aria-hidden="true"
+      className="rounded-lg grid place-items-center font-bold shrink-0 text-xs"
+      style={{
+        width: size,
+        height: size,
+        backgroundColor: `hsl(${hash} 55% 50% / 0.16)`,
+        color: `hsl(${hash} 60% 55%)`,
+        border: `1px solid hsl(${hash} 55% 50% / 0.3)`,
+      }}
+    >
+      {title.charAt(0).toUpperCase()}
+    </span>
+  );
+};
+
 export const BookmarksPage: React.FC<BookmarksPageProps> = ({
   bookmarks,
-  onAddBookmark,
-  onUpdateBookmark,
   onDeleteBookmark,
   onToggleFavorite,
   onRecordClick,
   onResetToDefaults,
-  onImportBookmarks,
   onOpenAddModal,
   onEditBookmark,
   onOpenExportImportModal,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<BookmarkCategory>('all');
-  const [typeFilter, setTypeFilter] = useState<'all' | 'ai' | 'non-ai' | 'favorites'>('all');
-  const [sortBy, setSortBy] = useState<'stars' | 'clicks' | 'name' | 'recent'>('stars');
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [showImportExport, setShowImportExport] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
-
-  // Pagination & Markdown export state
-  const [pageSize, setPageSize] = useState<number | 'all'>(24);
-  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [sortBy, setSortByState] = useState<SortKey>(() =>
+    readPref(STORAGE_SORT_KEY, ['stars', 'clicks', 'name', 'recent'] as const, 'stars')
+  );
+  const [view, setViewState] = useState<ViewMode>(() => readPref(STORAGE_VIEW_KEY, ['list', 'grid'] as const, 'list'));
+  const [visibleCount, setVisibleCount] = useState(PAGE_STEP);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isExportMarkdownOpen, setIsExportMarkdownOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  // Reset to page 1 whenever filters change
+  const setSortBy = (s: SortKey) => {
+    setSortByState(s);
+    savePref(STORAGE_SORT_KEY, s);
+  };
+  const setView = (v: ViewMode) => {
+    setViewState(v);
+    savePref(STORAGE_VIEW_KEY, v);
+  };
+
+  // Back to the first batch whenever the result set changes
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, selectedCategory, typeFilter, activeTagFilter, sortBy, pageSize]);
+    setVisibleCount(PAGE_STEP);
+  }, [searchQuery, selectedCategory, typeFilter, activeTagFilter, sortBy]);
 
-  // Filter and sort bookmarks
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [menuOpen]);
+
   const filteredBookmarks = useMemo(() => {
-    let result = bookmarks.filter((bm) => {
-      // Type filter
+    const q = searchQuery.toLowerCase().trim();
+    const result = bookmarks.filter((bm) => {
       if (typeFilter === 'ai' && !bm.isAi) return false;
       if (typeFilter === 'non-ai' && bm.isAi) return false;
       if (typeFilter === 'favorites' && !bm.isFavorite) return false;
-
-      // Category filter
       if (selectedCategory !== 'all' && bm.category !== selectedCategory) return false;
-
-      // Tag filter
       if (activeTagFilter && !bm.tags.includes(activeTagFilter)) return false;
-
-      // Search query
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
-        const inTitle = bm.title.toLowerCase().includes(q);
-        const inDesc = bm.description.toLowerCase().includes(q);
-        const inUrl = bm.url.toLowerCase().includes(q);
-        const inNotes = (bm.notes || '').toLowerCase().includes(q);
-        const inTags = bm.tags.some((t) => t.toLowerCase().includes(q));
-        if (!inTitle && !inDesc && !inUrl && !inNotes && !inTags) {
-          return false;
-        }
+      if (q) {
+        const hit =
+          bm.title.toLowerCase().includes(q) ||
+          bm.description.toLowerCase().includes(q) ||
+          bm.url.toLowerCase().includes(q) ||
+          (bm.notes || '').toLowerCase().includes(q) ||
+          bm.tags.some((t) => t.toLowerCase().includes(q));
+        if (!hit) return false;
       }
-
       return true;
     });
 
-    // Sort
     result.sort((a, b) => {
       if (sortBy === 'stars') {
-        const starsA = a.stars || 0;
-        const starsB = b.stars || 0;
-        if (starsB !== starsA) return starsB - starsA;
-        return a.title.localeCompare(b.title);
+        const d = (b.stars || 0) - (a.stars || 0);
+        return d !== 0 ? d : a.title.localeCompare(b.title);
       }
       if (sortBy === 'clicks') {
-        const clicksA = a.clickCount || 0;
-        const clicksB = b.clickCount || 0;
-        if (clicksB !== clicksA) return clicksB - clicksA;
-        return a.title.localeCompare(b.title);
+        const d = (b.clickCount || 0) - (a.clickCount || 0);
+        return d !== 0 ? d : a.title.localeCompare(b.title);
       }
-      if (sortBy === 'name') {
-        return a.title.localeCompare(b.title);
-      }
-      if (sortBy === 'recent') {
-        return (b.createdAt || '').localeCompare(a.createdAt || '');
-      }
-      return 0;
+      if (sortBy === 'name') return a.title.localeCompare(b.title);
+      return (b.createdAt || '').localeCompare(a.createdAt || '');
     });
-
     return result;
   }, [bookmarks, typeFilter, selectedCategory, activeTagFilter, searchQuery, sortBy]);
 
-  // Pagination calculations
-  const totalPages = useMemo(() => {
-    if (pageSize === 'all') return 1;
-    return Math.max(1, Math.ceil(filteredBookmarks.length / Number(pageSize)));
-  }, [filteredBookmarks.length, pageSize]);
+  const shown = filteredBookmarks.slice(0, visibleCount);
+  const remaining = filteredBookmarks.length - shown.length;
 
-  const paginatedBookmarks = useMemo(() => {
-    if (pageSize === 'all') return filteredBookmarks;
-    const size = Number(pageSize);
-    const start = (currentPage - 1) * size;
-    return filteredBookmarks.slice(start, start + size);
-  }, [filteredBookmarks, currentPage, pageSize]);
+  const categoryCounts = useMemo(() => {
+    const c: Record<string, number> = { all: bookmarks.length };
+    for (const b of bookmarks) c[b.category] = (c[b.category] || 0) + 1;
+    return c;
+  }, [bookmarks]);
 
-  const activeCategoryLabel = useMemo(() => {
-    return CATEGORY_TABS.find((c) => c.id === selectedCategory)?.label || 'All Tools';
-  }, [selectedCategory]);
-
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-    // Smooth scroll to top of tools section
-    const gridElem = document.getElementById('bookmarks-grid-section');
-    if (gridElem) {
-      gridElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
-  // Statistics counters
   const totalCount = bookmarks.length;
-  const nonAiCount = bookmarks.filter((b) => !b.isAi).length;
   const aiCount = bookmarks.filter((b) => b.isAi).length;
   const favoritesCount = bookmarks.filter((b) => b.isFavorite).length;
+
+  const activeCategoryLabel = CATEGORY_TABS.find((c) => c.id === selectedCategory)?.label || 'All Tools';
+  const anyFilter = searchQuery !== '' || activeTagFilter !== null || typeFilter !== 'all' || selectedCategory !== 'all';
+
+  const resetFilters = () => {
+    setSearchQuery('');
+    setActiveTagFilter(null);
+    setTypeFilter('all');
+    setSelectedCategory('all');
+  };
 
   const handleCopy = (bookmark: ToolBookmark) => {
     navigator.clipboard.writeText(bookmark.url);
     setCopiedId(bookmark.id);
-    setTimeout(() => {
-      setCopiedId(null);
-    }, 1800);
+    setTimeout(() => setCopiedId(null), 1800);
   };
 
   const handleOpenTool = (bookmark: ToolBookmark) => {
@@ -192,837 +234,468 @@ export const BookmarksPage: React.FC<BookmarksPageProps> = ({
 
   const handleExportJson = () => {
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(bookmarks, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', `ai_nexus_bookmarks_${new Date().toISOString().split('T')[0]}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
+    const a = document.createElement('a');
+    a.setAttribute('href', dataStr);
+    a.setAttribute('download', `ai_nexus_bookmarks_${new Date().toISOString().split('T')[0]}.json`);
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   };
 
-  const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const fileReader = new FileReader();
-    if (e.target.files && e.target.files[0]) {
-      fileReader.readAsText(e.target.files[0], 'UTF-8');
-      fileReader.onload = (event) => {
-        try {
-          const parsed = JSON.parse(event.target?.result as string);
-          if (Array.isArray(parsed)) {
-            onImportBookmarks(parsed);
-            alert(`Successfully imported ${parsed.length} bookmarks!`);
-          }
-        } catch {
-          alert('Could not parse the selected file. Please make sure it is a valid JSON bookmarks file.');
-        }
-      };
+  const handleDelete = (bm: ToolBookmark) => {
+    if (window.confirm(`Delete bookmark "${bm.title}"?`)) onDeleteBookmark(bm.id);
+  };
+
+  const handleRestoreDefaults = () => {
+    if (window.confirm('Reset bookmarks back to the curated default tools list? Any custom additions will be replaced.')) {
+      onResetToDefaults();
     }
   };
 
-  const getDomainFromUrl = (urlStr: string) => {
-    try {
-      const u = new URL(urlStr);
-      return u.hostname.replace('www.', '');
-    } catch {
-      return urlStr;
-    }
+  const typeOptions: { id: TypeFilter; label: string; icon: LucideIcon; count: number }[] = [
+    { id: 'all', label: 'All', icon: Bookmark, count: totalCount },
+    { id: 'non-ai', label: 'Web utilities', icon: Wrench, count: totalCount - aiCount },
+    { id: 'ai', label: 'Free AI utilities', icon: Sparkles, count: aiCount },
+    { id: 'favorites', label: 'Favorites', icon: Star, count: favoritesCount },
+  ];
+
+  const railStyle = (active: boolean): React.CSSProperties =>
+    active
+      ? { backgroundColor: 'var(--theme-raised)', color: 'var(--theme-text)', fontWeight: 600 }
+      : { color: 'var(--theme-text-secondary)' };
+
+  const iconBtn = 'p-1.5 rounded-lg border transition-colors cursor-pointer hover:opacity-85';
+  const iconBtnStyle: React.CSSProperties = {
+    backgroundColor: 'var(--theme-raised)',
+    borderColor: 'var(--theme-border)',
+    color: 'var(--theme-text-secondary)',
   };
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-      {/* Top Banner Header */}
-      <div
-        className="rounded-2xl border p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6"
+  const actions = (bm: ToolBookmark) => (
+    <div className="flex items-center justify-end gap-1.5">
+      <button onClick={() => onEditBookmark(bm)} title="Edit this bookmark" aria-label={`Edit ${bm.title}`} className={iconBtn} style={iconBtnStyle}>
+        <Pencil className="w-3.5 h-3.5" />
+      </button>
+      <button
+        onClick={() => handleCopy(bm)}
+        title="Copy URL"
+        aria-label={`Copy URL for ${bm.title}`}
+        className={iconBtn}
+        style={{ ...iconBtnStyle, color: copiedId === bm.id ? '#10b981' : iconBtnStyle.color }}
+      >
+        {copiedId === bm.id ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+      </button>
+      {bm.githubUrl && (
+        <a
+          href={bm.githubUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="View repository on GitHub"
+          aria-label={`${bm.title} on GitHub`}
+          className={iconBtn}
+          style={iconBtnStyle}
+        >
+          <Github className="w-3.5 h-3.5" />
+        </a>
+      )}
+      {bm.isCustom && (
+        <button
+          onClick={() => handleDelete(bm)}
+          title="Delete custom bookmark"
+          aria-label={`Delete ${bm.title}`}
+          className={`${iconBtn} text-rose-400`}
+          style={{ ...iconBtnStyle, color: undefined }}
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      )}
+      <button
+        onClick={() => handleOpenTool(bm)}
+        className="px-3 py-1.5 text-xs font-semibold rounded-lg shadow-sm flex items-center gap-1.5 cursor-pointer hover:opacity-95 active:scale-95 whitespace-nowrap"
+        style={{ backgroundColor: 'var(--theme-primary)', color: 'var(--theme-primary-foreground, #000000)' }}
+      >
+        Open <ExternalLink className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
+
+  const star = (bm: ToolBookmark) => (
+    <button
+      onClick={() => onToggleFavorite(bm.id)}
+      title={bm.isFavorite ? 'Remove from favorites' : 'Star as favorite'}
+      aria-label={bm.isFavorite ? `Unfavorite ${bm.title}` : `Favorite ${bm.title}`}
+      aria-pressed={!!bm.isFavorite}
+      className="p-1 rounded-md cursor-pointer active:scale-90 transition-transform"
+    >
+      <Star className={`w-4 h-4 ${bm.isFavorite ? 'fill-amber-400 text-amber-400' : 'opacity-40'}`} />
+    </button>
+  );
+
+  const tagButtons = (bm: ToolBookmark, max: number) =>
+    bm.tags.slice(0, max).map((tag) => (
+      <button
+        key={tag}
+        onClick={() => setActiveTagFilter(activeTagFilter === tag ? null : tag)}
+        className="px-1.5 py-0.5 text-[10px] rounded border cursor-pointer whitespace-nowrap"
         style={{
-          backgroundColor: 'var(--theme-card)',
+          backgroundColor: activeTagFilter === tag ? 'var(--theme-primary)' : 'var(--theme-raised)',
           borderColor: 'var(--theme-border)',
+          color: activeTagFilter === tag ? 'var(--theme-primary-foreground, #000000)' : 'var(--theme-text-secondary)',
         }}
       >
-        <div className="space-y-1.5 max-w-2xl">
-          <div className="flex items-center gap-2">
-            <span
-              className="px-2.5 py-0.5 text-xs font-semibold rounded-full border flex items-center gap-1.5"
-              style={{
-                backgroundColor: 'var(--theme-raised)',
-                borderColor: 'var(--theme-border)',
-                color: 'var(--theme-primary)',
-              }}
-            >
-              <Bookmark className="w-3.5 h-3.5" />
-              <span>Independent Directory</span>
-            </span>
-            <span
-              className="text-xs px-2 py-0.5 rounded-full"
-              style={{
-                backgroundColor: 'var(--theme-raised)',
-                color: 'var(--theme-text-secondary)',
-              }}
-            >
-              {totalCount} Free Online Tools
-            </span>
-          </div>
-          <h1 className="text-xl sm:text-2xl font-black tracking-tight" style={{ color: 'var(--theme-text)' }}>
-            Free Online Tool Bookmarks
-          </h1>
-          <p className="text-xs sm:text-sm leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
-            Your quick-access launchpad for essential web tools — both free non-AI developer utilities (regex testers, JSON formatters, SVG optimizers, diff checkers) and instant free AI utilities. Click any link to jump straight to work.
+        #{tag}
+      </button>
+    ));
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-bold tracking-tight">Free Online Tool Bookmarks</h2>
+          <p className="text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
+            {totalCount} free web tools, from developer utilities to AI helpers. Click any one to jump straight to work.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+        <div ref={menuRef} className="relative">
           <button
-            id="btn-add-bookmark"
-            onClick={onOpenAddModal}
-            className="px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl shadow-sm transition-all flex items-center gap-2 cursor-pointer hover:opacity-95 active:scale-95"
-            style={{
-              backgroundColor: 'var(--theme-primary)',
-              color: 'var(--theme-primary-foreground, #000000)',
-            }}
+            id="btn-bookmarks-manage"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            className="px-3 py-1.5 text-xs font-medium rounded-lg border flex items-center gap-1.5 cursor-pointer hover:opacity-85"
+            style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)', color: 'var(--theme-text)' }}
           >
-            <Plus className="w-4 h-4" />
-            <span>Bookmark Tool</span>
+            <MoreHorizontal className="w-3.5 h-3.5" />
+            Manage
           </button>
-
-          <button
-            id="btn-open-export-import-header"
-            onClick={() => {
-              if (onOpenExportImportModal) {
-                onOpenExportImportModal();
-              } else {
-                setShowImportExport(true);
-              }
-            }}
-            className="px-3 py-2 text-xs font-semibold rounded-xl border transition-colors flex items-center gap-1.5 cursor-pointer hover:opacity-85"
-            style={{
-              backgroundColor: 'var(--theme-raised)',
-              borderColor: 'var(--theme-border)',
-              color: 'var(--theme-primary)',
-            }}
-            title="Export JSON/HTML/CSV or Import bookmarks"
-          >
-            <FolderInput className="w-3.5 h-3.5" />
-            <span>Export & Import</span>
-          </button>
-
-          <button
-            id="btn-export-markdown-header"
-            onClick={() => setIsExportMarkdownOpen(true)}
-            className="px-3 py-2 text-xs font-medium rounded-xl border transition-colors flex items-center gap-1.5 cursor-pointer hover:opacity-85"
-            style={{
-              backgroundColor: 'var(--theme-raised)',
-              borderColor: 'var(--theme-border)',
-              color: 'var(--theme-text)',
-            }}
-            title="Export filtered tools to GitHub README Markdown format"
-          >
-            <FileText className="w-3.5 h-3.5 text-sky-400" />
-            <span>Export Markdown</span>
-          </button>
-
-          <button
-            id="btn-toggle-import-export"
-            onClick={() => setShowImportExport(!showImportExport)}
-            className="px-3 py-2 text-xs font-medium rounded-xl border transition-colors flex items-center gap-1.5 cursor-pointer hover:opacity-85"
-            style={{
-              backgroundColor: 'var(--theme-raised)',
-              borderColor: 'var(--theme-border)',
-              color: 'var(--theme-text)',
-            }}
-            title="Quick Backup or Restore bookmarks"
-          >
-            <SlidersHorizontal className="w-3.5 h-3.5" />
-            <span>Quick Backup</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Backup & Import Tray (Collapsible) */}
-      {showImportExport && (
-        <div
-          className="rounded-xl border p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs"
-          style={{
-            backgroundColor: 'var(--theme-raised)',
-            borderColor: 'var(--theme-border)',
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <Info className="w-4 h-4 text-sky-400 shrink-0" />
-            <span style={{ color: 'var(--theme-text-secondary)' }}>
-              Bookmarks are persisted locally in your browser. You can export a JSON backup, download Markdown docs, or restore defaults.
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap shrink-0">
-            {onOpenExportImportModal && (
-              <button
-                id="btn-tray-full-export-import"
-                onClick={onOpenExportImportModal}
-                className="px-3 py-1.5 rounded-lg border font-semibold flex items-center gap-1.5 cursor-pointer hover:opacity-90"
-                style={{
-                  backgroundColor: 'var(--theme-primary)',
-                  borderColor: 'var(--theme-primary)',
-                  color: 'var(--theme-primary-foreground, #000000)',
-                }}
-              >
-                <FolderInput className="w-3.5 h-3.5" />
-                <span>Full Export / Import Center</span>
-              </button>
-            )}
-
-            <button
-              onClick={() => setIsExportMarkdownOpen(true)}
-              className="px-3 py-1.5 rounded-lg border flex items-center gap-1.5 font-medium cursor-pointer hover:opacity-80"
-              style={{
-                backgroundColor: 'var(--theme-card)',
-                borderColor: 'var(--theme-border)',
-                color: 'var(--theme-text)',
-              }}
+          {menuOpen && (
+            <div
+              role="menu"
+              className="absolute right-0 top-full mt-1.5 w-56 p-1 rounded-xl border shadow-xl z-30"
+              style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)' }}
             >
-              <FileText className="w-3.5 h-3.5 text-sky-400" />
-              <span>Export Markdown</span>
-            </button>
-
-            <button
-              onClick={handleExportJson}
-              className="px-3 py-1.5 rounded-lg border flex items-center gap-1.5 font-medium cursor-pointer hover:opacity-80"
-              style={{
-                backgroundColor: 'var(--theme-card)',
-                borderColor: 'var(--theme-border)',
-                color: 'var(--theme-text)',
-              }}
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Quick JSON</span>
-            </button>
-
-            <button
-              onClick={() => {
-                if (window.confirm('Reset bookmarks back to the curated default tools list? Any custom additions will be replaced.')) {
-                  onResetToDefaults();
-                }
-              }}
-              className="px-3 py-1.5 rounded-lg border text-rose-400 flex items-center gap-1.5 font-medium cursor-pointer hover:opacity-80"
-              style={{
-                backgroundColor: 'var(--theme-card)',
-                borderColor: 'var(--theme-border)',
-              }}
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Restore Defaults</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Filter and Search Control Center */}
-      <div
-        className="rounded-2xl border p-4 space-y-4 shadow-sm"
-        style={{
-          backgroundColor: 'var(--theme-card)',
-          borderColor: 'var(--theme-border)',
-        }}
-      >
-        {/* Row 1: Search and Type Pills */}
-        <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
-          {/* Search Input */}
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 opacity-40" />
-            <input
-              id="input-search-bookmarks"
-              type="text"
-              placeholder="Search bookmarks by name, utility (e.g. regex, json, svg, diff), tag, or domain..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-xl border text-xs sm:text-sm focus:outline-none focus:ring-2"
-              style={{
-                backgroundColor: 'var(--theme-raised)',
-                borderColor: 'var(--theme-border)',
-                color: 'var(--theme-text)',
-              }}
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs opacity-50 hover:opacity-100 cursor-pointer"
-              >
-                Clear
-              </button>
-            )}
-          </div>
-
-          {/* Quick Type Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
-            <button
-              onClick={() => setTypeFilter('all')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                typeFilter === 'all' ? 'shadow-sm' : 'opacity-70 hover:opacity-100'
-              }`}
-              style={{
-                backgroundColor: typeFilter === 'all' ? 'var(--theme-primary)' : 'var(--theme-raised)',
-                color: typeFilter === 'all' ? 'var(--theme-primary-foreground, #000000)' : 'var(--theme-text)',
-              }}
-            >
-              All ({totalCount})
-            </button>
-
-            <button
-              onClick={() => setTypeFilter('non-ai')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
-                typeFilter === 'non-ai' ? 'shadow-sm' : 'opacity-70 hover:opacity-100'
-              }`}
-              style={{
-                backgroundColor: typeFilter === 'non-ai' ? 'var(--theme-primary)' : 'var(--theme-raised)',
-                color: typeFilter === 'non-ai' ? 'var(--theme-primary-foreground, #000000)' : 'var(--theme-text)',
-              }}
-            >
-              <Wrench className="w-3.5 h-3.5 text-amber-500" />
-              <span>Non-AI Web Utilities ({nonAiCount})</span>
-            </button>
-
-            <button
-              onClick={() => setTypeFilter('ai')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
-                typeFilter === 'ai' ? 'shadow-sm' : 'opacity-70 hover:opacity-100'
-              }`}
-              style={{
-                backgroundColor: typeFilter === 'ai' ? 'var(--theme-primary)' : 'var(--theme-raised)',
-                color: typeFilter === 'ai' ? 'var(--theme-primary-foreground, #000000)' : 'var(--theme-text)',
-              }}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-sky-400" />
-              <span>Free AI Utilities ({aiCount})</span>
-            </button>
-
-            <button
-              onClick={() => setTypeFilter('favorites')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
-                typeFilter === 'favorites' ? 'shadow-sm' : 'opacity-70 hover:opacity-100'
-              }`}
-              style={{
-                backgroundColor: typeFilter === 'favorites' ? 'var(--theme-primary)' : 'var(--theme-raised)',
-                color: typeFilter === 'favorites' ? 'var(--theme-primary-foreground, #000000)' : 'var(--theme-text)',
-              }}
-            >
-              <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-              <span>Favorites ({favoritesCount})</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Row 2: Category tabs & Sort */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t" style={{ borderColor: 'var(--theme-border)' }}>
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-            {CATEGORY_TABS.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-2.5 py-1 text-xs rounded-md whitespace-nowrap transition-colors cursor-pointer ${
-                  selectedCategory === cat.id
-                    ? 'font-bold border'
-                    : 'opacity-65 hover:opacity-100'
-                }`}
-                style={{
-                  backgroundColor: selectedCategory === cat.id ? 'var(--theme-raised)' : 'transparent',
-                  borderColor: selectedCategory === cat.id ? 'var(--theme-border)' : 'transparent',
-                  color: selectedCategory === cat.id ? 'var(--theme-primary)' : 'var(--theme-text)',
-                }}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-            {activeTagFilter && (
-              <div
-                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs border"
-                style={{
-                  backgroundColor: 'var(--theme-raised)',
-                  borderColor: 'var(--theme-border)',
-                  color: 'var(--theme-primary)',
-                }}
-              >
-                <Tag className="w-3 h-3" />
-                <span>#{activeTagFilter}</span>
-                <button
-                  onClick={() => setActiveTagFilter(null)}
-                  className="ml-1 opacity-60 hover:opacity-100 cursor-pointer"
-                >
-                  ×
-                </button>
-              </div>
-            )}
-
-            <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
-              <span>Sort:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-2 py-1 rounded-md border text-xs cursor-pointer focus:outline-none"
-                style={{
-                  backgroundColor: 'var(--theme-raised)',
-                  borderColor: 'var(--theme-border)',
-                  color: 'var(--theme-text)',
-                }}
-              >
-                <option value="stars">Top GitHub Stars</option>
-                <option value="clicks">Most Used</option>
-                <option value="name">Name (A-Z)</option>
-                <option value="recent">Recently Added</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
-              <span>Show:</span>
-              <select
-                value={pageSize}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setPageSize(val === 'all' ? 'all' : Number(val));
-                }}
-                className="px-2 py-1 rounded-md border text-xs cursor-pointer focus:outline-none"
-                style={{
-                  backgroundColor: 'var(--theme-raised)',
-                  borderColor: 'var(--theme-border)',
-                  color: 'var(--theme-text)',
-                }}
-              >
-                <option value={24}>24 / page</option>
-                <option value={48}>48 / page</option>
-                <option value={96}>96 / page</option>
-                <option value="all">All ({filteredBookmarks.length})</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Grid of Tool Bookmarks */}
-      {filteredBookmarks.length > 0 ? (
-        <div id="bookmarks-grid-section" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {paginatedBookmarks.map((bookmark) => {
-              const domain = getDomainFromUrl(bookmark.url);
-              const isCopied = copiedId === bookmark.id;
-
-            return (
-              <div
-                key={bookmark.id}
-                id={`card-bookmark-${bookmark.id}`}
-                className="group rounded-2xl border p-5 shadow-sm transition-all duration-200 flex flex-col justify-between hover:shadow-md"
-                style={{
-                  backgroundColor: 'var(--theme-card)',
-                  borderColor: 'var(--theme-border)',
-                }}
-              >
-                <div>
-                  {/* Top Metadata Row */}
-                  <div className="flex items-start justify-between gap-3 mb-2.5">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div
-                        className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 shadow-xs"
-                        style={{
-                          backgroundColor: bookmark.isAi ? 'rgba(56, 189, 248, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                          color: bookmark.isAi ? '#38bdf8' : '#f59e0b',
-                          border: `1px solid ${bookmark.isAi ? 'rgba(56, 189, 248, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
-                        }}
-                      >
-                        {bookmark.isAi ? <Sparkles className="w-4 h-4" /> : <Wrench className="w-4 h-4" />}
-                      </div>
-
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <h3
-                            className="font-bold text-sm truncate group-hover:text-sky-400 transition-colors"
-                            style={{ color: 'var(--theme-text)' }}
-                          >
-                            {bookmark.title}
-                          </h3>
-                        </div>
-                        <span className="text-[11px] font-mono opacity-55 truncate block">
-                          {domain}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Star Favorite Action */}
-                    <button
-                      onClick={() => onToggleFavorite(bookmark.id)}
-                      className="p-1.5 rounded-lg border transition-transform active:scale-90 cursor-pointer"
-                      style={{
-                        backgroundColor: 'var(--theme-raised)',
-                        borderColor: 'var(--theme-border)',
-                        color: bookmark.isFavorite ? '#f59e0b' : 'var(--theme-text-secondary)',
-                      }}
-                      title={bookmark.isFavorite ? 'Remove from favorites' : 'Star as favorite'}
-                    >
-                      <Star className={`w-3.5 h-3.5 ${bookmark.isFavorite ? 'fill-amber-400 text-amber-400' : ''}`} />
-                    </button>
-                  </div>
-
-                  {/* Badges Row */}
-                  <div className="flex items-center gap-1.5 flex-wrap mb-3">
-                    <span
-                      className="px-2 py-0.5 text-[10px] font-semibold rounded-md border"
-                      style={{
-                        backgroundColor: 'var(--theme-raised)',
-                        borderColor: 'var(--theme-border)',
-                        color: bookmark.isAi ? '#38bdf8' : '#10b981',
-                      }}
-                    >
-                      {bookmark.freeTierBadge}
-                    </span>
-
-                    <span
-                      className="px-2 py-0.5 text-[10px] font-medium rounded-md border capitalize"
-                      style={{
-                        backgroundColor: 'var(--theme-raised)',
-                        borderColor: 'var(--theme-border)',
-                        color: 'var(--theme-text-secondary)',
-                      }}
-                    >
-                      {bookmark.category.replace('-', ' ')}
-                    </span>
-
-                    {bookmark.clickCount && bookmark.clickCount > 0 ? (
-                      <span
-                        className="px-1.5 py-0.5 text-[10px] rounded-md opacity-70"
-                        style={{
-                          backgroundColor: 'var(--theme-raised)',
-                          color: 'var(--theme-text-secondary)',
-                        }}
-                      >
-                        {bookmark.clickCount} visits
-                      </span>
-                    ) : null}
-                  </div>
-
-                  {/* Description */}
-                  <p
-                    className="text-xs line-clamp-3 leading-relaxed mb-3"
-                    style={{ color: 'var(--theme-text-secondary)' }}
-                  >
-                    {bookmark.description}
-                  </p>
-
-                  {/* Notes if available */}
-                  {bookmark.notes && (
-                    <div
-                      className="mb-3 p-2 rounded-lg text-[11px] leading-snug border border-dashed"
-                      style={{
-                        backgroundColor: 'var(--theme-raised)',
-                        borderColor: 'var(--theme-border)',
-                        color: 'var(--theme-text-secondary)',
-                      }}
-                    >
-                      <span className="font-semibold text-sky-400 mr-1">Tip:</span>
-                      {bookmark.notes}
-                    </div>
-                  )}
-
-                  {/* Tags */}
-                  {bookmark.tags && bookmark.tags.length > 0 && (
-                    <div className="flex items-center gap-1 flex-wrap mb-4">
-                      {bookmark.tags.slice(0, 4).map((tag) => (
-                        <button
-                          key={tag}
-                          onClick={() => setActiveTagFilter(activeTagFilter === tag ? null : tag)}
-                          className="px-1.5 py-0.5 text-[10px] rounded border transition-colors cursor-pointer hover:opacity-100"
-                          style={{
-                            backgroundColor: activeTagFilter === tag ? 'var(--theme-primary)' : 'var(--theme-raised)',
-                            borderColor: 'var(--theme-border)',
-                            color: activeTagFilter === tag ? 'var(--theme-primary-foreground, #000000)' : 'var(--theme-text-secondary)',
-                          }}
-                        >
-                          #{tag}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Card Actions Bottom Row */}
-                <div
-                  className="pt-3 border-t flex items-center justify-between gap-2"
-                  style={{ borderColor: 'var(--theme-border)' }}
-                >
-                  {/* Left: Edit / Delete */}
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => onEditBookmark(bookmark)}
-                      className="p-1.5 rounded-lg border transition-colors cursor-pointer hover:opacity-80"
-                      style={{
-                        backgroundColor: 'var(--theme-raised)',
-                        borderColor: 'var(--theme-border)',
-                        color: 'var(--theme-text-secondary)',
-                      }}
-                      title="Edit this bookmark"
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
-
-                    <button
-                      onClick={() => handleCopy(bookmark)}
-                      className="p-1.5 rounded-lg border transition-colors cursor-pointer hover:opacity-80 flex items-center gap-1"
-                      style={{
-                        backgroundColor: 'var(--theme-raised)',
-                        borderColor: 'var(--theme-border)',
-                        color: isCopied ? '#10b981' : 'var(--theme-text-secondary)',
-                      }}
-                      title="Copy URL"
-                    >
-                      {isCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    </button>
-
-                    {bookmark.githubUrl && (
-                      <a
-                        href={bookmark.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-1.5 rounded-lg border transition-colors cursor-pointer hover:opacity-80 flex items-center gap-1 text-[11px]"
-                        style={{
-                          backgroundColor: 'var(--theme-raised)',
-                          borderColor: 'var(--theme-border)',
-                          color: 'var(--theme-text-secondary)',
-                        }}
-                        title="View open-source repository on GitHub"
-                      >
-                        <Github className="w-3.5 h-3.5" />
-                        {bookmark.stars !== undefined && bookmark.stars > 0 && (
-                          <span className="font-mono text-[10px] font-semibold">
-                            {bookmark.stars >= 1000 ? `${(bookmark.stars / 1000).toFixed(1)}k` : bookmark.stars}
-                          </span>
-                        )}
-                      </a>
-                    )}
-
-                    {bookmark.isCustom && (
-                      <button
-                        onClick={() => {
-                          if (window.confirm(`Delete bookmark "${bookmark.title}"?`)) {
-                            onDeleteBookmark(bookmark.id);
-                          }
-                        }}
-                        className="p-1.5 rounded-lg border text-rose-400 transition-colors cursor-pointer hover:opacity-80"
-                        style={{
-                          backgroundColor: 'var(--theme-raised)',
-                          borderColor: 'var(--theme-border)',
-                        }}
-                        title="Delete custom bookmark"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Right: Primary "Open Tool" Button */}
+              {[
+                { id: 'btn-open-export-import-header', icon: FolderInput, label: 'Export & Import', run: () => onOpenExportImportModal?.(), hidden: !onOpenExportImportModal },
+                { id: 'btn-export-markdown-header', icon: FileText, label: 'Export Markdown', run: () => setIsExportMarkdownOpen(true) },
+                { id: 'btn-quick-json', icon: Download, label: 'Quick JSON backup', run: handleExportJson },
+                { id: 'btn-restore-defaults', icon: RotateCcw, label: 'Restore defaults', run: handleRestoreDefaults },
+              ]
+                .filter((i) => !i.hidden)
+                .map(({ id, icon: Icon, label, run }) => (
                   <button
-                    onClick={() => handleOpenTool(bookmark)}
-                    className="px-3.5 py-1.5 text-xs font-semibold rounded-lg shadow-sm transition-all flex items-center gap-1.5 cursor-pointer hover:opacity-95 active:scale-95"
-                    style={{
-                      backgroundColor: 'var(--theme-primary)',
-                      color: 'var(--theme-primary-foreground, #000000)',
+                    key={id}
+                    id={id}
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      run();
                     }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-left rounded-md cursor-pointer hover:bg-[var(--theme-raised)]"
+                    style={{ color: 'var(--theme-text)' }}
                   >
-                    <span>Open Tool</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
+                    <Icon className="w-3.5 h-3.5 opacity-70" />
+                    {label}
                   </button>
-                </div>
-              </div>
-            );
-          })}
+                ))}
+            </div>
+          )}
         </div>
+      </div>
 
-        {/* Pagination & Load More Controls */}
-        {pageSize !== 'all' && totalPages > 1 && (
-          <div
-            className="rounded-2xl border p-4 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4 mt-6"
-            style={{
-              backgroundColor: 'var(--theme-card)',
-              borderColor: 'var(--theme-border)',
-            }}
-          >
-            {/* Left: Range Summary */}
-            <div className="text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
-              Showing{' '}
-              <span className="font-semibold" style={{ color: 'var(--theme-text)' }}>
-                {(currentPage - 1) * Number(pageSize) + 1}
-              </span>{' '}
-              to{' '}
-              <span className="font-semibold" style={{ color: 'var(--theme-text)' }}>
-                {Math.min(currentPage * Number(pageSize), filteredBookmarks.length)}
-              </span>{' '}
-              of{' '}
-              <span className="font-semibold" style={{ color: 'var(--theme-text)' }}>
-                {filteredBookmarks.length}
-              </span>{' '}
-              online tools
-            </div>
+      <div className="grid grid-cols-1 lg:grid-cols-[11rem_minmax(0,1fr)] gap-5 items-start">
+        {/* Filter rail */}
+        <aside className="flex flex-col gap-0.5 lg:sticky lg:top-0" aria-label="Bookmark filters">
+          <h6 className="px-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>
+            Category
+          </h6>
+          {CATEGORY_TABS.filter((c) => c.id === 'all' || (categoryCounts[c.id] || 0) > 0).map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              aria-pressed={selectedCategory === cat.id}
+              className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-left cursor-pointer hover:bg-[var(--theme-raised)]"
+              style={railStyle(selectedCategory === cat.id)}
+            >
+              <span className="flex-1 truncate">{cat.label}</span>
+              <span className="font-mono text-[10px]" style={{ color: 'var(--theme-text-muted)' }}>
+                {categoryCounts[cat.id] || 0}
+              </span>
+            </button>
+          ))}
 
-            {/* Middle: Page navigation buttons */}
-            <div className="flex items-center gap-1.5 flex-wrap justify-center">
-              <button
-                id="btn-prev-page"
-                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-                className="px-2.5 py-1.5 rounded-lg border text-xs flex items-center gap-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer hover:opacity-85"
-                style={{
-                  backgroundColor: 'var(--theme-raised)',
-                  borderColor: 'var(--theme-border)',
-                  color: 'var(--theme-text)',
-                }}
-                title="Previous page"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span className="hidden sm:inline">Prev</span>
-              </button>
+          <h6 className="px-2.5 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>
+            Show
+          </h6>
+          {typeOptions.map(({ id, label, icon: Icon, count }) => (
+            <button
+              key={id}
+              onClick={() => setTypeFilter(id)}
+              aria-pressed={typeFilter === id}
+              className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-left cursor-pointer hover:bg-[var(--theme-raised)]"
+              style={railStyle(typeFilter === id)}
+            >
+              <Icon className={`w-3.5 h-3.5 shrink-0 ${id === 'favorites' ? 'text-amber-400' : ''}`} />
+              <span className="flex-1 truncate">{label}</span>
+              <span className="font-mono text-[10px]" style={{ color: 'var(--theme-text-muted)' }}>
+                {count}
+              </span>
+            </button>
+          ))}
+          {anyFilter && (
+            <button onClick={resetFilters} className="mt-2 px-2.5 py-1 text-xs text-left underline cursor-pointer" style={{ color: 'var(--theme-primary)' }}>
+              Reset all
+            </button>
+          )}
+        </aside>
 
-              {/* Dynamic Page Pill List */}
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter((p) => {
-                    return p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1;
-                  })
-                  .reduce<(number | string)[]>((acc, p, idx, arr) => {
-                    if (idx > 0 && p - (arr[idx - 1] as number) > 1) {
-                      acc.push('...');
-                    }
-                    acc.push(p);
-                    return acc;
-                  }, [])
-                  .map((item, idx) => {
-                    if (item === '...') {
-                      return (
-                        <span key={`ellipsis-${idx}`} className="px-1.5 text-xs opacity-40">
-                          ...
-                        </span>
-                      );
-                    }
-                    const p = item as number;
-                    const isActive = p === currentPage;
-                    return (
-                      <button
-                        key={p}
-                        onClick={() => handlePageChange(p)}
-                        className="w-8 h-8 rounded-lg text-xs font-semibold border transition-all cursor-pointer"
-                        style={
-                          isActive
-                            ? {
-                                backgroundColor: 'var(--theme-primary)',
-                                borderColor: 'var(--theme-primary)',
-                                color: 'var(--theme-primary-foreground, #000000)',
-                              }
-                            : {
-                                backgroundColor: 'var(--theme-raised)',
-                                borderColor: 'var(--theme-border)',
-                                color: 'var(--theme-text)',
-                              }
-                        }
-                      >
-                        {p}
-                      </button>
-                    );
-                  })}
-              </div>
-
-              <button
-                id="btn-next-page"
-                onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                disabled={currentPage === totalPages}
-                className="px-2.5 py-1.5 rounded-lg border text-xs flex items-center gap-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer hover:opacity-85"
-                style={{
-                  backgroundColor: 'var(--theme-raised)',
-                  borderColor: 'var(--theme-border)',
-                  color: 'var(--theme-text)',
-                }}
-                title="Next page"
-              >
-                <span className="hidden sm:inline">Next</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Right: Load More quick button */}
-            <div className="flex items-center gap-2">
-              {currentPage < totalPages && (
+        <div className="min-w-0 space-y-3">
+          {/* Toolbar */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative flex-1 min-w-[12rem]">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 opacity-40 pointer-events-none" />
+              <input
+                id="input-search-bookmarks"
+                type="text"
+                placeholder="Search by name, utility (regex, json, svg), tag, or domain..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-8 py-1.5 rounded-lg text-xs focus:outline-none"
+                style={{ backgroundColor: 'var(--theme-card)', border: '1px solid var(--theme-border)', color: 'var(--theme-text)' }}
+              />
+              {searchQuery && (
                 <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer hover:opacity-85"
-                  style={{
-                    backgroundColor: 'var(--theme-raised)',
-                    borderColor: 'var(--theme-border)',
-                    color: 'var(--theme-primary)',
-                  }}
+                  onClick={() => setSearchQuery('')}
+                  aria-label="Clear search"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100 cursor-pointer"
                 >
-                  Load Next {Math.min(Number(pageSize), filteredBookmarks.length - currentPage * Number(pageSize))}
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
-          </div>
-        )}
-      </div>
-      ) : (
-        /* Empty State */
-        <div
-          className="rounded-2xl border p-12 text-center space-y-4 max-w-md mx-auto"
-          style={{
-            backgroundColor: 'var(--theme-card)',
-            borderColor: 'var(--theme-border)',
-          }}
-        >
-          <div
-            className="w-12 h-12 mx-auto rounded-2xl flex items-center justify-center"
-            style={{
-              backgroundColor: 'var(--theme-raised)',
-              color: 'var(--theme-text-secondary)',
-            }}
-          >
-            <Bookmark className="w-6 h-6" />
-          </div>
-          <div className="space-y-1">
-            <h3 className="font-bold text-base" style={{ color: 'var(--theme-text)' }}>
-              No bookmarks found
-            </h3>
-            <p className="text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
-              {searchQuery || activeTagFilter || typeFilter !== 'all' || selectedCategory !== 'all'
-                ? 'No online tools match your active filter criteria.'
-                : 'Your bookmark list is currently empty.'}
-            </p>
-          </div>
-          <div className="flex items-center justify-center gap-2 pt-2">
-            {(searchQuery || activeTagFilter || typeFilter !== 'all' || selectedCategory !== 'all') && (
-              <button
-                onClick={() => {
-                  setSearchQuery('');
-                  setActiveTagFilter(null);
-                  setTypeFilter('all');
-                  setSelectedCategory('all');
-                }}
-                className="px-3 py-1.5 text-xs font-medium rounded-lg border cursor-pointer hover:opacity-85"
-                style={{
-                  backgroundColor: 'var(--theme-raised)',
-                  borderColor: 'var(--theme-border)',
-                  color: 'var(--theme-text)',
-                }}
-              >
-                Clear Filters
-              </button>
-            )}
 
-            <button
-              onClick={onOpenAddModal}
-              className="px-4 py-1.5 text-xs font-semibold rounded-lg shadow-sm cursor-pointer hover:opacity-95"
-              style={{
-                backgroundColor: 'var(--theme-primary)',
-                color: 'var(--theme-primary-foreground, #000000)',
-              }}
+            <select
+              id="select-bookmarks-sort"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortKey)}
+              aria-label="Sort bookmarks"
+              className="py-1.5 pl-2.5 pr-2 rounded-lg text-xs cursor-pointer focus:outline-none"
+              style={{ backgroundColor: 'var(--theme-card)', border: '1px solid var(--theme-border)', color: 'var(--theme-text)' }}
             >
-              Add New Bookmark
-            </button>
-          </div>
-        </div>
-      )}
+              <option value="stars">Sort: Top GitHub stars</option>
+              <option value="clicks">Sort: Most used</option>
+              <option value="name">Sort: Name (A–Z)</option>
+              <option value="recent">Sort: Recently added</option>
+            </select>
 
-      {/* Export to Markdown Modal */}
+            <div
+              className="inline-flex rounded-lg overflow-hidden border"
+              style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-card)' }}
+              role="group"
+              aria-label="View mode"
+            >
+              {([
+                ['list', List, 'List view'],
+                ['grid', LayoutGrid, 'Grid view'],
+              ] as const).map(([mode, Icon, label]) => (
+                <button
+                  key={mode}
+                  id={`btn-bookmarks-view-${mode}`}
+                  onClick={() => setView(mode)}
+                  aria-pressed={view === mode}
+                  title={label}
+                  aria-label={label}
+                  className="px-2.5 py-1.5 cursor-pointer"
+                  style={{
+                    backgroundColor: view === mode ? 'var(--theme-raised)' : 'transparent',
+                    color: view === mode ? 'var(--theme-text)' : 'var(--theme-text-muted)',
+                  }}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--theme-text-muted)' }}>
+            <span>
+              Showing <strong style={{ color: 'var(--theme-text)' }}>{shown.length}</strong> of{' '}
+              <strong style={{ color: 'var(--theme-text)' }}>{filteredBookmarks.length}</strong>
+              {selectedCategory !== 'all' && <> in {activeCategoryLabel}</>}
+            </span>
+            {activeTagFilter && (
+              <span
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border"
+                style={{ backgroundColor: 'var(--theme-raised)', borderColor: 'var(--theme-border)', color: 'var(--theme-primary)' }}
+              >
+                <Tag className="w-3 h-3" />#{activeTagFilter}
+                <button onClick={() => setActiveTagFilter(null)} aria-label="Clear tag filter" className="ml-1 opacity-60 hover:opacity-100 cursor-pointer">
+                  ×
+                </button>
+              </span>
+            )}
+          </div>
+
+          {filteredBookmarks.length === 0 ? (
+            <div
+              className="rounded-2xl border p-12 text-center space-y-4"
+              style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)' }}
+            >
+              <div className="space-y-1">
+                <h3 className="font-bold text-base">No bookmarks found</h3>
+                <p className="text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
+                  {anyFilter ? 'No online tools match your active filter criteria.' : 'Your bookmark list is currently empty.'}
+                </p>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                {anyFilter && (
+                  <button
+                    onClick={resetFilters}
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg border cursor-pointer hover:opacity-85"
+                    style={{ backgroundColor: 'var(--theme-raised)', borderColor: 'var(--theme-border)', color: 'var(--theme-text)' }}
+                  >
+                    Clear Filters
+                  </button>
+                )}
+                <button
+                  onClick={onOpenAddModal}
+                  className="px-4 py-1.5 text-xs font-semibold rounded-lg shadow-sm cursor-pointer hover:opacity-95"
+                  style={{ backgroundColor: 'var(--theme-primary)', color: 'var(--theme-primary-foreground, #000000)' }}
+                >
+                  Add New Bookmark
+                </button>
+              </div>
+            </div>
+          ) : view === 'list' ? (
+            <div
+              id="bookmarks-grid-section"
+              className="rounded-xl border overflow-x-auto"
+              style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)' }}
+            >
+              <table className="w-full text-xs min-w-[760px]">
+                <thead>
+                  <tr>
+                    {['', 'Name', 'Tags', 'Type', 'Stars', ''].map((h, i) => (
+                      <th
+                        key={i}
+                        className="text-left px-3 py-2 text-[10px] font-semibold uppercase tracking-wider border-b"
+                        style={{ color: 'var(--theme-text-muted)', borderColor: 'var(--theme-border)' }}
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {shown.map((bm) => (
+                    <tr
+                      key={bm.id}
+                      id={`card-bookmark-${bm.id}`}
+                      className="border-b last:border-b-0 hover:bg-[var(--theme-raised)]/50 transition-colors"
+                      style={{ borderColor: 'var(--theme-border)' }}
+                    >
+                      <td className="pl-3 pr-0 py-2 align-middle w-8">{star(bm)}</td>
+                      <td className="px-3 py-2 align-middle">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <Avatar title={bm.title} url={bm.url} />
+                          <div className="min-w-0">
+                            <div className="text-[13px] font-semibold truncate" title={bm.description}>
+                              {bm.title}
+                            </div>
+                            <div className="text-[11px] font-mono truncate" style={{ color: 'var(--theme-text-muted)' }}>
+                              {getDomainFromUrl(bm.url)}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 align-middle">
+                        <div className="flex flex-wrap gap-1 max-w-[16rem]">{tagButtons(bm, 2)}</div>
+                      </td>
+                      <td className="px-3 py-2 align-middle">
+                        <span
+                          className="px-2 py-0.5 text-[10px] font-medium rounded-md border whitespace-nowrap"
+                          style={{
+                            backgroundColor: 'var(--theme-raised)',
+                            borderColor: 'var(--theme-border)',
+                            color: bm.isAi ? '#38bdf8' : '#10b981',
+                          }}
+                        >
+                          {bm.freeTierBadge}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 align-middle font-mono text-[11px]" style={{ color: 'var(--theme-text-secondary)' }}>
+                        {bm.stars ? formatStars(bm.stars) : ''}
+                      </td>
+                      <td className="px-3 py-2 align-middle">{actions(bm)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div id="bookmarks-grid-section" className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
+              {shown.map((bm) => (
+                <div
+                  key={bm.id}
+                  id={`card-bookmark-${bm.id}`}
+                  className="rounded-xl border p-4 flex flex-col gap-3 min-w-0"
+                  style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)' }}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Avatar title={bm.title} url={bm.url} size={36} />
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-sm truncate">{bm.title}</h3>
+                        <span className="text-[11px] font-mono truncate block" style={{ color: 'var(--theme-text-muted)' }}>
+                          {getDomainFromUrl(bm.url)}
+                        </span>
+                      </div>
+                    </div>
+                    {star(bm)}
+                  </div>
+                  <p className="text-xs line-clamp-2 leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
+                    {bm.description}
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    <span
+                      className="px-2 py-0.5 text-[10px] font-medium rounded-md border"
+                      style={{ backgroundColor: 'var(--theme-raised)', borderColor: 'var(--theme-border)', color: bm.isAi ? '#38bdf8' : '#10b981' }}
+                    >
+                      {bm.freeTierBadge}
+                    </span>
+                    {tagButtons(bm, 3)}
+                  </div>
+                  <div className="mt-auto pt-3 border-t flex items-center justify-between gap-2" style={{ borderColor: 'var(--theme-border)' }}>
+                    {bm.stars ? (
+                      <span className="font-mono text-[11px] flex items-center gap-1" style={{ color: 'var(--theme-text-secondary)' }}>
+                        <Star className="w-3 h-3" />
+                        {formatStars(bm.stars)}
+                      </span>
+                    ) : (
+                      <span />
+                    )}
+                    {actions(bm)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {remaining > 0 && (
+            <div className="flex justify-center pt-1">
+              <button
+                id="btn-bookmarks-show-more"
+                onClick={() => setVisibleCount((n) => n + PAGE_STEP)}
+                className="px-4 py-2 text-xs font-medium rounded-lg border cursor-pointer hover:opacity-85"
+                style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)', color: 'var(--theme-primary)' }}
+              >
+                Show {Math.min(PAGE_STEP, remaining)} more ({remaining} remaining)
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
       <ExportMarkdownModal
         isOpen={isExportMarkdownOpen}
         onClose={() => setIsExportMarkdownOpen(false)}
