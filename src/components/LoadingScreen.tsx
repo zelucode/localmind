@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Cpu, ShieldCheck, Database, Globe, CheckCircle2 } from 'lucide-react';
+import { BrandMark } from './BrandMark';
+import { Cpu, ShieldCheck, Database, Globe, CheckCircle2 } from 'lucide-react';
 
 interface LoadingScreenProps {
   onFinish: () => void;
@@ -184,8 +185,8 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
                   borderColor: 'var(--theme-border, #2d3148)',
                 }}
               >
-                <Sparkles
-                  className="w-7 h-7 transition-colors"
+                <BrandMark
+                  className="w-8 h-8 transition-colors"
                   style={{ color: 'var(--theme-primary, #6366f1)' }}
                 />
               </motion.div>

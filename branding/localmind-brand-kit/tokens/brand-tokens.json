@@ -1,0 +1,21 @@
+{
+  "name": "LocalMind",
+  "default_theme": "Pastel Dusk",
+  "brand": {
+    "primary": "#e0a8c5",
+    "primary_on_light": "#a8497f",
+    "canvas": "#1e1e2e",
+    "card": "#282838",
+    "icon_tile": "#232336",
+    "text": "#d8dbe8",
+    "muted": "#8e92a8",
+    "paper": "#f6f4ee"
+  },
+  "fonts": {
+    "wordmark": "Inter Light (Local) + Inter Bold (Mind), outlined in the SVGs",
+    "ui": "system / Tailwind default sans",
+    "mono": "system monospace"
+  },
+  "tagline": "Your private AI hub, always nearby.",
+  "handle": "/localmind"
+}

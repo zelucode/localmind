@@ -2,8 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="alternate icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#1e1e2e" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LocalMind - Desktop AI Dashboard</title>
+    <title>LocalMind - Your private AI hub</title>
     <meta name="description" content="Unified command center for AI tools, LLMs, coding agents, free tool bookmarks, OmniRoute detection, and API key management." />
     <meta property="og:title" content="LocalMind - Desktop AI Dashboard" />
     <meta property="og:description" content="Unified command center for AI tools, LLMs, coding agents, free tool bookmarks, OmniRoute detection, and API key management." />
@@ -12,20 +19,24 @@
   </head>
   <body>
     <div id="root">
-      <div style="min-height: 100vh; background-color: #0f111a; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #f1f3f9;">
+      <div style="min-height: 100vh; background-color: #1e1e2e; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #d8dbe8;">
         <div style="position: relative; width: 64px; height: 64px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center;">
           <svg style="position: absolute; inset: 0; width: 100%; height: 100%; animation: spin 2.5s linear infinite;" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="42" fill="none" stroke="#25293d" stroke-width="4" />
-            <circle cx="50" cy="50" r="42" fill="none" stroke="#6366f1" stroke-width="4" stroke-dasharray="70 190" stroke-linecap="round" />
+            <circle cx="50" cy="50" r="42" fill="none" stroke="#43435a" stroke-width="4" />
+            <circle cx="50" cy="50" r="42" fill="none" stroke="#e0a8c5" stroke-width="4" stroke-dasharray="70 190" stroke-linecap="round" />
           </svg>
-          <div style="width: 32px; height: 32px; border-radius: 8px; background: #1a1d2e; border: 1px solid #333852; display: flex; align-items: center; justify-content: center;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+          <div style="width: 32px; height: 32px; border-radius: 8px; background: #282838; border: 1px solid #43435a; display: flex; align-items: center; justify-content: center;">
+            <svg width="18" height="18" viewBox="88 88 848 848" fill="none" stroke="#e0a8c5" stroke-width="30">
+              <circle cx="512" cy="512" r="150" />
+              <circle cx="512" cy="512" r="56" fill="#e0a8c5" stroke="none" />
+              <circle cx="512" cy="200" r="52" fill="#e0a8c5" stroke="none" />
+              <circle cx="782" cy="668" r="52" fill="#e0a8c5" stroke="none" />
+              <circle cx="242" cy="668" r="52" fill="#e0a8c5" stroke="none" />
             </svg>
           </div>
         </div>
-        <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #818cf8; margin-bottom: 6px;">LocalMind</div>
-        <div style="font-size: 11px; font-weight: 500; color: #64748b; letter-spacing: 0.05em;">Booting Intelligence Engine...</div>
+        <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #e0a8c5; margin-bottom: 6px;">LocalMind</div>
+        <div style="font-size: 11px; font-weight: 500; color: #8e92a8; letter-spacing: 0.05em;">Starting LocalMind...</div>
         <style>
           @keyframes spin { 100% { transform: rotate(360deg); } }
         </style>

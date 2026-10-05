@@ -1,0 +1,10 @@
+:root{
+  --lm-primary:#e0a8c5;        /* Pastel Dusk primary; use #a8497f on light backgrounds */
+  --lm-primary-on-light:#a8497f;
+  --lm-canvas:#1e1e2e;
+  --lm-card:#282838;
+  --lm-icon-tile:#232336;
+  --lm-text:#d8dbe8;
+  --lm-muted:#8e92a8;
+  --lm-paper:#f6f4ee;
+}

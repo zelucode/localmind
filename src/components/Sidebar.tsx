@@ -6,7 +6,6 @@ import {
   KeyRound,
   Cpu,
   Settings,
-  Layers,
   Sun,
   Moon,
   Plus,
@@ -16,6 +15,7 @@ import {
   Search,
   Compass,
 } from 'lucide-react';
+import { BrandMark } from './BrandMark';
 import { ThemePreset } from '../theme';
 import { ActiveView } from '../types';
 
@@ -79,7 +79,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               color: 'var(--theme-primary-foreground, #000000)',
             }}
           >
-            <Layers className="w-5 h-5" />
+            <BrandMark className="w-5 h-5" />
           </button>
 
           {/* Navigation Icons */}

@@ -36,4 +36,4 @@ Windows/PowerShell 5.1 gotcha: `Set-Content -Encoding utf8` writes a BOM, which 
 ## Config notes
 
 - `vite.config.ts` uses Tauri's required settings (fixed port 1420 with `strictPort`, `clearScreen: false`, ignores `src-tauri/**` in watch, honors `TAURI_DEV_HOST`).
-- `README.md` describes product features and design principles (privacy-first key vault in `localStorage`, scope badges `web-only` / `local-agent` / `ide-plugin` / `local-runner` / `uniform-proxy` / `cloud-builder`); `backlog.md` tracks planned features.
+- `README.md` describes product features and design principles (privacy-first key vault in `localStorage`, scope badges `web-only` / `local-agent` / `ide-plugin` / `local-runner` / `uniform-proxy` / `cloud-builder`); `docs/BACKLOG.md` tracks planned features and `docs/ARCHITECTURE.md` has deeper architecture notes.

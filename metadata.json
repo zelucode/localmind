@@ -1,6 +1,6 @@
 {
   "name": "LocalMind - Desktop AI Dashboard",
-  "description": "Unified command center for AI tools, LLMs, coding agents, free tool bookmarks, OmniRoute detection, and API key management.",
+  "description": "LocalMind, your private AI hub, always nearby. A desktop command center for free-tier AI tools, local AI daemons, and a local API key vault.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

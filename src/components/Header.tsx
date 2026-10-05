@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { Plus, Layers, ArrowLeft, ChevronRight, Bookmark, Search } from 'lucide-react';
+import { BrandMark } from './BrandMark';
+import { Plus, ArrowLeft, ChevronRight, Bookmark, Search } from 'lucide-react';
 import { ActiveView } from '../types';
 
 interface HeaderProps {
@@ -48,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({
               color: 'var(--theme-primary-foreground, #000000)',
             }}
           >
-            {activeView === 'bookmarks' ? <Bookmark className="w-4 h-4" /> : <Layers className="w-4 h-4" />}
+            {activeView === 'bookmarks' ? <Bookmark className="w-4 h-4" /> : <BrandMark className="w-4 h-4" />}
           </div>
 
           <div className="min-w-0">
