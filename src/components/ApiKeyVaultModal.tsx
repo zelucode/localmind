@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { StoredApiKey } from '../types';
 import { POPULAR_API_PROVIDERS } from '../data/defaultTools';
+import { verifyApiKey, VerifyStatus } from '../lib/backend';
 
 interface ApiKeyVaultModalProps {
   isOpen: boolean;
@@ -26,6 +27,8 @@ interface ApiKeyVaultModalProps {
   onAddKey: (key: StoredApiKey) => void;
   onDeleteKey: (id: string) => void;
   onOpenConfigExporter?: (provider?: string) => void;
+  /** Called after a key was checked against its provider. */
+  onKeyTested?: (id: string, status: 'valid' | 'invalid' | 'unknown') => void;
   /** Render as a normal page section (no overlay, no close button). */
   inline?: boolean;
 }
@@ -38,6 +41,7 @@ export const ApiKeyVaultModal: React.FC<ApiKeyVaultModalProps> = ({
   onAddKey,
   onDeleteKey,
   onOpenConfigExporter,
+  onKeyTested,
 }) => {
   const [selectedProvider, setSelectedProvider] = useState<StoredApiKey['provider']>('gemini');
   const [keyInput, setKeyInput] = useState('');
@@ -45,7 +49,7 @@ export const ApiKeyVaultModal: React.FC<ApiKeyVaultModalProps> = ({
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState<string | null>(null);
-  const [verificationFeedback, setVerificationFeedback] = useState<Record<string, { valid: boolean; message: string }>>({});
+  const [verificationFeedback, setVerificationFeedback] = useState<Record<string, { status: VerifyStatus; message: string }>>({});
 
   if (!isOpen && !inline) return null;
 
@@ -84,39 +88,22 @@ export const ApiKeyVaultModal: React.FC<ApiKeyVaultModalProps> = ({
 
   const testKey = async (keyItem: StoredApiKey) => {
     setIsVerifying(keyItem.id);
-    if (keyItem.provider === 'gemini') {
-      try {
-        const res = await fetch('/api/verify-gemini-key', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ key: keyItem.key }),
-        });
-        const data = await res.json();
-        setVerificationFeedback((prev) => ({
-          ...prev,
-          [keyItem.id]: { valid: data.valid, message: data.message },
-        }));
-      } catch {
-        setVerificationFeedback((prev) => ({
-          ...prev,
-          [keyItem.id]: { valid: false, message: 'Network error verifying key' },
-        }));
-      }
-    } else {
-      setTimeout(() => {
-        const looksOk = keyItem.key.length > 10;
-        setVerificationFeedback((prev) => ({
-          ...prev,
-          [keyItem.id]: {
-            valid: looksOk,
-            message: looksOk ? 'Key format looks valid for provider' : 'Key appears too short or invalid format',
-          },
-        }));
-        setIsVerifying(null);
-      }, 500);
-      return;
+    try {
+      const result = await verifyApiKey(keyItem.provider, keyItem.key);
+      setVerificationFeedback((prev) => ({ ...prev, [keyItem.id]: result }));
+      if (result.status === 'valid') onKeyTested?.(keyItem.id, 'valid');
+      else if (result.status === 'invalid') onKeyTested?.(keyItem.id, 'invalid');
+    } catch (err) {
+      setVerificationFeedback((prev) => ({
+        ...prev,
+        [keyItem.id]: {
+          status: 'error',
+          message: err instanceof Error ? err.message : 'Could not verify the key.',
+        },
+      }));
+    } finally {
+      setIsVerifying(null);
     }
-    setIsVerifying(null);
   };
 
   return (
@@ -451,13 +438,16 @@ export const ApiKeyVaultModal: React.FC<ApiKeyVaultModalProps> = ({
                       {/* Verification Feedback Banner */}
                       {feedback && (
                         <div
+                          role="status"
                           className={`text-xs px-2.5 py-1 rounded flex items-center gap-1.5 font-medium border ${
-                            feedback.valid
+                            feedback.status === 'valid'
                               ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                              : 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                              : feedback.status === 'invalid'
+                              ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                              : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
                           }`}
                         >
-                          {feedback.valid ? (
+                          {feedback.status === 'valid' ? (
                             <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                           ) : (
                             <AlertCircle className="w-3.5 h-3.5 shrink-0" />

@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { ToolBookmark, BookmarkCategory } from '../types';
 import { ExportMarkdownModal } from './ExportMarkdownModal';
+import { openExternal } from '../lib/tauri';
 
 interface BookmarksPageProps {
   bookmarks: ToolBookmark[];
@@ -229,7 +230,7 @@ export const BookmarksPage: React.FC<BookmarksPageProps> = ({
 
   const handleOpenTool = (bookmark: ToolBookmark) => {
     onRecordClick(bookmark.id);
-    window.open(bookmark.url, '_blank', 'noopener,noreferrer');
+    void openExternal(bookmark.url);
   };
 
   const handleExportJson = () => {

@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Network, RefreshCw, CheckCircle, XCircle, ExternalLink, Copy, Check, Play, HelpCircle, Settings2 } from 'lucide-react';
-import { LocalServiceStatus } from '../types';
+
+import { probePorts, indexProbeResults } from '../lib/backend';
+
+interface LocalServiceStatus {
+  id: string;
+  name: string;
+  port: number;
+  status: 'online' | 'offline' | 'checking';
+  latency?: number;
+  commandToStart: string;
+  docsUrl: string;
+}
 
 interface OmniRouteWidgetProps {
   onStatusChange?: (isOnline: boolean) => void;
@@ -43,33 +54,34 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
   ]);
 
   const [isScanning, setIsScanning] = useState(false);
+  const [scanError, setScanError] = useState<string | null>(null);
   const [copiedCmd, setCopiedCmd] = useState<string | null>(null);
   const [showConfigHelp, setShowConfigHelp] = useState(false);
-  const [customPort, setCustomPort] = useState<number>(8000);
+  const [customPortText, setCustomPortText] = useState('8000');
+  const [customPortError, setCustomPortError] = useState<string | null>(null);
   const [customStatus, setCustomStatus] = useState<'idle' | 'online' | 'offline'>('idle');
   const [customLatency, setCustomLatency] = useState<number | null>(null);
 
   const scanServices = async () => {
     setIsScanning(true);
+    setScanError(null);
     try {
-      const res = await fetch('/api/local-daemons/check');
-      const data = await res.json();
-      if (data && data.services) {
-        setServices(data.services);
-        const omni = data.services.find((s: LocalServiceStatus) => s.id === 'omniroute');
-        if (onStatusChange) {
-          onStatusChange(omni?.status === 'online');
-        }
-      }
-    } catch (err) {
-      // Fallback
-      setServices((prev) =>
-        prev.map((s) => ({
+      const results = indexProbeResults(await probePorts(services.map((s) => s.port)));
+      const next = services.map((s) => {
+        const r = results.get(s.port);
+        return {
           ...s,
-          status: s.id === 'omniroute' ? 'online' : 'offline',
-          latency: s.id === 'omniroute' ? 3 : undefined,
-        }))
-      );
+          status: r?.online ? ('online' as const) : ('offline' as const),
+          latency: r?.online ? r.latencyMs ?? undefined : undefined,
+        };
+      });
+      setServices(next);
+      onStatusChange?.(next.find((s) => s.id === 'omniroute')?.status === 'online');
+    } catch (err) {
+      // Never pretend a service is up when we couldn't check.
+      setScanError(err instanceof Error ? err.message : 'Could not scan local ports.');
+      setServices((prev) => prev.map((s) => ({ ...s, status: 'offline' as const, latency: undefined })));
+      onStatusChange?.(false);
     } finally {
       setIsScanning(false);
     }
@@ -86,13 +98,21 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
   };
 
   const testCustomPort = async () => {
+    const port = Number(customPortText.trim());
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+      setCustomPortError('Enter a port between 1 and 65535.');
+      setCustomStatus('idle');
+      return;
+    }
+    setCustomPortError(null);
     try {
-      const res = await fetch(`/api/local-daemons/probe?port=${customPort}`);
-      const data = await res.json();
-      setCustomStatus(data.online ? 'online' : 'offline');
-      setCustomLatency(data.latency || null);
-    } catch {
+      const [result] = await probePorts([port]);
+      setCustomStatus(result?.online ? 'online' : 'offline');
+      setCustomLatency(result?.latencyMs ?? null);
+    } catch (err) {
+      setScanError(err instanceof Error ? err.message : 'Could not check that port.');
       setCustomStatus('offline');
+      setCustomLatency(null);
     }
   };
 
@@ -151,6 +171,11 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
             <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--theme-text-secondary)' }}>
               Uniform gateway that pools free-tier models (Groq, Gemini, OpenRouter :free) and local Ollama into a single local API port.
             </p>
+            {scanError && (
+              <p role="alert" className="text-xs mt-1.5 font-medium" style={{ color: 'var(--theme-danger, #f43f5e)' }}>
+                {scanError}
+              </p>
+            )}
           </div>
         </div>
 
@@ -349,9 +374,18 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
             <span className="font-mono text-xs mr-1" style={{ color: 'var(--theme-text-muted)' }}>localhost:</span>
             <input
               id="input-custom-port"
-              type="number"
-              value={customPort}
-              onChange={(e) => setCustomPort(parseInt(e.target.value, 10) || 8000)}
+              type="text"
+              inputMode="numeric"
+              aria-label="Port to check"
+              aria-invalid={customPortError ? true : undefined}
+              value={customPortText}
+              onChange={(e) => {
+                setCustomPortText(e.target.value.replace(/[^0-9]/g, '').slice(0, 5));
+                setCustomPortError(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') void testCustomPort();
+              }}
               className="w-16 bg-transparent font-mono text-xs focus:outline-none"
               style={{ color: 'var(--theme-text)' }}
             />
@@ -368,6 +402,11 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
           >
             Check Port
           </button>
+          {customPortError && (
+            <span role="alert" className="text-xs font-medium" style={{ color: 'var(--theme-danger, #f43f5e)' }}>
+              {customPortError}
+            </span>
+          )}
           {customStatus !== 'idle' && (
             <span
               className="text-xs px-2 py-0.5 rounded font-medium border"

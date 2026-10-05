@@ -146,9 +146,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             >
               <Palette className="w-5 h-5" />
             </div>
-            <h1 className="text-xl font-bold tracking-tight" style={{ color: 'var(--theme-text)' }}>
+            <h2 className="text-xl font-bold tracking-tight" style={{ color: 'var(--theme-text)' }}>
               Workspace Settings & Themes
-            </h1>
+            </h2>
           </div>
           <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--theme-text-secondary)' }}>
             Customize your visual styling, inspect theme presets, manage backups, and set launcher behavior.

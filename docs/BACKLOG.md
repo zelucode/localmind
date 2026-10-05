@@ -62,8 +62,25 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 
 ### [ ] Task 9: Audit that every UI feature actually works
 - **Problem**: The UI came from AI Studio; some controls may not be wired up.
-- **Solution**: Walk every page and tag each feature as working / UI-only / broken, then implement the logic with tests (Rust unit tests; Vitest + React Testing Library). Known gaps: `/api/ai/advisor`, `/api/verify-gemini-key`, `/api/local-daemons/*` (need Rust commands or direct calls). Also check: external links via `window.open` inside Tauri (may need the opener plugin), and wording that claims keys are "AES-GCM encrypted" in the global search while they are stored as plain JSON in localStorage.
-- **Status**: Planned. No test setup exists in the repo yet.
+- **Done so far**: Rust commands + unit tests for local port probing, API key verification (Gemini, OpenRouter, Groq, OpenAI, DeepSeek, Mistral, Anthropic) and the Advisor. Removed the fake "OmniRoute online (3 ms)" fallback and the length-based "valid key" check. External links use the opener plugin. Vitest + RTL set up with tests for the shell, Tools, Bookmarks, Home, Runtimes, Vault, Advisor, Ctrl+K and `lib/`.
+- **Still to audit** (walk each, tag working / UI-only / broken, then fix with tests): Config Exporter output correctness, Rate-Limit Matrix data, Export/Import bookmarks modal (JSON/HTML/CSV), Export Markdown, Settings (theme editor, backup/restore, factory reset), AddTool / AddBookmark modals, Quick Query URL templates, Welcome screen copy.
+- **Known wrong copy**: welcome screen and Ctrl+K say keys are "AES-GCM encrypted" and "v2.5", but keys are stored as plain JSON in localStorage and the app is v0.1.0. Either implement encryption (Task 13) or fix the text.
+- **Status**: In progress.
+
+### [ ] Task 13: Encrypt stored API keys
+- **Problem**: Keys sit in localStorage as plain JSON; any code in the webview can read them.
+- **Solution**: Move key storage to Rust (OS credential store via `keyring`, or an encrypted file), expose get/set/delete commands, migrate existing keys, and keep keys out of backups unless the user opts in.
+- **Status**: Planned. Needs a decision on where the master secret lives (OS keychain recommended).
+
+### [ ] Task 14: Advisor key selection and offline fallback
+- **Problem**: The Advisor uses the first Gemini key in the vault (a verified one preferred). With no Gemini key it only shows a hint. The old Express server had static fallback advice.
+- **Solution**: Let the user choose the provider and key for the Advisor, and ship a small offline fallback (keyword-matched suggestions from the catalog).
+- **Status**: Open question for the product owner: which providers should the Advisor support?
+
+### [ ] Task 15: Verify keys for more providers
+- **Problem**: Providers marked "other" cannot be verified (the UI says so, honestly).
+- **Solution**: Add per-provider verification as providers are added to the vault list.
+- **Status**: Planned.
 
 ### [x] Task 10: AI Tools list view and denser cards
 - **Problem**: Cards were tall (about 4 visible at once); comparing free tiers was slow.

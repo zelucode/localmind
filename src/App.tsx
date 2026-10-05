@@ -594,6 +594,18 @@ export default function App() {
     });
   };
 
+  const handleKeyTested = (id: string, status: 'valid' | 'invalid' | 'unknown') => {
+    setKeys((prev) => {
+      const next = prev.map((k) => (k.id === id ? { ...k, lastTestedStatus: status } : k));
+      try {
+        localStorage.setItem(STORAGE_KEYS_KEY, JSON.stringify(next));
+      } catch {
+        // Ignored
+      }
+      return next;
+    });
+  };
+
   const handleDeleteKey = (id: string) => {
     setKeys((prev) => {
       const next = prev.filter((k) => k.id !== id);
@@ -730,6 +742,12 @@ export default function App() {
       return false;
     }
   };
+
+  // The Advisor runs on the user's own Gemini key; prefer one that was verified.
+  const advisorGeminiKey = useMemo(() => {
+    const gemini = keys.filter((k) => k.provider === 'gemini');
+    return (gemini.find((k) => k.lastTestedStatus === 'valid') || gemini[0])?.key;
+  }, [keys]);
 
   // Open Advisor with optional query
   const handleOpenAdvisor = (initialPrompt?: string) => {
@@ -889,6 +907,7 @@ export default function App() {
               onAddKey={handleAddKey}
               onDeleteKey={handleDeleteKey}
               onOpenConfigExporter={(provId) => handleOpenConfigExporter(provId)}
+              onKeyTested={handleKeyTested}
             />
           </main>
         ) : (
@@ -917,6 +936,7 @@ export default function App() {
           isOpen={isAdvisorOpen}
           onClose={() => setIsAdvisorOpen(false)}
           initialPrompt={advisorPrompt}
+          geminiKey={advisorGeminiKey}
         />
 
         <QuickSearchModal

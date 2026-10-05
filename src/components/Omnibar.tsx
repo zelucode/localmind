@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Compass, Bot, Code2, Gauge } from 'lucide-react';
+import { openExternal } from '../lib/tauri';
 
 interface OmnibarProps {
   onOpenAdvisor: (initialPrompt?: string) => void;
@@ -16,20 +17,20 @@ export const Omnibar: React.FC<OmnibarProps> = ({
 
   const launchPerplexity = () => {
     if (!query.trim()) {
-      window.open('https://www.perplexity.ai', '_blank');
+      void openExternal('https://www.perplexity.ai');
       return;
     }
     const url = `https://www.perplexity.ai/search?q=${encodeURIComponent(query.trim())}`;
-    window.open(url, '_blank');
+    void openExternal(url);
   };
 
   const launchChatGPT = () => {
     if (!query.trim()) {
-      window.open('https://chatgpt.com', '_blank');
+      void openExternal('https://chatgpt.com');
       return;
     }
     const url = `https://chatgpt.com/?q=${encodeURIComponent(query.trim())}`;
-    window.open(url, '_blank');
+    void openExternal(url);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -188,7 +189,7 @@ export const Omnibar: React.FC<OmnibarProps> = ({
               onClick={() => {
                 setQuery(sample);
                 const url = `https://www.perplexity.ai/search?q=${encodeURIComponent(sample)}`;
-                window.open(url, '_blank');
+                void openExternal(url);
               }}
               className="text-[11px] px-2.5 py-1 rounded-md border transition-all cursor-pointer whitespace-nowrap hover:opacity-80"
               style={{

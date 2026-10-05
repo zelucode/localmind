@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { X, Sparkles, Send, Bot, AlertCircle, RefreshCw } from 'lucide-react';
+import { askAdvisor } from '../lib/backend';
 
 interface AIAdvisorModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialPrompt?: string;
+  /** The user's Gemini key from the vault; the Advisor runs on it. */
+  geminiKey?: string;
 }
 
 export const AIAdvisorModal: React.FC<AIAdvisorModalProps> = ({
   isOpen,
   onClose,
   initialPrompt = '',
+  geminiKey,
 }) => {
   const [prompt, setPrompt] = useState(initialPrompt);
   const [response, setResponse] = useState<string | null>(null);
@@ -34,24 +38,13 @@ export const AIAdvisorModal: React.FC<AIAdvisorModalProps> = ({
     setResponse(null);
 
     try {
-      const res = await fetch('/api/ai/advisor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: activeQuery.trim() }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        if (data.fallbackAdvice) {
-          setResponse(data.fallbackAdvice);
-        } else {
-          setError(data.error || 'Failed to generate guidance.');
-        }
-      } else {
-        setResponse(data.advice);
+      if (!geminiKey) {
+        setError('Add a Gemini API key in the Key Vault to use the Advisor. It is free from Google AI Studio.');
+        return;
       }
-    } catch {
-      setError('Network error contacting advisor.');
+      setResponse(await askAdvisor(activeQuery.trim(), geminiKey));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not reach the Advisor.');
     } finally {
       setIsLoading(false);
     }

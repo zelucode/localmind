@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Search, ExternalLink } from 'lucide-react';
 import { AITool } from '../types';
+import { openExternal } from '../lib/tauri';
 
 interface QuickSearchModalProps {
   tool: AITool | null;
@@ -18,16 +19,16 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({
   const handleLaunch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!query.trim()) {
-      window.open(tool.url, '_blank');
+      void openExternal(tool.url);
       onClose();
       return;
     }
 
     if (tool.quickSearchUrlTemplate) {
       const url = tool.quickSearchUrlTemplate.replace('{query}', encodeURIComponent(query.trim()));
-      window.open(url, '_blank');
+      void openExternal(url);
     } else {
-      window.open(tool.url, '_blank');
+      void openExternal(tool.url);
     }
     onClose();
   };

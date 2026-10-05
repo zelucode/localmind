@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { AITool, ToolBookmark, ActiveView } from '../types';
 import { ThemePreset } from '../theme';
+import { openExternal } from '../lib/tauri';
 
 interface GlobalSearchModalProps {
   isOpen: boolean;
@@ -349,7 +350,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
         tags: tool.tags,
         action: () => {
           onClose();
-          window.open(tool.url, '_blank');
+          void openExternal(tool.url);
         },
       });
     });
@@ -359,16 +360,16 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       addItem({
         id: `bm-${bm.id}`,
         type: 'bookmark',
-        title: bm.name,
+        title: bm.title,
         subtitle: bm.description,
         categoryLabel: `Bookmark • ${bm.category}`,
         icon: <Bookmark className="w-4 h-4 text-emerald-400" />,
         url: bm.url,
-        stars: bm.githubStars,
+        stars: bm.stars,
         tags: bm.tags,
         action: () => {
           onClose();
-          window.open(bm.url, '_blank');
+          void openExternal(bm.url);
         },
       });
     });
@@ -428,7 +429,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           icon: <Search className="w-4 h-4 text-sky-400" />,
           action: () => {
             onClose();
-            window.open(`https://www.perplexity.ai/search?q=${encodeURIComponent(query)}`, '_blank');
+            void openExternal(`https://www.perplexity.ai/search?q=${encodeURIComponent(query)}`);
           },
         },
         {
@@ -440,7 +441,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           icon: <Compass className="w-4 h-4 text-emerald-400" />,
           action: () => {
             onClose();
-            window.open(`https://chatgpt.com/?q=${encodeURIComponent(query)}`, '_blank');
+            void openExternal(`https://chatgpt.com/?q=${encodeURIComponent(query)}`);
           },
         },
       ];
