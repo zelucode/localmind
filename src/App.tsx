@@ -4,10 +4,11 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { Sparkles } from 'lucide-react';
 import { Header } from './components/Header';
-import { Sidebar, ActiveView } from './components/Sidebar';
-import { Omnibar } from './components/Omnibar';
-import { ScopeExplainer } from './components/ScopeExplainer';
+import { Sidebar, ActiveView, SIDEBAR_WIDTH, SIDEBAR_WIDTH_COLLAPSED } from './components/Sidebar';
+import { HomePage } from './components/HomePage';
+import { AboutModal } from './components/AboutModal';
 import { OmniRouteWidget } from './components/OmniRouteWidget';
 import { ToolFilterBar } from './components/ToolFilterBar';
 import { ToolCard } from './components/ToolCard';
@@ -46,10 +47,31 @@ const STORAGE_SCOPE_EXPLAINER_KEY = 'ai_nexus_show_scope_explainer_v1';
 const STORAGE_BOOKMARKS_KEY = 'ai_nexus_bookmarks_v3';
 const STORAGE_SHOW_STARTUP_KEY = 'ai_nexus_show_startup_v1';
 const STORAGE_SHOW_LOADING_KEY = 'ai_nexus_show_loading_v1';
+const STORAGE_SIDEBAR_COLLAPSED_KEY = 'localmind_sidebar_collapsed_v1';
 
 export default function App() {
   // Navigation view
-  const [activeView, setActiveView] = useState<ActiveView>('dashboard');
+  const [activeView, setActiveView] = useState<ActiveView>('home');
+
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(STORAGE_SIDEBAR_COLLAPSED_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const handleToggleSidebarCollapsed = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(STORAGE_SIDEBAR_COLLAPSED_KEY, String(next));
+      } catch {
+        // Ignored
+      }
+      return next;
+    });
+  };
 
   // Theme state
   const [themeId, setThemeId] = useState<string>(() => {
@@ -151,13 +173,12 @@ export default function App() {
 
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isKeyVaultOpen, setIsKeyVaultOpen] = useState(false);
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
   const [advisorPrompt, setAdvisorPrompt] = useState('');
   const [quickSearchTool, setQuickSearchTool] = useState<AITool | null>(null);
-  const [isConfigExporterOpen, setIsConfigExporterOpen] = useState(false);
+  const [configsTab, setConfigsTab] = useState<'exporter' | 'limits'>('exporter');
   const [configExporterProvider, setConfigExporterProvider] = useState<string | undefined>(undefined);
-  const [isRateLimitMatrixOpen, setIsRateLimitMatrixOpen] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
   const [isExportImportBookmarksOpen, setIsExportImportBookmarksOpen] = useState(false);
@@ -373,11 +394,13 @@ export default function App() {
 
   const handleOpenConfigExporter = (providerId?: string) => {
     setConfigExporterProvider(providerId);
-    setIsConfigExporterOpen(true);
+    setConfigsTab('exporter');
+    setActiveView('configs');
   };
 
   const handleOpenRateLimitMatrix = () => {
-    setIsRateLimitMatrixOpen(true);
+    setConfigsTab('limits');
+    setActiveView('configs');
   };
 
   // Global Keyboard Shortcuts Listener
@@ -410,16 +433,8 @@ export default function App() {
           setIsShortcutsOpen(false);
           return;
         }
-        if (isConfigExporterOpen) {
-          setIsConfigExporterOpen(false);
-          return;
-        }
-        if (isRateLimitMatrixOpen) {
-          setIsRateLimitMatrixOpen(false);
-          return;
-        }
-        if (isKeyVaultOpen) {
-          setIsKeyVaultOpen(false);
+        if (isAboutOpen) {
+          setIsAboutOpen(false);
           return;
         }
         if (isAdvisorOpen) {
@@ -470,27 +485,26 @@ export default function App() {
         return;
       }
 
-      // Number keys 1, 2, 3 for view navigation
-      if (e.key === '1') {
+      // Number keys switch pages in sidebar order
+      const NUMBER_VIEWS: Record<string, ActiveView> = {
+        '1': 'home',
+        '2': 'tools',
+        '3': 'bookmarks',
+        '4': 'runtimes',
+        '5': 'configs',
+        '6': 'vault',
+        '7': 'settings',
+      };
+      if (NUMBER_VIEWS[e.key]) {
         e.preventDefault();
-        setActiveView('dashboard');
-        return;
-      }
-      if (e.key === '2') {
-        e.preventDefault();
-        setActiveView('bookmarks');
-        return;
-      }
-      if (e.key === '3') {
-        e.preventDefault();
-        setActiveView('settings');
+        setActiveView(NUMBER_VIEWS[e.key]);
         return;
       }
 
       // Utility hotkeys
       if (e.key === 'k' || e.key === 'K') {
         e.preventDefault();
-        setIsKeyVaultOpen(true);
+        setActiveView('vault');
         return;
       }
       if (e.key === 'c' || e.key === 'C') {
@@ -500,7 +514,7 @@ export default function App() {
       }
       if (e.key === 'l' || e.key === 'L') {
         e.preventDefault();
-        setIsRateLimitMatrixOpen(true);
+        handleOpenRateLimitMatrix();
         return;
       }
       if (e.key === 'a' || e.key === 'A') {
@@ -525,9 +539,7 @@ export default function App() {
   }, [
     isGlobalSearchOpen,
     isShortcutsOpen,
-    isConfigExporterOpen,
-    isRateLimitMatrixOpen,
-    isKeyVaultOpen,
+    isAboutOpen,
     isAdvisorOpen,
     isAddModalOpen,
     isAddBookmarkModalOpen,
@@ -733,14 +745,6 @@ export default function App() {
     setIsAdvisorOpen(true);
   };
 
-  // Scroll to omniroute widget
-  const handleScrollToOmniRoute = () => {
-    const el = document.getElementById('section-omniroute');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   // Filtered tools
   const filteredTools = useMemo(() => {
     return tools.filter((tool) => {
@@ -804,38 +808,37 @@ export default function App() {
         color: 'var(--theme-text)',
       }}
     >
-      {/* Left Icon-Based Sidebar */}
+      {/* Left sidebar (labeled, grouped, collapsible) */}
       <Sidebar
         activeView={activeView}
         onNavigate={setActiveView}
-        onOpenAdvisor={() => handleOpenAdvisor()}
-        onOpenKeyVault={() => setIsKeyVaultOpen(true)}
-        onOpenConfigExporter={() => handleOpenConfigExporter()}
-        onOpenRateLimitMatrix={handleOpenRateLimitMatrix}
-        onOpenAddModal={() => setIsAddModalOpen(true)}
-        onScrollToOmniRoute={handleScrollToOmniRoute}
-        onOpenShortcuts={() => setIsShortcutsOpen(true)}
-        onOpenGlobalSearch={() => setIsGlobalSearchOpen(true)}
-        onOpenStartupScreen={() => setIsStartupScreenOpen(true)}
-        activeTheme={activeThemePreset}
-        onToggleLightDark={handleToggleLightDark}
-        totalKeys={keys.length}
+        collapsed={sidebarCollapsed}
+        onToggleCollapsed={handleToggleSidebarCollapsed}
+        totalTools={tools.length}
         totalBookmarks={bookmarks.length}
+        totalKeys={keys.length}
       />
 
-      {/* Main Workspace Frame (offset for md:sidebar and mobile bottom nav) */}
-      <div className="mt-11 md:ml-16 pb-16 md:pb-0 flex-1 min-h-0 overflow-y-auto flex flex-col min-w-0">
-        {/* Top Application Header (streamlined without sidebar duplicates) */}
-        <Header
-          activeView={activeView}
-          onNavigate={setActiveView}
-          totalTools={tools.length}
-          totalBookmarks={bookmarks.length}
-          onOpenAddModal={() => setIsAddModalOpen(true)}
-          onOpenAddBookmarkModal={handleOpenAddBookmarkModal}
-          onOpenGlobalSearch={() => setIsGlobalSearchOpen(true)}
-        />
+      {/* Title bar */}
+      <Header
+        activeView={activeView}
+        onNavigate={setActiveView}
+        sidebarCollapsed={sidebarCollapsed}
+        themeMode={activeThemePreset.mode === 'dark' ? 'dark' : 'light'}
+        onToggleTheme={handleToggleLightDark}
+        onOpenAddModal={() => setIsAddModalOpen(true)}
+        onOpenAddBookmarkModal={handleOpenAddBookmarkModal}
+        onOpenGlobalSearch={() => setIsGlobalSearchOpen(true)}
+        onOpenShortcuts={() => setIsShortcutsOpen(true)}
+        onOpenWelcome={() => setIsStartupScreenOpen(true)}
+        onOpenAbout={() => setIsAboutOpen(true)}
+      />
 
+      {/* Content area: the only scrolling region, so the scrollbar stays below the title bar */}
+      <div
+        className="mt-11 pb-16 md:pb-0 flex-1 min-h-0 overflow-y-auto flex flex-col min-w-0 md:ml-[var(--sidebar-w)] transition-[margin] duration-150"
+        style={{ ['--sidebar-w' as string]: `${sidebarCollapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH}px` }}
+      >
         {/* View Switcher: Settings Page vs Bookmarks Catalog vs Dashboard Hub */}
         {activeView === 'settings' ? (
           <main className="flex-1 w-full">
@@ -860,7 +863,7 @@ export default function App() {
               onExportBackup={handleExportBackup}
               onImportBackup={handleImportBackup}
               onResetFactoryDefaults={handleResetFactoryDefaults}
-              onBackToDashboard={() => setActiveView('dashboard')}
+              onBackToDashboard={() => setActiveView('home')}
             />
           </main>
         ) : activeView === 'bookmarks' ? (
@@ -879,21 +882,80 @@ export default function App() {
               onOpenExportImportModal={() => setIsExportImportBookmarksOpen(true)}
             />
           </main>
+        ) : activeView === 'home' ? (
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <HomePage
+              tools={tools}
+              bookmarks={bookmarks}
+              keys={keys}
+              showScopeExplainer={showScopeExplainer}
+              onNavigate={setActiveView}
+              onOpenAdvisor={handleOpenAdvisor}
+            />
+          </main>
+        ) : activeView === 'runtimes' ? (
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <OmniRouteWidget />
+          </main>
+        ) : activeView === 'configs' ? (
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
+            <div
+              role="tablist"
+              className="flex gap-1 border-b"
+              style={{ borderColor: 'var(--theme-border)' }}
+            >
+              {([
+                ['exporter', 'IDE & Agent Config Exporter'],
+                ['limits', 'Rate-Limit & Rotation Matrix'],
+              ] as const).map(([id, label]) => (
+                <button
+                  key={id}
+                  role="tab"
+                  aria-selected={configsTab === id}
+                  onClick={() => setConfigsTab(id)}
+                  className="px-3.5 py-2 text-xs font-medium -mb-px border-b-2 cursor-pointer transition-colors"
+                  style={{
+                    color: configsTab === id ? 'var(--theme-text)' : 'var(--theme-text-secondary)',
+                    borderColor: configsTab === id ? 'var(--theme-primary)' : 'transparent',
+                    fontWeight: configsTab === id ? 600 : 500,
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {configsTab === 'exporter' ? (
+              <IDEConfigExporterModal
+                inline
+                isOpen
+                onClose={() => {}}
+                savedKeys={keys}
+                onSaveKey={handleAddKey}
+                initialProvider={configExporterProvider}
+              />
+            ) : (
+              <RateLimitMatrixModal
+                inline
+                isOpen
+                onClose={() => {}}
+                onOpenExporterWithProvider={(provId) => handleOpenConfigExporter(provId)}
+              />
+            )}
+          </main>
+        ) : activeView === 'vault' ? (
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <ApiKeyVaultModal
+              inline
+              isOpen
+              onClose={() => {}}
+              keys={keys}
+              onAddKey={handleAddKey}
+              onDeleteKey={handleDeleteKey}
+              onOpenConfigExporter={(provId) => handleOpenConfigExporter(provId)}
+            />
+          </main>
         ) : (
           <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            {/* Universal Omnibar */}
-            <Omnibar
-              onOpenAdvisor={handleOpenAdvisor}
-              onOpenConfigExporter={() => handleOpenConfigExporter()}
-              onOpenRateLimitMatrix={handleOpenRateLimitMatrix}
-            />
-
-            {/* Scope Explainer Banner (Web vs Local Code Agent) */}
-            {showScopeExplainer && <ScopeExplainer />}
-
-            {/* OmniRoute & Local AI Daemon Monitor Widget */}
-            <OmniRouteWidget />
-
             {/* Tool Filter Bar */}
             <ToolFilterBar
               activeCategory={activeCategory}
@@ -973,29 +1035,6 @@ export default function App() {
           onAddTool={handleAddTool}
         />
 
-        <ApiKeyVaultModal
-          isOpen={isKeyVaultOpen}
-          onClose={() => setIsKeyVaultOpen(false)}
-          keys={keys}
-          onAddKey={handleAddKey}
-          onDeleteKey={handleDeleteKey}
-          onOpenConfigExporter={(provId) => handleOpenConfigExporter(provId)}
-        />
-
-        <IDEConfigExporterModal
-          isOpen={isConfigExporterOpen}
-          onClose={() => setIsConfigExporterOpen(false)}
-          savedKeys={keys}
-          onSaveKey={handleAddKey}
-          initialProvider={configExporterProvider}
-        />
-
-        <RateLimitMatrixModal
-          isOpen={isRateLimitMatrixOpen}
-          onClose={() => setIsRateLimitMatrixOpen(false)}
-          onOpenExporterWithProvider={(provId) => handleOpenConfigExporter(provId)}
-        />
-
         <AIAdvisorModal
           isOpen={isAdvisorOpen}
           onClose={() => setIsAdvisorOpen(false)}
@@ -1029,7 +1068,7 @@ export default function App() {
           bookmarks={bookmarks}
           activeView={activeView}
           onNavigate={setActiveView}
-          onOpenKeyVault={() => setIsKeyVaultOpen(true)}
+          onOpenKeyVault={() => setActiveView('vault')}
           onOpenConfigExporter={(provId) => handleOpenConfigExporter(provId)}
           onOpenRateLimitMatrix={handleOpenRateLimitMatrix}
           onOpenAdvisor={(prompt) => handleOpenAdvisor(prompt)}
@@ -1057,7 +1096,7 @@ export default function App() {
           showOnStartup={showStartupScreen}
           onToggleShowOnStartup={handleToggleShowStartupScreen}
           onNavigate={setActiveView}
-          onOpenKeyVault={() => setIsKeyVaultOpen(true)}
+          onOpenKeyVault={() => setActiveView('vault')}
           onOpenGlobalSearch={() => setIsGlobalSearchOpen(true)}
           totalTools={tools.length}
           totalBookmarks={bookmarks.length}
@@ -1073,55 +1112,23 @@ export default function App() {
           />
         )}
 
-        {/* Desktop & Mobile Footer */}
-        <footer
-          className="mt-auto border-t py-6 text-center text-xs transition-colors"
-          style={{
-            backgroundColor: 'var(--theme-card)',
-            borderColor: 'var(--theme-border)',
-            color: 'var(--theme-text-muted)',
-          }}
-        >
-          <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <span>
-              LocalMind Command Center • Active Theme:{' '}
-              <strong style={{ color: 'var(--theme-text)' }}>{activeThemePreset.name}</strong>
-            </span>
-            <div className="flex items-center gap-4 text-[11px] opacity-80">
-              <button
-                onClick={() => setIsStartupScreenOpen(true)}
-                className="hover:underline cursor-pointer flex items-center gap-1"
-                style={{ color: 'var(--theme-primary)' }}
-                title="Launch Startup Welcome Screen"
-              >
-                <span>Welcome Guide</span>
-              </button>
-              <span>•</span>
-              <button
-                onClick={() => setIsShortcutsOpen(true)}
-                className="hover:underline cursor-pointer flex items-center gap-1"
-                style={{ color: 'var(--theme-primary)' }}
-                title="View keyboard hotkeys"
-              >
-                <span>Shortcuts</span>
-                <kbd className="px-1 py-0.2 rounded border text-[9px] font-mono">?</kbd>
-              </button>
-              <span>•</span>
-              <button
-                onClick={() => setActiveView('settings')}
-                className="hover:underline cursor-pointer"
-                style={{ color: 'var(--theme-primary)' }}
-              >
-                Customize Theme
-              </button>
-              <span>•</span>
-              <span>OmniRoute Enabled</span>
-              <span>•</span>
-              <span>Zero-Cost AI Catalog</span>
-            </div>
-          </div>
-        </footer>
+        <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
       </div>
+
+      {/* Advisor: a floating action rather than a sidebar page */}
+      <button
+        id="btn-open-advisor"
+        onClick={() => handleOpenAdvisor()}
+        title="Ask the AI Architecture Advisor (A)"
+        className="fixed right-5 bottom-20 md:bottom-5 z-30 px-4 py-2.5 rounded-full shadow-lg text-xs font-semibold flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 active:scale-95"
+        style={{
+          backgroundColor: 'var(--theme-primary)',
+          color: 'var(--theme-primary-foreground, #000000)',
+        }}
+      >
+        <Sparkles className="w-4 h-4" />
+        Ask Advisor
+      </button>
     </div>
   );
 }

@@ -38,3 +38,44 @@ This document outlines the high-value community-researched features and tasks pr
 - **Problem**: When testing an API, developers frequently want a rapid 5-line terminal `curl` command or Node.js/Python script to verify prompt responses.
 - **Solution**: A quick "Code Snippet" action on each provider card that generates an instantly executable terminal command or code block with the developer's active vault key pre-filled.
 - **Status**: Planned.
+
+---
+
+## 🧭 Navigation & UX restructure follow-ups
+
+Tracked here so nothing from the restructure (sidebar pages, title bar, Help menu) is silently dropped.
+
+### [ ] Task 6: Help menu: Documentation link
+- **Problem**: The Help menu has a disabled "Documentation" item; the repo has no remote or docs site URL yet.
+- **Solution**: Decide the docs location (hosted site, GitHub README, or bundled docs), then open it with the Tauri opener plugin.
+- **Status**: Blocked on a URL.
+
+### [ ] Task 7: Help menu: Report a Problem
+- **Problem**: Disabled "Report a Problem" item. Needs a diagnostic bundle design.
+- **Solution**: Build on `src/lib/errorLog.ts`: save a `.zip` (app log, version/OS, environment) via a Rust command and a save dialog, with stored API keys redacted before writing. Nothing is sent automatically.
+- **Status**: Planned.
+
+### [ ] Task 8: About: Check for Updates
+- **Problem**: About shows the version only. No updater is configured.
+- **Solution**: Add `tauri-plugin-updater`, signing keys and an update endpoint, then a "Check for Updates" button.
+- **Status**: Planned.
+
+### [ ] Task 9: Audit that every UI feature actually works
+- **Problem**: The UI came from AI Studio; some controls may not be wired up.
+- **Solution**: Walk every page and tag each feature as working / UI-only / broken, then implement the logic with tests (Rust unit tests; Vitest + React Testing Library). Known gaps: `/api/ai/advisor`, `/api/verify-gemini-key`, `/api/local-daemons/*` (need Rust commands or direct calls). Also check: external links via `window.open` inside Tauri (may need the opener plugin), and wording that claims keys are "AES-GCM encrypted" in the global search while they are stored as plain JSON in localStorage.
+- **Status**: Planned. No test setup exists in the repo yet.
+
+### [ ] Task 10: AI Tools list view and denser cards
+- **Problem**: Cards are tall (about 4 visible at once); comparing free tiers is slow.
+- **Solution**: Add a list/table view with a grid toggle, a left filter rail, and one search (merge the Omnibar and the filter box behavior).
+- **Status**: Planned (structure is done; density is next).
+
+### [ ] Task 11: Bookmarks list view with favicons
+- **Problem**: 270 bookmarks in tall cards, 24 per page, all with the same wrench icon.
+- **Solution**: Default compact list with a category rail, optional grid, and cached favicons or letter avatars.
+- **Status**: Planned.
+
+### [ ] Task 12: Runtime status in the title bar / Home
+- **Problem**: Home no longer shows live runtime status because probing needs Rust (CORS blocks webview fetch to localhost).
+- **Solution**: Add a Rust command that probes the known ports, then show an online/offline dot on the Runtimes sidebar item and on Home.
+- **Status**: Blocked on the Rust probe command (see Task 9).

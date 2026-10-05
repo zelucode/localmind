@@ -1,21 +1,16 @@
 import React from 'react';
 import {
-  LayoutDashboard,
+  Home,
+  LayoutGrid,
   Bookmark,
-  Sparkles,
-  KeyRound,
   Cpu,
-  Settings,
-  Sun,
-  Moon,
-  Plus,
   Code2,
-  Gauge,
-  Keyboard,
-  Search,
-  Compass,
+  KeyRound,
+  Settings,
+  PanelLeftClose,
+  PanelLeftOpen,
+  type LucideIcon,
 } from 'lucide-react';
-import { ThemePreset } from '../theme';
 import { ActiveView } from '../types';
 
 export type { ActiveView };
@@ -23,389 +18,152 @@ export type { ActiveView };
 interface SidebarProps {
   activeView: ActiveView;
   onNavigate: (view: ActiveView) => void;
-  onOpenAdvisor: () => void;
-  onOpenKeyVault: () => void;
-  onOpenConfigExporter?: () => void;
-  onOpenRateLimitMatrix?: () => void;
-  onOpenAddModal?: () => void;
-  onScrollToOmniRoute?: () => void;
-  onOpenShortcuts?: () => void;
-  onOpenGlobalSearch?: () => void;
-  onOpenStartupScreen?: () => void;
-  activeTheme: ThemePreset;
-  onToggleLightDark: () => void;
+  collapsed: boolean;
+  onToggleCollapsed: () => void;
+  totalTools: number;
+  totalBookmarks: number;
   totalKeys: number;
-  totalBookmarks?: number;
 }
+
+interface NavItem {
+  view: ActiveView;
+  label: string;
+  icon: LucideIcon;
+  count?: number;
+}
+
+/** Sidebar widths in px. The title bar's brand column mirrors these so its edge lines up. */
+export const SIDEBAR_WIDTH = 208;
+export const SIDEBAR_WIDTH_COLLAPSED = 64;
 
 export const Sidebar: React.FC<SidebarProps> = ({
   activeView,
   onNavigate,
-  onOpenAdvisor,
-  onOpenKeyVault,
-  onOpenConfigExporter,
-  onOpenRateLimitMatrix,
-  onOpenAddModal,
-  onScrollToOmniRoute,
-  onOpenShortcuts,
-  onOpenGlobalSearch,
-  onOpenStartupScreen,
-  activeTheme,
-  onToggleLightDark,
-  totalKeys,
+  collapsed,
+  onToggleCollapsed,
+  totalTools,
   totalBookmarks,
+  totalKeys,
 }) => {
+  const groups: { title: string; items: NavItem[] }[] = [
+    {
+      title: 'Discover',
+      items: [
+        { view: 'home', label: 'Home', icon: Home },
+        { view: 'tools', label: 'AI Tools', icon: LayoutGrid, count: totalTools },
+        { view: 'bookmarks', label: 'Bookmarks', icon: Bookmark, count: totalBookmarks },
+      ],
+    },
+    {
+      title: 'Local',
+      items: [
+        { view: 'runtimes', label: 'Runtimes', icon: Cpu },
+        { view: 'configs', label: 'Configs & Limits', icon: Code2 },
+      ],
+    },
+    {
+      title: 'Secure',
+      items: [{ view: 'vault', label: 'Key Vault', icon: KeyRound, count: totalKeys }],
+    },
+  ];
+
+  const renderItem = ({ view, label, icon: Icon, count }: NavItem) => {
+    const active = activeView === view;
+    return (
+      <button
+        key={view}
+        id={`sidebar-nav-${view}`}
+        onClick={() => onNavigate(view)}
+        title={collapsed ? label : undefined}
+        aria-label={label}
+        aria-current={active ? 'page' : undefined}
+        className={`w-full flex items-center rounded-lg transition-colors cursor-pointer ${
+          collapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2'
+        } ${active ? '' : 'opacity-75 hover:opacity-100'}`}
+        style={
+          active
+            ? {
+                backgroundColor: 'var(--theme-raised)',
+                color: 'var(--theme-primary)',
+                boxShadow: 'inset 0 0 0 1px var(--theme-border)',
+              }
+            : { color: 'var(--theme-text-secondary)' }
+        }
+      >
+        <span className="relative shrink-0">
+          <Icon className="w-[18px] h-[18px]" />
+          {collapsed && view === 'vault' && count !== undefined && count > 0 && (
+            <span
+              className="absolute -top-1 -right-1 w-2 h-2 rounded-full"
+              style={{ backgroundColor: 'var(--theme-primary)' }}
+            />
+          )}
+        </span>
+        {!collapsed && (
+          <>
+            <span className={`flex-1 text-left text-[13px] truncate ${active ? 'font-semibold' : 'font-medium'}`}>
+              {label}
+            </span>
+            {count !== undefined && (
+              <span className="text-[11px] font-mono" style={{ color: 'var(--theme-text-muted)' }}>
+                {count}
+              </span>
+            )}
+          </>
+        )}
+      </button>
+    );
+  };
+
   return (
     <>
-      {/* Desktop Fixed Left Icon Sidebar */}
+      {/* Desktop sidebar: sits below the title bar */}
       <aside
         id="app-left-sidebar"
-        className="hidden md:flex fixed top-11 left-0 bottom-0 w-16 flex-col items-center justify-between py-4 border-r z-40 transition-colors"
+        className="hidden md:flex fixed top-11 left-0 bottom-0 flex-col py-3 px-2 border-r z-40 overflow-y-auto transition-[width] duration-150"
         style={{
+          width: collapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH,
           backgroundColor: 'var(--theme-card)',
           borderColor: 'var(--theme-border)',
         }}
       >
-        <div className="flex flex-col items-center gap-6">
-          {/* Navigation Icons */}
-          <nav className="flex flex-col items-center gap-2">
-            {/* Dashboard / Catalog */}
-            <div className="relative group">
-              <button
-                id="sidebar-nav-dashboard"
-                onClick={() => onNavigate('dashboard')}
-                className="p-2.5 rounded-xl transition-all cursor-pointer"
-                style={
-                  activeView === 'dashboard'
-                    ? {
-                        backgroundColor: 'var(--theme-raised)',
-                        color: 'var(--theme-primary)',
-                        boxShadow: 'inset 0 0 0 1px var(--theme-border)',
-                      }
-                    : {
-                        color: 'var(--theme-text-muted)',
-                      }
-                }
-              >
-                <LayoutDashboard className="w-5 h-5" />
-              </button>
-              <div
-                className="absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded-md shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 border"
-                style={{
-                  backgroundColor: 'var(--theme-card)',
-                  borderColor: 'var(--theme-border)',
-                  color: 'var(--theme-text)',
-                }}
-              >
-                AI Dashboard & Tools
-              </div>
-            </div>
-
-            {/* Free Tool Bookmarks (AI & Non-AI) */}
-            <div className="relative group">
-              <button
-                id="sidebar-nav-bookmarks"
-                onClick={() => onNavigate('bookmarks')}
-                className="p-2.5 rounded-xl transition-all relative cursor-pointer"
-                style={
-                  activeView === 'bookmarks'
-                    ? {
-                        backgroundColor: 'var(--theme-raised)',
-                        color: 'var(--theme-primary)',
-                        boxShadow: 'inset 0 0 0 1px var(--theme-border)',
-                      }
-                    : {
-                        color: 'var(--theme-text-muted)',
-                      }
-                }
-              >
-                <Bookmark className="w-5 h-5" />
-                {totalBookmarks !== undefined && totalBookmarks > 0 && (
-                  <span
-                    className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
-                    style={{ backgroundColor: 'var(--theme-primary)' }}
-                  />
-                )}
-              </button>
-              <div
-                className="absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded-md shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 border"
-                style={{
-                  backgroundColor: 'var(--theme-card)',
-                  borderColor: 'var(--theme-border)',
-                  color: 'var(--theme-text)',
-                }}
-              >
-                Free Tool Bookmarks ({totalBookmarks ?? 0})
-              </div>
-            </div>
-
-            {/* IDE & Agent Config Exporter */}
-            {onOpenConfigExporter && (
-              <div className="relative group">
-                <button
-                  id="sidebar-nav-config-exporter"
-                  onClick={onOpenConfigExporter}
-                  className="p-2.5 rounded-xl transition-all cursor-pointer opacity-70 hover:opacity-100"
-                  style={{ color: 'var(--theme-text-muted)' }}
-                >
-                  <Code2 className="w-5 h-5" />
-                </button>
-                <div
-                  className="absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded-md shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 border"
-                  style={{
-                    backgroundColor: 'var(--theme-card)',
-                    borderColor: 'var(--theme-border)',
-                    color: 'var(--theme-text)',
-                  }}
-                >
-                  IDE & Agent Config Exporter
-                </div>
-              </div>
-            )}
-
-            {/* Rate-Limit & Rotation Matrix */}
-            {onOpenRateLimitMatrix && (
-              <div className="relative group">
-                <button
-                  id="sidebar-nav-rate-matrix"
-                  onClick={onOpenRateLimitMatrix}
-                  className="p-2.5 rounded-xl transition-all cursor-pointer opacity-70 hover:opacity-100"
-                  style={{ color: 'var(--theme-text-muted)' }}
-                >
-                  <Gauge className="w-5 h-5" />
-                </button>
-                <div
-                  className="absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded-md shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 border"
-                  style={{
-                    backgroundColor: 'var(--theme-card)',
-                    borderColor: 'var(--theme-border)',
-                    color: 'var(--theme-text)',
-                  }}
-                >
-                  Rate-Limits & Rotation Matrix
-                </div>
-              </div>
-            )}
-
-            {/* AI Advisor Modal */}
-            <div className="relative group">
-              <button
-                id="sidebar-nav-advisor"
-                onClick={onOpenAdvisor}
-                className="p-2.5 rounded-xl transition-all cursor-pointer opacity-70 hover:opacity-100"
-                style={{ color: 'var(--theme-text-muted)' }}
-              >
-                <Sparkles className="w-5 h-5" />
-              </button>
-              <div
-                className="absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded-md shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 border"
-                style={{
-                  backgroundColor: 'var(--theme-card)',
-                  borderColor: 'var(--theme-border)',
-                  color: 'var(--theme-text)',
-                }}
-              >
-                AI Architecture Advisor
-              </div>
-            </div>
-
-            {/* API Key Vault */}
-            <div className="relative group">
-              <button
-                id="sidebar-nav-vault"
-                onClick={onOpenKeyVault}
-                className="p-2.5 rounded-xl transition-all relative cursor-pointer opacity-70 hover:opacity-100"
-                style={{ color: 'var(--theme-text-muted)' }}
-              >
-                <KeyRound className="w-5 h-5" />
-                {totalKeys > 0 && (
-                  <span
-                    className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
-                    style={{ backgroundColor: 'var(--theme-primary)' }}
-                  />
-                )}
-              </button>
-              <div
-                className="absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded-md shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 border"
-                style={{
-                  backgroundColor: 'var(--theme-card)',
-                  borderColor: 'var(--theme-border)',
-                  color: 'var(--theme-text)',
-                }}
-              >
-                API Key Vault ({totalKeys})
-              </div>
-            </div>
-
-            {/* OmniRoute & Daemon status */}
-            <div className="relative group">
-              <button
-                id="sidebar-nav-omniroute"
-                onClick={() => {
-                  if (activeView !== 'dashboard') {
-                    onNavigate('dashboard');
-                    setTimeout(() => onScrollToOmniRoute?.(), 100);
-                  } else {
-                    onScrollToOmniRoute?.();
-                  }
-                }}
-                className="p-2.5 rounded-xl transition-all cursor-pointer opacity-70 hover:opacity-100"
-                style={{ color: 'var(--theme-text-muted)' }}
-              >
-                <Cpu className="w-5 h-5" />
-              </button>
-              <div
-                className="absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded-md shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 border"
-                style={{
-                  backgroundColor: 'var(--theme-card)',
-                  borderColor: 'var(--theme-border)',
-                  color: 'var(--theme-text)',
-                }}
-              >
-                OmniRoute & Local Daemons
-              </div>
-            </div>
-
-            {/* Add Custom Tool */}
-            {onOpenAddModal && (
-              <div className="relative group">
-                <button
-                  id="sidebar-nav-add-tool"
-                  onClick={onOpenAddModal}
-                  className="p-2.5 rounded-xl transition-all cursor-pointer opacity-70 hover:opacity-100"
-                  style={{ color: 'var(--theme-text-muted)' }}
-                >
-                  <Plus className="w-5 h-5" />
-                </button>
-                <div
-                  className="absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded-md shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 border"
-                  style={{
-                    backgroundColor: 'var(--theme-card)',
-                    borderColor: 'var(--theme-border)',
-                    color: 'var(--theme-text)',
-                  }}
-                >
-                  Add Custom AI Tool
-                </div>
-              </div>
-            )}
-          </nav>
-        </div>
-
-        {/* Bottom Actions: Quick Theme Switcher & Settings */}
-        <div className="flex flex-col items-center gap-2">
-          {/* Quick Mode Toggle (Light/Dark) */}
-          <div className="relative group">
-            <button
-              id="sidebar-btn-theme-toggle"
-              onClick={onToggleLightDark}
-              className="p-2.5 rounded-xl transition-all cursor-pointer opacity-70 hover:opacity-100"
-              style={{ color: 'var(--theme-text-muted)' }}
-              title={`Switch to ${activeTheme.mode === 'dark' ? 'Light' : 'Dark'} Mode`}
-            >
-              {activeTheme.mode === 'dark' ? (
-                <Sun className="w-5 h-5 text-amber-400" />
+        <nav className="flex flex-col gap-0.5" aria-label="Main navigation">
+          {groups.map((group) => (
+            <div key={group.title} className="flex flex-col gap-0.5">
+              {collapsed ? (
+                <div className="h-px mx-3 my-2 first:hidden" style={{ backgroundColor: 'var(--theme-border)' }} />
               ) : (
-                <Moon className="w-5 h-5 text-indigo-500" />
+                <h6
+                  className="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-wider first:pt-1"
+                  style={{ color: 'var(--theme-text-muted)' }}
+                >
+                  {group.title}
+                </h6>
               )}
-            </button>
-            <div
-              className="absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded-md shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 border"
-              style={{
-                backgroundColor: 'var(--theme-card)',
-                borderColor: 'var(--theme-border)',
-                color: 'var(--theme-text)',
-              }}
-            >
-              Toggle {activeTheme.mode === 'dark' ? 'Light' : 'Dark'} Mode (T)
+              {group.items.map(renderItem)}
             </div>
-          </div>
+          ))}
+        </nav>
 
-          {/* Keyboard Shortcuts Trigger */}
-          {onOpenShortcuts && (
-            <div className="relative group">
-              <button
-                id="sidebar-btn-shortcuts"
-                onClick={onOpenShortcuts}
-                className="p-2.5 rounded-xl transition-all cursor-pointer opacity-70 hover:opacity-100"
-                style={{ color: 'var(--theme-text-muted)' }}
-                title="Keyboard Shortcuts (?)"
-              >
-                <Keyboard className="w-5 h-5" />
-              </button>
-              <div
-                className="absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded-md shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 border"
-                style={{
-                  backgroundColor: 'var(--theme-card)',
-                  borderColor: 'var(--theme-border)',
-                  color: 'var(--theme-text)',
-                }}
-              >
-                Keyboard Shortcuts (?)
-              </div>
-            </div>
-          )}
-
-          {/* Startup Welcome Screen Trigger */}
-          {onOpenStartupScreen && (
-            <div className="relative group">
-              <button
-                id="sidebar-btn-startup-screen"
-                onClick={onOpenStartupScreen}
-                className="p-2.5 rounded-xl transition-all cursor-pointer opacity-70 hover:opacity-100"
-                style={{ color: 'var(--theme-text-muted)' }}
-                title="Welcome & Quick Start Launcher"
-              >
-                <Compass className="w-5 h-5" />
-              </button>
-              <div
-                className="absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded-md shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 border"
-                style={{
-                  backgroundColor: 'var(--theme-card)',
-                  borderColor: 'var(--theme-border)',
-                  color: 'var(--theme-text)',
-                }}
-              >
-                Welcome & Quick Start
-              </div>
-            </div>
-          )}
-
-          {/* Settings Page Nav */}
-          <div className="relative group">
-            <button
-              id="sidebar-nav-settings"
-              onClick={() => onNavigate('settings')}
-              className="p-2.5 rounded-xl transition-all cursor-pointer"
-              style={
-                activeView === 'settings'
-                  ? {
-                      backgroundColor: 'var(--theme-raised)',
-                      color: 'var(--theme-primary)',
-                      boxShadow: 'inset 0 0 0 1px var(--theme-border)',
-                    }
-                  : {
-                      color: 'var(--theme-text-muted)',
-                    }
-              }
-            >
-              <Settings className="w-5 h-5" />
-            </button>
-            <div
-              className="absolute left-full ml-3 px-2.5 py-1 text-xs font-medium rounded-md shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 border"
-              style={{
-                backgroundColor: 'var(--theme-card)',
-                borderColor: 'var(--theme-border)',
-                color: 'var(--theme-text)',
-              }}
-            >
-              Hub Settings & Themes
-            </div>
-          </div>
+        <div className="mt-auto flex flex-col gap-0.5 pt-3">
+          <button
+            id="sidebar-btn-collapse"
+            onClick={onToggleCollapsed}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className={`w-full flex items-center rounded-lg transition-colors cursor-pointer opacity-75 hover:opacity-100 ${
+              collapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2'
+            }`}
+            style={{ color: 'var(--theme-text-secondary)' }}
+          >
+            {collapsed ? <PanelLeftOpen className="w-[18px] h-[18px]" /> : <PanelLeftClose className="w-[18px] h-[18px]" />}
+            {!collapsed && <span className="text-[13px] font-medium">Collapse</span>}
+          </button>
+          {renderItem({ view: 'settings', label: 'Settings', icon: Settings })}
         </div>
       </aside>
 
-      {/* Mobile Bottom Navigation Bar */}
+      {/* Mobile bottom navigation */}
       <div
         id="app-mobile-nav"
         className="md:hidden fixed bottom-0 left-0 right-0 h-14 border-t z-40 flex items-center justify-around px-1 backdrop-blur-md transition-colors"
@@ -414,96 +172,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
           borderColor: 'var(--theme-border)',
         }}
       >
-        <button
-          onClick={() => onNavigate('dashboard')}
-          className="p-1.5 rounded-lg flex flex-col items-center gap-0.5 cursor-pointer"
-          style={{
-            color: activeView === 'dashboard' ? 'var(--theme-primary)' : 'var(--theme-text-muted)',
-            fontWeight: activeView === 'dashboard' ? 600 : 400,
-          }}
-        >
-          <LayoutDashboard className="w-4 h-4" />
-          <span className="text-[9px]">Hub</span>
-        </button>
-
-        <button
-          id="mobile-nav-bookmarks"
-          onClick={() => onNavigate('bookmarks')}
-          className="p-1.5 rounded-lg flex flex-col items-center gap-0.5 cursor-pointer"
-          style={{
-            color: activeView === 'bookmarks' ? 'var(--theme-primary)' : 'var(--theme-text-muted)',
-            fontWeight: activeView === 'bookmarks' ? 600 : 400,
-          }}
-        >
-          <Bookmark className="w-4 h-4" />
-          <span className="text-[9px]">Bookmarks</span>
-        </button>
-
-        {onOpenGlobalSearch && (
+        {(
+          [
+            { view: 'home', label: 'Home', icon: Home },
+            { view: 'tools', label: 'Tools', icon: LayoutGrid },
+            { view: 'bookmarks', label: 'Bookmarks', icon: Bookmark },
+            { view: 'runtimes', label: 'Runtimes', icon: Cpu },
+            { view: 'vault', label: 'Vault', icon: KeyRound },
+            { view: 'settings', label: 'Settings', icon: Settings },
+          ] as NavItem[]
+        ).map(({ view, label, icon: Icon }) => (
           <button
-            id="mobile-nav-search"
-            onClick={onOpenGlobalSearch}
-            className="p-1.5 rounded-lg flex flex-col items-center gap-0.5 cursor-pointer opacity-80 hover:opacity-100"
-            style={{ color: 'var(--theme-primary)' }}
+            key={view}
+            onClick={() => onNavigate(view)}
+            className="p-1.5 rounded-lg flex flex-col items-center gap-0.5 cursor-pointer"
+            style={{
+              color: activeView === view ? 'var(--theme-primary)' : 'var(--theme-text-muted)',
+              fontWeight: activeView === view ? 600 : 400,
+            }}
           >
-            <Search className="w-4 h-4" />
-            <span className="text-[9px]">Search</span>
+            <Icon className="w-4 h-4" />
+            <span className="text-[9px]">{label}</span>
           </button>
-        )}
-
-        {onOpenShortcuts && (
-          <button
-            onClick={onOpenShortcuts}
-            className="p-1.5 rounded-lg flex flex-col items-center gap-0.5 cursor-pointer opacity-70 hover:opacity-100"
-            style={{ color: 'var(--theme-text-muted)' }}
-          >
-            <Keyboard className="w-4 h-4" />
-            <span className="text-[9px]">Keys (?)</span>
-          </button>
-        )}
-
-        {onOpenConfigExporter && (
-          <button
-            onClick={onOpenConfigExporter}
-            className="p-1.5 rounded-lg flex flex-col items-center gap-0.5 cursor-pointer opacity-70 hover:opacity-100"
-            style={{ color: 'var(--theme-text-muted)' }}
-          >
-            <Code2 className="w-4 h-4" />
-            <span className="text-[9px]">Configs</span>
-          </button>
-        )}
-
-        {onOpenRateLimitMatrix && (
-          <button
-            onClick={onOpenRateLimitMatrix}
-            className="p-1.5 rounded-lg flex flex-col items-center gap-0.5 cursor-pointer opacity-70 hover:opacity-100"
-            style={{ color: 'var(--theme-text-muted)' }}
-          >
-            <Gauge className="w-4 h-4" />
-            <span className="text-[9px]">Limits</span>
-          </button>
-        )}
-
-        <button
-          onClick={onOpenKeyVault}
-          className="p-1.5 rounded-lg flex flex-col items-center gap-0.5 cursor-pointer opacity-70 hover:opacity-100"
-          style={{ color: 'var(--theme-text-muted)' }}
-        >
-          <KeyRound className="w-4 h-4" />
-          <span className="text-[9px]">Keys ({totalKeys})</span>
-        </button>
-
-        <button
-          onClick={() => onNavigate('settings')}
-          className="p-1.5 rounded-lg flex flex-col items-center gap-0.5 cursor-pointer"
-          style={{
-            color: activeView === 'settings' ? 'var(--theme-primary)' : 'var(--theme-text-muted)',
-            fontWeight: activeView === 'settings' ? 600 : 400,
-          }}
-        >
-          <Settings className="w-4 h-4" />
-          <span className="text-[9px]">Settings</span>
-        </button>
+        ))}
       </div>
     </>
   );

@@ -15,15 +15,19 @@ interface ShortcutItem {
 const SHORTCUTS: ShortcutItem[] = [
   // Navigation & Search
   { keys: ['⌘K / Ctrl+K'], description: 'Open Global Search Command Palette (Find pages, tools, bookmarks & actions)', category: 'navigation' },
-  { keys: ['1'], description: 'Switch to LocalMind Hub & Tools Catalog', category: 'navigation' },
-  { keys: ['2'], description: 'Switch to Free Online Tool Bookmarks', category: 'navigation' },
-  { keys: ['3'], description: 'Switch to Workspace Settings & Themes', category: 'navigation' },
+  { keys: ['1'], description: 'Go to Home', category: 'navigation' },
+  { keys: ['2'], description: 'Go to AI Tools', category: 'navigation' },
+  { keys: ['3'], description: 'Go to Bookmarks', category: 'navigation' },
+  { keys: ['4'], description: 'Go to Runtimes (OmniRoute & local daemons)', category: 'navigation' },
+  { keys: ['5'], description: 'Go to Configs & Limits', category: 'navigation' },
+  { keys: ['6'], description: 'Go to Key Vault', category: 'navigation' },
+  { keys: ['7'], description: 'Go to Settings', category: 'navigation' },
   { keys: ['/'], description: 'Quick-focus search bar on active page', category: 'navigation' },
 
   // Tools & Modals
-  { keys: ['k'], description: 'Open Encrypted API Key Vault', category: 'tools' },
-  { keys: ['c'], description: 'Open IDE & Agent Config Exporter (.cursorrules, Continue, Cline)', category: 'tools' },
-  { keys: ['l'], description: 'Open Rate Limit & Quota Matrix', category: 'tools' },
+  { keys: ['k'], description: 'Go to Key Vault', category: 'tools' },
+  { keys: ['c'], description: 'Go to the IDE & Agent Config Exporter (.cursorrules, Continue, Cline)', category: 'tools' },
+  { keys: ['l'], description: 'Go to the Rate-Limit & Rotation Matrix', category: 'tools' },
   { keys: ['a'], description: 'Open AI Assistant & Architecture Advisor', category: 'tools' },
   { keys: ['b'], description: 'Add New Custom Tool or Bookmark', category: 'tools' },
 
@@ -38,7 +42,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
 
   const categories = [
     { id: 'navigation', title: 'Navigation & View Switching' },
-    { id: 'tools', title: 'Modals & Developer Utilities' },
+    { id: 'tools', title: 'Utilities' },
     { id: 'workspace', title: 'System & Global Hotkeys' },
   ] as const;
 

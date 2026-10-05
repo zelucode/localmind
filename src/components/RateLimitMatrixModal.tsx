@@ -146,11 +146,14 @@ interface RateLimitMatrixModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenExporterWithProvider?: (providerId: string) => void;
+  /** Render as a normal page section (no overlay, no close buttons). */
+  inline?: boolean;
 }
 
 export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
   isOpen,
   onClose,
+  inline = false,
   onOpenExporterWithProvider,
 }) => {
   const [activeTab, setActiveTab] = useState<'matrix' | 'strategy'>('matrix');
@@ -168,17 +171,17 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
     });
   }, [filterCategory, searchQuery]);
 
-  if (!isOpen) return null;
+  if (!isOpen && !inline) return null;
 
   return (
     <div
       id="modal-rate-limit-backdrop"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-y-auto backdrop-blur-sm transition-opacity animate-in fade-in"
-      style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
+      className={inline ? '' : 'fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-y-auto backdrop-blur-sm transition-opacity animate-in fade-in'}
+      style={inline ? undefined : { backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
     >
       <div
         id="modal-rate-limit-content"
-        className="w-full max-w-5xl rounded-2xl border shadow-2xl overflow-hidden flex flex-col my-auto transition-all max-h-[90vh]"
+        className={`w-full rounded-2xl border overflow-hidden flex flex-col transition-all ${inline ? '' : 'max-w-5xl shadow-2xl my-auto max-h-[90vh]'}`}
         style={{
           backgroundColor: 'var(--theme-card)',
           borderColor: 'var(--theme-border)',
@@ -247,7 +250,7 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
             <button
               id="btn-close-rate-limit"
               onClick={onClose}
-              className="p-2 rounded-xl border transition-colors cursor-pointer hover:opacity-80"
+              className={`${inline ? 'hidden ' : ''}p-2 rounded-xl border transition-colors cursor-pointer hover:opacity-80`}
               style={{
                 backgroundColor: 'var(--theme-raised)',
                 borderColor: 'var(--theme-border)',
@@ -296,7 +299,7 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <div className="p-5 sm:p-6 overflow-y-auto space-y-6">
+        <div className={`p-5 sm:p-6 space-y-6 ${inline ? '' : 'overflow-y-auto'}`}>
           {activeTab === 'matrix' ? (
             <>
               {/* Filter controls */}
@@ -665,7 +668,7 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-lg border text-xs font-medium cursor-pointer hover:opacity-85"
+            className={`${inline ? 'hidden ' : ''}px-4 py-1.5 rounded-lg border text-xs font-medium cursor-pointer hover:opacity-85`}
             style={{
               backgroundColor: 'var(--theme-card)',
               borderColor: 'var(--theme-border)',

@@ -134,7 +134,7 @@ export const StartupWelcomeModal: React.FC<StartupWelcomeModalProps> = ({
             <div
               id="bento-ai-catalog"
               onClick={() => {
-                onNavigate('dashboard');
+                onNavigate('tools');
                 onClose();
               }}
               className="group p-4 sm:p-5 rounded-2xl border transition-all duration-150 cursor-pointer hover:shadow-md flex flex-col justify-between space-y-3"

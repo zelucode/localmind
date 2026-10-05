@@ -122,14 +122,40 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
     // 1. Pages / Navigation
     addItem({
-      id: 'page-dashboard',
+      id: 'page-home',
       type: 'page',
-      title: 'LocalMind Command Center',
-      subtitle: 'Browse AI catalog, manage zero-cost models, OmniRoute proxy & filters',
+      title: 'Home',
+      subtitle: 'Quick launcher, status overview and favorites',
       categoryLabel: 'Navigation',
       icon: <LayoutDashboard className="w-4 h-4 text-sky-400" />,
       action: () => {
-        onNavigate('dashboard');
+        onNavigate('home');
+        onClose();
+      },
+    });
+
+    addItem({
+      id: 'page-tools',
+      type: 'page',
+      title: 'AI Tools',
+      subtitle: 'Browse the AI catalog, compare free tiers and filter by capability',
+      categoryLabel: 'Navigation',
+      icon: <Sparkles className="w-4 h-4 text-orange-400" />,
+      action: () => {
+        onNavigate('tools');
+        onClose();
+      },
+    });
+
+    addItem({
+      id: 'page-runtimes',
+      type: 'page',
+      title: 'Runtimes',
+      subtitle: 'OmniRoute and local AI daemons (Ollama, LM Studio, Jan)',
+      categoryLabel: 'Navigation',
+      icon: <Cpu className="w-4 h-4 text-emerald-400" />,
+      action: () => {
+        onNavigate('runtimes');
         onClose();
       },
     });

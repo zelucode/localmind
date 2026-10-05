@@ -95,7 +95,8 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onFinish, duration
               style={{
                 width: 176,
                 height: 40,
-                backgroundColor: 'var(--theme-text)',
+                background:
+                  'linear-gradient(90deg, var(--theme-text) 0 50.1%, var(--theme-primary) 50.1% 100%)',
                 WebkitMask: 'url(/wordmark.svg) center / contain no-repeat',
                 mask: 'url(/wordmark.svg) center / contain no-repeat',
               }}

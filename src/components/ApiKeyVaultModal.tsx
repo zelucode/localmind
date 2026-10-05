@@ -26,11 +26,14 @@ interface ApiKeyVaultModalProps {
   onAddKey: (key: StoredApiKey) => void;
   onDeleteKey: (id: string) => void;
   onOpenConfigExporter?: (provider?: string) => void;
+  /** Render as a normal page section (no overlay, no close button). */
+  inline?: boolean;
 }
 
 export const ApiKeyVaultModal: React.FC<ApiKeyVaultModalProps> = ({
   isOpen,
   onClose,
+  inline = false,
   keys,
   onAddKey,
   onDeleteKey,
@@ -44,7 +47,7 @@ export const ApiKeyVaultModal: React.FC<ApiKeyVaultModalProps> = ({
   const [isVerifying, setIsVerifying] = useState<string | null>(null);
   const [verificationFeedback, setVerificationFeedback] = useState<Record<string, { valid: boolean; message: string }>>({});
 
-  if (!isOpen) return null;
+  if (!isOpen && !inline) return null;
 
   const currentProviderConfig = POPULAR_API_PROVIDERS.find((p) => p.provider === selectedProvider) || POPULAR_API_PROVIDERS[0];
 
@@ -117,10 +120,10 @@ export const ApiKeyVaultModal: React.FC<ApiKeyVaultModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className={inline ? '' : 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200'}>
       <div
         id="modal-key-vault"
-        className="border rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden transition-colors"
+        className={`border rounded-2xl w-full flex flex-col overflow-hidden transition-colors ${inline ? 'max-w-4xl mx-auto' : 'max-w-2xl max-h-[90vh] shadow-2xl'}`}
         style={{
           backgroundColor: 'var(--theme-card)',
           borderColor: 'var(--theme-border)',
@@ -152,7 +155,7 @@ export const ApiKeyVaultModal: React.FC<ApiKeyVaultModalProps> = ({
           <button
             id="btn-close-key-vault"
             onClick={onClose}
-            className="p-1.5 rounded-lg transition-colors cursor-pointer opacity-70 hover:opacity-100"
+            className={`${inline ? 'hidden ' : ''}p-1.5 rounded-lg transition-colors cursor-pointer opacity-70 hover:opacity-100`}
             style={{ color: 'var(--theme-text)' }}
           >
             <X className="w-5 h-5" />

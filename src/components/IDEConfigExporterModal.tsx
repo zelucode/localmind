@@ -24,6 +24,8 @@ interface IDEConfigExporterModalProps {
   savedKeys: StoredApiKey[];
   onSaveKey?: (key: StoredApiKey) => void;
   initialProvider?: string;
+  /** Render as a normal page section (no overlay, no close buttons). */
+  inline?: boolean;
 }
 
 type TargetToolId =
@@ -225,6 +227,7 @@ const PROVIDER_PRESETS: ProviderPreset[] = [
 export const IDEConfigExporterModal: React.FC<IDEConfigExporterModalProps> = ({
   isOpen,
   onClose,
+  inline = false,
   savedKeys,
   onSaveKey,
   initialProvider,
@@ -489,17 +492,17 @@ curl ${baseUrl}chat/completions \\
     setManualKeyInput('');
   };
 
-  if (!isOpen) return null;
+  if (!isOpen && !inline) return null;
 
   return (
     <div
       id="modal-ide-exporter-backdrop"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-y-auto backdrop-blur-sm transition-opacity animate-in fade-in"
-      style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
+      className={inline ? '' : 'fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-y-auto backdrop-blur-sm transition-opacity animate-in fade-in'}
+      style={inline ? undefined : { backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
     >
       <div
         id="modal-ide-exporter-content"
-        className="w-full max-w-4xl rounded-2xl border shadow-2xl overflow-hidden flex flex-col my-auto transition-all"
+        className={`w-full rounded-2xl border overflow-hidden flex flex-col transition-all ${inline ? '' : 'max-w-4xl shadow-2xl my-auto'}`}
         style={{
           backgroundColor: 'var(--theme-card)',
           borderColor: 'var(--theme-border)',
@@ -534,7 +537,7 @@ curl ${baseUrl}chat/completions \\
           <button
             id="btn-close-ide-exporter"
             onClick={onClose}
-            className="p-2 rounded-xl border transition-colors cursor-pointer hover:opacity-80"
+            className={`${inline ? 'hidden ' : ''}p-2 rounded-xl border transition-colors cursor-pointer hover:opacity-80`}
             style={{
               backgroundColor: 'var(--theme-raised)',
               borderColor: 'var(--theme-border)',
@@ -546,7 +549,7 @@ curl ${baseUrl}chat/completions \\
         </div>
 
         {/* Content Body */}
-        <div className="p-5 sm:p-6 space-y-6 overflow-y-auto max-h-[80vh]">
+        <div className={`p-5 sm:p-6 space-y-6 ${inline ? '' : 'overflow-y-auto max-h-[80vh]'}`}>
           {/* Step 1: Select Target IDE / Agent */}
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider mb-2.5" style={{ color: 'var(--theme-text-secondary)' }}>
@@ -809,7 +812,7 @@ curl ${baseUrl}chat/completions \\
           </div>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-lg border text-xs font-medium cursor-pointer hover:opacity-85"
+            className={`${inline ? 'hidden ' : ''}px-4 py-1.5 rounded-lg border text-xs font-medium cursor-pointer hover:opacity-85`}
             style={{
               backgroundColor: 'var(--theme-card)',
               borderColor: 'var(--theme-border)',

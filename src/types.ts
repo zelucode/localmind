@@ -1,4 +1,4 @@
-export type ActiveView = 'dashboard' | 'bookmarks' | 'settings';
+export type ActiveView = 'home' | 'tools' | 'bookmarks' | 'runtimes' | 'configs' | 'vault' | 'settings';
 
 export type ToolCategory =
   | 'all'

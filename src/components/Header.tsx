@@ -1,30 +1,158 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { BrandMark } from './BrandMark';
-import { Plus, ArrowLeft, ChevronRight, Search } from 'lucide-react';
+import {
+  Plus,
+  Search,
+  Sun,
+  Moon,
+  CircleHelp,
+  Keyboard,
+  Compass,
+  Info,
+  BookOpen,
+  Bug,
+} from 'lucide-react';
 import { ActiveView } from '../types';
 import { TitleBarDragRegion, WindowControls } from './WindowControls';
 
 interface HeaderProps {
   activeView: ActiveView;
   onNavigate: (view: ActiveView) => void;
-  totalTools: number;
-  totalBookmarks?: number;
-  totalKeys?: number;
-  activeThemeName?: string;
+  sidebarCollapsed: boolean;
+  themeMode: 'light' | 'dark';
+  onToggleTheme: () => void;
   onOpenAddModal: () => void;
   onOpenAddBookmarkModal?: () => void;
-  onScrollToOmniRoute?: () => void;
   onOpenGlobalSearch?: () => void;
+  onOpenShortcuts: () => void;
+  onOpenWelcome: () => void;
+  onOpenAbout: () => void;
 }
+
+const PAGE_TITLES: Record<ActiveView, string> = {
+  home: 'Home',
+  tools: 'AI Tools',
+  bookmarks: 'Bookmarks',
+  runtimes: 'Runtimes',
+  configs: 'Configs & Limits',
+  vault: 'Key Vault',
+  settings: 'Settings',
+};
+
+const iconBtn =
+  'h-8 w-8 flex items-center justify-center rounded-lg transition-colors cursor-pointer opacity-70 hover:opacity-100 hover:bg-[var(--theme-raised)]';
+
+interface MenuItemProps {
+  icon: React.ReactNode;
+  label: string;
+  hint?: string;
+  disabled?: boolean;
+  onSelect?: () => void;
+}
+
+const MenuItem: React.FC<MenuItemProps> = ({ icon, label, hint, disabled, onSelect }) => (
+  <button
+    role="menuitem"
+    disabled={disabled}
+    onClick={onSelect}
+    className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs text-left rounded-md transition-colors ${
+      disabled ? 'opacity-45 cursor-not-allowed' : 'cursor-pointer hover:bg-[var(--theme-raised)]'
+    }`}
+    style={{ color: 'var(--theme-text)' }}
+  >
+    <span className="shrink-0 opacity-70">{icon}</span>
+    <span className="flex-1">{label}</span>
+    {hint && (
+      <span className="text-[10px] font-mono opacity-60" style={{ color: 'var(--theme-text-muted)' }}>
+        {hint}
+      </span>
+    )}
+  </button>
+);
+
+const HelpMenu: React.FC<{
+  onOpenShortcuts: () => void;
+  onOpenWelcome: () => void;
+  onOpenAbout: () => void;
+}> = ({ onOpenShortcuts, onOpenWelcome, onOpenAbout }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const pick = (fn?: () => void) => () => {
+    setOpen(false);
+    fn?.();
+  };
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        id="header-btn-help"
+        onClick={() => setOpen((v) => !v)}
+        title="Help"
+        aria-label="Help"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className={iconBtn}
+        style={{ color: 'var(--theme-text)' }}
+      >
+        <CircleHelp className="w-4 h-4" />
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-full mt-1.5 w-60 p-1 rounded-xl border shadow-xl z-[60]"
+          style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)' }}
+        >
+          <MenuItem
+            icon={<Keyboard className="w-3.5 h-3.5" />}
+            label="Keyboard Shortcuts"
+            hint="?"
+            onSelect={pick(onOpenShortcuts)}
+          />
+          <MenuItem
+            icon={<Compass className="w-3.5 h-3.5" />}
+            label="Welcome & Quick Start"
+            onSelect={pick(onOpenWelcome)}
+          />
+          <div className="h-px my-1" style={{ backgroundColor: 'var(--theme-border)' }} />
+          <MenuItem icon={<Info className="w-3.5 h-3.5" />} label="About LocalMind" onSelect={pick(onOpenAbout)} />
+          <MenuItem icon={<BookOpen className="w-3.5 h-3.5" />} label="Documentation" hint="Soon" disabled />
+          <div className="h-px my-1" style={{ backgroundColor: 'var(--theme-border)' }} />
+          <MenuItem icon={<Bug className="w-3.5 h-3.5" />} label="Report a Problem" hint="Soon" disabled />
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const Header: React.FC<HeaderProps> = ({
   activeView,
   onNavigate,
-  totalTools,
-  totalBookmarks = 0,
+  sidebarCollapsed,
+  themeMode,
+  onToggleTheme,
   onOpenAddModal,
   onOpenAddBookmarkModal,
   onOpenGlobalSearch,
+  onOpenShortcuts,
+  onOpenWelcome,
+  onOpenAbout,
 }) => {
   const isMac = useMemo(() => {
     return typeof window !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
@@ -41,12 +169,16 @@ export const Header: React.FC<HeaderProps> = ({
       }}
     >
       {/* Brand column: same width as the sidebar so its vertical edge continues under the title bar */}
-      <div className="w-16 shrink-0 flex items-center justify-center">
+      <div
+        className={`shrink-0 flex items-center ${
+          sidebarCollapsed ? 'w-16 justify-center' : 'w-16 md:w-52 justify-center md:justify-start md:pl-4 md:gap-2.5'
+        }`}
+      >
         <button
           id="header-btn-brand"
-          onClick={() => onNavigate('dashboard')}
-          title="LocalMind Dashboard"
-          className="p-1.5 rounded-lg shadow-sm transition-transform hover:scale-105 active:scale-95 cursor-pointer"
+          onClick={() => onNavigate('home')}
+          title="LocalMind Home"
+          className="p-1.5 rounded-lg shadow-sm transition-transform hover:scale-105 active:scale-95 cursor-pointer shrink-0"
           style={{
             backgroundColor: 'var(--theme-primary)',
             color: 'var(--theme-primary-foreground, #000000)',
@@ -54,70 +186,20 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <BrandMark className="w-5 h-5" />
         </button>
+        {!sidebarCollapsed && (
+          <span className="hidden md:inline text-sm font-bold tracking-tight truncate">LocalMind</span>
+        )}
       </div>
 
       <div className="flex-1 min-w-0 grid grid-cols-[1fr_auto_1fr] items-center gap-4 pl-4">
-        {/* Left: page title / breadcrumbs (drag region) */}
+        {/* Left: current page title (drag region) */}
         <TitleBarDragRegion className="flex items-center min-w-0 h-full">
-          <div className="min-w-0">
-            {activeView === 'settings' ? (
-              <div className="flex items-center gap-2 flex-wrap">
-                <button
-                  id="header-breadcrumb-home"
-                  onClick={() => onNavigate('dashboard')}
-                  className="text-xs sm:text-sm font-medium transition-colors cursor-pointer flex items-center gap-1 opacity-70 hover:opacity-100"
-                  style={{ color: 'var(--theme-text)' }}
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>LocalMind</span>
-                </button>
-                <ChevronRight className="w-3.5 h-3.5 opacity-40" />
-                <span
-                  className="text-xs sm:text-sm font-bold tracking-tight"
-                  style={{ color: 'var(--theme-text)' }}
-                >
-                  Settings
-                </span>
-              </div>
-            ) : activeView === 'bookmarks' ? (
-              <div className="flex items-center gap-2 flex-wrap">
-                <button
-                  id="header-breadcrumb-home-bm"
-                  onClick={() => onNavigate('dashboard')}
-                  className="text-xs sm:text-sm font-medium transition-colors cursor-pointer flex items-center gap-1 opacity-70 hover:opacity-100"
-                  style={{ color: 'var(--theme-text)' }}
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">LocalMind</span>
-                </button>
-                <ChevronRight className="w-3.5 h-3.5 opacity-40 hidden sm:inline" />
-                <div>
-                  <h1
-                    className="text-xs sm:text-sm font-bold tracking-tight"
-                    style={{ color: 'var(--theme-text)' }}
-                  >
-                    Bookmarks
-                  </h1>
-                </div>
-                <span className="opacity-40 text-xs hidden md:inline">•</span>
-                <span className="text-[11px] opacity-70 hidden md:inline">
-                  {totalBookmarks} Tools
-                </span>
-              </div>
-            ) : (
-              <div>
-                <h1
-                  className="text-sm sm:text-base font-bold tracking-tight"
-                  style={{ color: 'var(--theme-text)' }}
-                >
-                  LocalMind
-                </h1>
-              </div>
-            )}
-          </div>
+          <h1 className="text-sm font-semibold tracking-tight truncate" style={{ color: 'var(--theme-text)' }}>
+            {PAGE_TITLES[activeView]}
+          </h1>
         </TitleBarDragRegion>
 
-        {/* Center: Global Search Trigger Bar */}
+        {/* Center: global search trigger */}
         {onOpenGlobalSearch ? (
           <div className="w-64 lg:w-96 justify-self-center hidden sm:block">
             <button
@@ -133,68 +215,58 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <div className="flex items-center gap-2 min-w-0">
                 <Search className="w-3.5 h-3.5 opacity-50 shrink-0 group-hover:opacity-80 transition-opacity" />
-                <span className="truncate opacity-65 text-xs hidden sm:inline">
-                  Search tools, 270+ bookmarks, actions...
-                </span>
-                <span className="truncate opacity-65 text-xs sm:hidden">
-                  Search anything...
-                </span>
+                <span className="truncate opacity-65 text-xs">Search tools, 270+ bookmarks, actions...</span>
               </div>
-              <div className="flex items-center gap-1 shrink-0 ml-1.5">
-                <kbd
-                  className="px-1.5 py-px rounded border text-[10px] leading-4 font-mono font-semibold shadow-2xs"
-                  style={{
-                    backgroundColor: 'var(--theme-card)',
-                    borderColor: 'var(--theme-border)',
-                    color: 'var(--theme-primary)',
-                  }}
-                >
-                  {isMac ? '⌘K' : 'Ctrl+K'}
-                </kbd>
-              </div>
+              <kbd
+                className="px-1.5 py-px rounded border text-[10px] leading-4 font-mono font-semibold shadow-2xs shrink-0 ml-1.5"
+                style={{
+                  backgroundColor: 'var(--theme-card)',
+                  borderColor: 'var(--theme-border)',
+                  color: 'var(--theme-primary)',
+                }}
+              >
+                {isMac ? '⌘K' : 'Ctrl+K'}
+              </kbd>
             </button>
           </div>
         ) : (
           <div />
         )}
 
-        {/* Right: drag filler, primary action, window controls */}
+        {/* Right: drag filler, contextual action, theme + help, window controls */}
         <div className="flex items-center h-full min-w-0">
-        <TitleBarDragRegion className="flex-1 h-full min-w-0" />
-        <div className="flex items-center gap-2 shrink-0 pr-2">
-          {activeView === 'settings' ? (
-            <button
-              id="header-btn-back-hub"
-              onClick={() => onNavigate('dashboard')}
-              className="px-3 py-1.5 text-xs font-medium rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer hover:opacity-80"
-              style={{
-                backgroundColor: 'var(--theme-raised)',
-                borderColor: 'var(--theme-border)',
-                color: 'var(--theme-text)',
-              }}
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Hub</span>
-            </button>
-          ) : activeView === 'bookmarks' ? (
-            <div className="flex items-center gap-2">
+          <TitleBarDragRegion className="flex-1 h-full min-w-0" />
+          <div className="flex items-center gap-1.5 shrink-0 pr-2">
+            {onOpenGlobalSearch && (
               <button
-                id="header-btn-back-hub-bm"
-                onClick={() => onNavigate('dashboard')}
-                className="px-3 py-1.5 text-xs font-medium rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer hover:opacity-80 hidden sm:flex"
+                onClick={onOpenGlobalSearch}
+                title="Search"
+                aria-label="Search"
+                className={`${iconBtn} sm:hidden`}
+                style={{ color: 'var(--theme-text)' }}
+              >
+                <Search className="w-4 h-4" />
+              </button>
+            )}
+            {(activeView === 'home' || activeView === 'tools') && (
+              <button
+                id="btn-nav-add-tool"
+                onClick={onOpenAddModal}
+                className="mr-1 px-3 py-1 text-xs font-semibold rounded-lg shadow-sm transition-all flex items-center gap-1.5 cursor-pointer hover:opacity-95 active:scale-95"
                 style={{
-                  backgroundColor: 'var(--theme-raised)',
-                  borderColor: 'var(--theme-border)',
-                  color: 'var(--theme-text)',
+                  backgroundColor: 'var(--theme-primary)',
+                  color: 'var(--theme-primary-foreground, #000000)',
                 }}
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>AI Hub</span>
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Tool</span>
               </button>
+            )}
+            {activeView === 'bookmarks' && onOpenAddBookmarkModal && (
               <button
                 id="btn-header-add-bookmark"
                 onClick={onOpenAddBookmarkModal}
-                className="px-3.5 py-1.5 text-xs font-semibold rounded-lg shadow-sm transition-all flex items-center gap-1.5 cursor-pointer hover:opacity-95 active:scale-95"
+                className="mr-1 px-3 py-1 text-xs font-semibold rounded-lg shadow-sm transition-all flex items-center gap-1.5 cursor-pointer hover:opacity-95 active:scale-95"
                 style={{
                   backgroundColor: 'var(--theme-primary)',
                   color: 'var(--theme-primary-foreground, #000000)',
@@ -203,23 +275,20 @@ export const Header: React.FC<HeaderProps> = ({
                 <Plus className="w-3.5 h-3.5" />
                 <span>Bookmark Tool</span>
               </button>
-            </div>
-          ) : (
+            )}
             <button
-              id="btn-nav-add-tool"
-              onClick={onOpenAddModal}
-              className="px-3.5 py-1.5 text-xs font-semibold rounded-lg shadow-sm transition-all flex items-center gap-1.5 cursor-pointer hover:opacity-95 active:scale-95"
-              style={{
-                backgroundColor: 'var(--theme-primary)',
-                color: 'var(--theme-primary-foreground, #000000)',
-              }}
+              id="header-btn-theme"
+              onClick={onToggleTheme}
+              title={`Switch to ${themeMode === 'dark' ? 'light' : 'dark'} mode (T)`}
+              aria-label="Toggle light and dark mode"
+              className={iconBtn}
+              style={{ color: 'var(--theme-text)' }}
             >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add Tool</span>
+              {themeMode === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
-          )}
-        </div>
-        <WindowControls />
+            <HelpMenu onOpenShortcuts={onOpenShortcuts} onOpenWelcome={onOpenWelcome} onOpenAbout={onOpenAbout} />
+          </div>
+          <WindowControls />
         </div>
       </div>
     </header>
