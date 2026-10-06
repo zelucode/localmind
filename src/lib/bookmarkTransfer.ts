@@ -41,12 +41,12 @@ export function safeHttpUrl(raw: unknown): string | null {
   }
 }
 
-/** Key used to decide whether two bookmarks are the same link (case, trailing slash and #fragment don't matter). */
+/** Key used to decide whether two bookmarks are the same link (case, a leading www., trailing slash and #fragment don't matter). */
 export function normalizeUrl(url: string): string {
   try {
     const u = new URL(url.trim());
     u.hash = '';
-    return `${u.protocol}//${u.host.toLowerCase()}${u.pathname.replace(/\/+$/, '')}${u.search}`;
+    return `${u.protocol}//${u.host.toLowerCase().replace(/^www\./, '')}${u.pathname.replace(/\/+$/, '')}${u.search}`;
   } catch {
     return url.trim().toLowerCase();
   }

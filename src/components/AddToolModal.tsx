@@ -1,17 +1,22 @@
-import React, { useState } from 'react';
-import { X, Plus, Globe, Terminal, Palette, Network, Sparkles, CheckCircle2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, Plus, Globe, Terminal, Palette, Network, Sparkles, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { AITool, CapabilityScope, ToolCategory } from '../types';
+import { toWebUrl } from '../lib/url';
+import { normalizeUrl } from '../lib/bookmarkTransfer';
 
 interface AddToolModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddTool: (tool: AITool) => void;
+  /** Tools already in the catalog, used to warn about a link that is already there. */
+  existingTools?: AITool[];
 }
 
 export const AddToolModal: React.FC<AddToolModalProps> = ({
   isOpen,
   onClose,
   onAddTool,
+  existingTools = [],
 }) => {
   const [name, setName] = useState('');
   const [url, setUrl] = useState('');
@@ -25,6 +30,25 @@ export const AddToolModal: React.FC<AddToolModalProps> = ({
   const [creditCardRequired, setCreditCardRequired] = useState(false);
   const [allowCustomApiKey, setAllowCustomApiKey] = useState(false);
   const [tagsInput, setTagsInput] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  // Start every opening with an empty form (the component stays mounted while closed).
+  useEffect(() => {
+    if (!isOpen) return;
+    setName('');
+    setUrl('');
+    setDownloadUrl('');
+    setCategory('web-llm');
+    setScope('web-only');
+    setDescription('');
+    setFreeQuotaSummary('');
+    setFreeCreditValue('');
+    setHasWebSearch(false);
+    setCreditCardRequired(false);
+    setAllowCustomApiKey(false);
+    setTagsInput('');
+    setError(null);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -32,10 +56,29 @@ export const AddToolModal: React.FC<AddToolModalProps> = ({
     e.preventDefault();
     if (!name.trim() || !url.trim()) return;
 
-    let formattedUrl = url.trim();
-    if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
-      formattedUrl = `https://${formattedUrl}`;
+    const checked = toWebUrl(url);
+    if ('error' in checked) {
+      setError(checked.error);
+      return;
     }
+    const formattedUrl = checked.url;
+
+    let formattedDownload: string | undefined;
+    if (downloadUrl.trim()) {
+      const download = toWebUrl(downloadUrl);
+      if ('error' in download) {
+        setError(`Download link: ${download.error}`);
+        return;
+      }
+      formattedDownload = download.url;
+    }
+
+    const duplicate = existingTools.find((t) => normalizeUrl(t.url) === normalizeUrl(formattedUrl));
+    if (duplicate) {
+      setError(`"${duplicate.name}" already uses this link.`);
+      return;
+    }
+    setError(null);
 
     const tags = tagsInput
       .split(',')
@@ -48,19 +91,19 @@ export const AddToolModal: React.FC<AddToolModalProps> = ({
       category,
       scope,
       url: formattedUrl,
-      downloadUrl: downloadUrl.trim() ? downloadUrl.trim() : undefined,
+      downloadUrl: formattedDownload,
       logo: 'Globe',
       badge: 'User Added',
-      description: description.trim() || 'Custom AI tool bookmarked by user.',
+      description: description.trim() || 'Custom AI tool added by you.',
       tags: tags.length > 0 ? tags : ['custom', 'ai-tool'],
       isCustom: true,
       freeTier: {
-        summary: freeQuotaSummary.trim() || 'Custom free tier details as provided.',
+        summary: freeQuotaSummary.trim() || 'No free-tier details added.',
         hasWebSearch,
         creditCardRequired,
         allowCustomApiKey,
         limits: 'User configured',
-        freeCreditValue: freeCreditValue.trim() || 'Free tier',
+        freeCreditValue: freeCreditValue.trim() || 'Not specified',
       },
     };
 
@@ -356,6 +399,13 @@ export const AddToolModal: React.FC<AddToolModalProps> = ({
               }}
             />
           </div>
+
+          {error && (
+            <div role="alert" className="p-3 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-400 text-xs flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
 
           {/* Form Actions */}
           <div className="flex items-center justify-end gap-2 pt-2 border-t" style={{ borderColor: 'var(--theme-border)' }}>

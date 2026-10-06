@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { X, Bookmark, Globe, Sparkles, Wrench, Tag, FileText, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { ToolBookmark, BookmarkCategory } from '../types';
+import { toWebUrl } from '../lib/url';
+import { normalizeUrl } from '../lib/bookmarkTransfer';
 
 interface AddBookmarkModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSaveBookmark: (bookmark: ToolBookmark) => void;
   bookmarkToEdit?: ToolBookmark | null;
+  /** Bookmarks already saved, used to warn about a link that is already there. */
+  existingBookmarks?: ToolBookmark[];
 }
 
 const CATEGORY_OPTIONS: { id: BookmarkCategory; label: string }[] = [
@@ -27,13 +31,14 @@ export const AddBookmarkModal: React.FC<AddBookmarkModalProps> = ({
   onClose,
   onSaveBookmark,
   bookmarkToEdit,
+  existingBookmarks = [],
 }) => {
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<BookmarkCategory>('developer');
   const [isAi, setIsAi] = useState(false);
-  const [freeTierBadge, setFreeTierBadge] = useState('100% Free • No Sign Up');
+  const [freeTierBadge, setFreeTierBadge] = useState('');
   const [tagsInput, setTagsInput] = useState('');
   const [notes, setNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +50,7 @@ export const AddBookmarkModal: React.FC<AddBookmarkModalProps> = ({
       setDescription(bookmarkToEdit.description);
       setCategory(bookmarkToEdit.category);
       setIsAi(bookmarkToEdit.isAi);
-      setFreeTierBadge(bookmarkToEdit.freeTierBadge || '100% Free');
+      setFreeTierBadge(bookmarkToEdit.freeTierBadge || '');
       setTagsInput(bookmarkToEdit.tags ? bookmarkToEdit.tags.join(', ') : '');
       setNotes(bookmarkToEdit.notes || '');
     } else {
@@ -54,7 +59,7 @@ export const AddBookmarkModal: React.FC<AddBookmarkModalProps> = ({
       setDescription('');
       setCategory('developer');
       setIsAi(false);
-      setFreeTierBadge('100% Free • No Sign Up');
+      setFreeTierBadge('');
       setTagsInput('');
       setNotes('');
     }
@@ -64,23 +69,16 @@ export const AddBookmarkModal: React.FC<AddBookmarkModalProps> = ({
   // Quick auto-populate helper if user pastes a URL
   const handleUrlBlur = () => {
     if (!url.trim()) return;
-    try {
-      let cleanUrl = url.trim();
-      if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
-        cleanUrl = 'https://' + cleanUrl;
-        setUrl(cleanUrl);
+    // An invalid address is reported on submit, not while the user is still typing.
+    const checked = toWebUrl(url);
+    if ('error' in checked) return;
+    if (checked.url !== url.trim()) setUrl(checked.url);
+    if (!title) {
+      // Derive clean title from hostname (e.g. "jsoncrack.com" -> "Jsoncrack")
+      const hostParts = new URL(checked.url).hostname.replace('www.', '').split('.');
+      if (hostParts.length > 0 && hostParts[0]) {
+        setTitle(hostParts[0].charAt(0).toUpperCase() + hostParts[0].slice(1));
       }
-      const parsed = new URL(cleanUrl);
-      if (!title) {
-        // Derive clean title from hostname (e.g. "jsoncrack.com" -> "Jsoncrack")
-        const hostParts = parsed.hostname.replace('www.', '').split('.');
-        if (hostParts.length > 0 && hostParts[0]) {
-          const derived = hostParts[0].charAt(0).toUpperCase() + hostParts[0].slice(1);
-          setTitle(derived);
-        }
-      }
-    } catch {
-      // ignore invalid url for now, validation catches on submit
     }
   };
 
@@ -93,20 +91,18 @@ export const AddBookmarkModal: React.FC<AddBookmarkModalProps> = ({
       return;
     }
 
-    let finalUrl = url.trim();
-    if (!finalUrl) {
-      setError('Please provide a valid web link URL.');
+    const checked = toWebUrl(url);
+    if ('error' in checked) {
+      setError(checked.error);
       return;
     }
+    const finalUrl = checked.url;
 
-    if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
-      finalUrl = 'https://' + finalUrl;
-    }
-
-    try {
-      new URL(finalUrl);
-    } catch {
-      setError('Invalid URL format. Please include a valid website address.');
+    const duplicate = existingBookmarks.find(
+      (b) => b.id !== bookmarkToEdit?.id && normalizeUrl(b.url) === normalizeUrl(finalUrl),
+    );
+    if (duplicate) {
+      setError(`"${duplicate.title}" is already in your bookmarks with this link.`);
       return;
     }
 
@@ -121,19 +117,21 @@ export const AddBookmarkModal: React.FC<AddBookmarkModalProps> = ({
       .filter((t) => t.length > 0);
 
     const newBookmark: ToolBookmark = {
+      // Editing keeps everything the form does not show (GitHub link, stars, license, ...).
+      ...bookmarkToEdit,
       id: bookmarkToEdit?.id || `bm-custom-${Date.now()}`,
       title: title.trim(),
       url: finalUrl,
       description: description.trim(),
       category,
       isAi,
-      freeTierBadge: freeTierBadge.trim() || '100% Free',
+      freeTierBadge: freeTierBadge.trim() || 'Free Web Tool',
       tags: parsedTags.length > 0 ? parsedTags : ['free-tool', category],
       isFavorite: bookmarkToEdit?.isFavorite ?? false,
       clickCount: bookmarkToEdit?.clickCount ?? 0,
       createdAt: bookmarkToEdit?.createdAt || new Date().toISOString().split('T')[0],
       notes: notes.trim(),
-      isCustom: true,
+      isCustom: bookmarkToEdit ? bookmarkToEdit.isCustom : true,
     };
 
     onSaveBookmark(newBookmark);
@@ -343,7 +341,7 @@ export const AddBookmarkModal: React.FC<AddBookmarkModalProps> = ({
               </label>
               <input
                 type="text"
-                placeholder="e.g. 100% Free • No Sign Up"
+                placeholder="e.g. Free • No sign-up (leave empty for Free Web Tool)"
                 value={freeTierBadge}
                 onChange={(e) => setFreeTierBadge(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg border text-xs focus:outline-none focus:ring-2"

@@ -43,6 +43,7 @@ describe('safeHttpUrl / normalizeUrl', () => {
 
   it('treats case, trailing slash and fragments as the same link', () => {
     expect(normalizeUrl('https://Example.com/Tool/#top')).toBe(normalizeUrl('https://example.com/Tool'));
+    expect(normalizeUrl('https://www.example.com/x')).toBe(normalizeUrl('https://example.com/x'));
     expect(normalizeUrl('https://a.com/x?q=1')).not.toBe(normalizeUrl('https://a.com/x'));
   });
 });

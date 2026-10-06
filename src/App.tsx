@@ -923,6 +923,7 @@ export default function App() {
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
           onAddTool={handleAddTool}
+          existingTools={tools}
         />
 
         {FEATURES.advisor && (
@@ -946,6 +947,7 @@ export default function App() {
             setBookmarkToEdit(null);
           }}
           onSaveBookmark={handleAddOrUpdateBookmark}
+          existingBookmarks={bookmarks}
           bookmarkToEdit={bookmarkToEdit}
         />
 
