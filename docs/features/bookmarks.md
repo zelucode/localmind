@@ -26,4 +26,4 @@ About 270 curated free web tools (developer utilities, design, converters, produ
 
 ## Limits
 - Favicons are letter avatars for now.
-- The export/import center and Markdown export have not been audited yet (backlog Task 9).
+- The export/import center and Markdown export were audited; see [bookmark-export-import.md](bookmark-export-import.md).

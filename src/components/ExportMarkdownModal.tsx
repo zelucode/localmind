@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { X, FileText, Copy, Check, Download, Table, List } from 'lucide-react';
 import { ToolBookmark } from '../types';
+import { copyText, downloadTextFile } from '../lib/files';
 
 interface ExportMarkdownModalProps {
   isOpen: boolean;
@@ -16,17 +17,20 @@ export const ExportMarkdownModal: React.FC<ExportMarkdownModalProps> = ({
   activeCategoryName,
 }) => {
   const [format, setFormat] = useState<'table' | 'list'>('table');
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
 
   // Generate GitHub-flavored Markdown
   const markdownContent = useMemo(() => {
     const timestamp = new Date().toISOString().split('T')[0];
     const header = [
-      `# Curated Free Online Tools & Utilities (${bookmarks.length} Tools)`,
-      `> Sourced from LocalMind & FckSignups Registry • Exported on ${timestamp}`,
-      `> Scope: ${activeCategoryName} • 100% Free & No Account Required`,
+      `# Online Tools & Utilities (${bookmarks.length} tools)`,
+      `> Exported from LocalMind on ${timestamp}`,
+      `> Scope: ${activeCategoryName}`,
       '',
     ];
+    const oneLine = (text: string) => (text || '').replace(/\s*\n\s*/g, ' ');
+    const mdText = (text: string) => text.replace(/([\\[\]])/g, '\\$1');
+    const mdUrl = (url: string) => url.replace(/\)/g, '%29');
 
     if (format === 'table') {
       const tableRows = [
@@ -36,17 +40,18 @@ export const ExportMarkdownModal: React.FC<ExportMarkdownModalProps> = ({
           const starsText = b.stars ? `${(b.stars / 1000).toFixed(1)}k` : '-';
           const licText = b.license || 'Free';
           const typeText = b.isAi ? '🤖 AI' : '🛠️ Utility';
-          const cleanDesc = b.description.replace(/\|/g, '\\|').replace(/\n/g, ' ');
-          const titleMd = b.githubUrl ? `[**${b.title}**](${b.githubUrl})` : `**${b.title}**`;
-          return `| ${titleMd} | ${b.category} | ${typeText} | ${licText} | ${starsText} | ${cleanDesc} | [Open Tool](${b.url}) |`;
+          const cleanDesc = oneLine(b.description).replace(/\|/g, '\\|');
+          const title = mdText(b.title).replace(/\|/g, '\\|');
+          const titleMd = b.githubUrl ? `[**${title}**](${mdUrl(b.githubUrl)})` : `**${title}**`;
+          return `| ${titleMd} | ${b.category} | ${typeText} | ${licText} | ${starsText} | ${cleanDesc} | [Open Tool](${mdUrl(b.url)}) |`;
         }),
       ];
-      return [...header, ...tableRows, '', '---', '*Generated with [LocalMind](https://github.com)*'].join('\n');
+      return [...header, ...tableRows, '', '---', '*Generated with LocalMind*'].join('\n');
     } else {
       const listItems = bookmarks.map((b) => {
         const lines = [
-          `### [${b.title}](${b.url})`,
-          `- **Description**: ${b.description}`,
+          `### [${mdText(b.title)}](${mdUrl(b.url)})`,
+          `- **Description**: ${oneLine(b.description)}`,
           `- **Category**: ${b.category} | **Type**: ${b.isAi ? 'AI Web Utility' : 'Web Developer Tool'}`,
         ];
         if (b.license) lines.push(`- **License**: ${b.license}`);
@@ -60,28 +65,20 @@ export const ExportMarkdownModal: React.FC<ExportMarkdownModalProps> = ({
         return lines.join('\n');
       });
 
-      return [...header, listItems.join('\n\n'), '', '---', '*Generated with [LocalMind](https://github.com)*'].join('\n');
+      return [...header, listItems.join('\n\n'), '', '---', '*Generated with LocalMind*'].join('\n');
     }
   }, [bookmarks, format, activeCategoryName]);
 
   if (!isOpen) return null;
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(markdownContent);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopy = async () => {
+    setCopyState((await copyText(markdownContent)) ? 'copied' : 'failed');
+    setTimeout(() => setCopyState('idle'), 2000);
   };
 
   const handleDownload = () => {
-    const blob = new Blob([markdownContent], { type: 'text/markdown;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `free_online_tools_${format}_${new Date().toISOString().split('T')[0]}.md`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const day = new Date().toISOString().split('T')[0];
+    downloadTextFile(`localmind_tools_${format}_${day}.md`, markdownContent, 'text/markdown');
   };
 
   return (
@@ -194,8 +191,8 @@ export const ExportMarkdownModal: React.FC<ExportMarkdownModalProps> = ({
                 color: 'var(--theme-text)',
               }}
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copied ? 'Copied Markdown!' : 'Copy Markdown'}</span>
+              {copyState === 'copied' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copyState === 'copied' ? 'Copied Markdown!' : copyState === 'failed' ? 'Copy failed: use Download instead' : 'Copy Markdown'}</span>
             </button>
 
             <button

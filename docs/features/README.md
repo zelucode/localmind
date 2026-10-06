@@ -9,6 +9,7 @@ One page per feature: what it does for the user, how it works, where the code li
 | [Bookmarks](bookmarks.md) | 270 free web tools: category rail, list/grid, management menu |
 | [Runtimes](runtimes.md) | Detecting OmniRoute, Ollama, LM Studio and Jan on localhost |
 | [Key Vault](key-vault.md) | Storing keys encrypted, verifying them with each provider |
+| [Bookmark export / import](bookmark-export-import.md) | Backing up, restoring and moving bookmarks (JSON, browser HTML, CSV, Markdown) |
 | [Config Exporter](config-exporter.md) | Generating IDE / agent / SDK config snippets for each provider and model |
 | [Rate-Limit Matrix](rate-limit-matrix.md) | Free-tier quota comparison and the fallback (rotation) order |
 | [Advisor](advisor.md) | The Free Tier Advisor (built, currently hidden) |

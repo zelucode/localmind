@@ -65,7 +65,8 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 - **Done so far**: Rust commands + unit tests for local port probing, API key verification (Gemini, OpenRouter, Groq, OpenAI, DeepSeek, Mistral, Anthropic) and the Advisor. Removed the fake "OmniRoute online (3 ms)" fallback and the length-based "valid key" check. External links use the opener plugin. Vitest + RTL set up with tests for the shell, Tools, Bookmarks, Home, Runtimes, Vault, Advisor, Ctrl+K and `lib/`.
 - **Audited**: Config Exporter (fixed 6 bugs, see `docs/features/config-exporter.md`; preset model IDs and endpoints still need a manual check against provider docs).
 - **Audited**: Rate-Limit Matrix (wrong quota numbers and a false "verified" claim fixed, see `docs/features/rate-limit-matrix.md`; the data now has one source of truth, `src/data/providers.ts`, with review dates; only Gemini, Groq and DeepSeek have actually been re-checked).
-- **Still to audit** (walk each, tag working / UI-only / broken, then fix with tests): Export/Import bookmarks modal (JSON/HTML/CSV), Export Markdown, Settings (theme editor, backup/restore, factory reset), AddTool / AddBookmark modals, Quick Query URL templates, Welcome screen copy.
+- **Audited**: Bookmark Export/Import center and Export Markdown (merge duplication, data loss, unsafe links and false copy fixed, CSV import added, see `docs/features/bookmark-export-import.md`; downloads and the file picker still need a check in the real Tauri window).
+- **Still to audit** (walk each, tag working / UI-only / broken, then fix with tests): Settings (theme editor, backup/restore, factory reset), AddTool / AddBookmark modals, Quick Query URL templates, Welcome screen copy.
 - **Known wrong copy**: welcome screen and Ctrl+K say keys are "AES-GCM encrypted" and "v2.5", but keys are stored as plain JSON in localStorage and the app is v0.1.0. Either implement encryption (Task 13) or fix the text.
 - **Status**: In progress.
 
