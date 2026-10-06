@@ -35,7 +35,7 @@ The AI tooling landscape moves quickly, and developers keep running into the sam
 
 1. **Fragmentation.** Hundreds of models, web UIs, agents and APIs exist. Finding ones with a useful, renewing free tier that doesn't demand a credit card is slow.
 2. **Web vs. local confusion.** Browser chatbots can't touch your repo. Local agents (Aider, Cline, Cursor, ...) can edit files and run commands. The difference matters and is rarely labeled.
-3. **Key and rate-limit fatigue.** Free keys from Gemini, Groq, Mistral, OpenRouter and GitHub Models each have different limits, base URLs and model IDs. Juggling them breaks flow.
+3. **Key and rate-limit fatigue.** Free keys from Gemini, Groq, Mistral and OpenRouter each have different limits, base URLs and model IDs. Juggling them breaks flow.
 
 LocalMind puts the catalog, the local runtimes and the keys in one desktop window.
 
@@ -63,7 +63,7 @@ LocalMind puts the catalog, the local runtimes and the keys in one desktop windo
 - Guidance for fronting free Gemini, Groq and Mistral keys with OmniRoute's OpenAI-compatible endpoint (`http://localhost:8000/v1`).
 
 ### API key vault
-- Store and label keys for Gemini, Groq, Mistral, Hugging Face, OpenRouter and GitHub Models.
+- Store and label keys for Gemini, Groq, Mistral, Hugging Face and OpenRouter.
 - Keys are **encrypted at rest** (AES-256-GCM, master key in the OS credential store) and are only plaintext in memory.
 - Mask/reveal, one-click copy, direct links to each provider's key console, and a **live test** against Gemini, OpenRouter, Groq, OpenAI, DeepSeek, Mistral and Anthropic.
 

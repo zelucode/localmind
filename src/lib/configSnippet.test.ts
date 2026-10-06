@@ -85,10 +85,10 @@ describe('buildConfigSnippet', () => {
     });
 
     it('uses the OpenAI-compatible flags for everything else, without a stray env export', () => {
-      const out = build('aider', 'github');
-      expect(out).toContain('--openai-api-base https://models.inference.ai.azure.com');
-      expect(out).toContain('--model openai/gpt-4o-mini');
-      expect(out).not.toContain('export GITHUB_TOKEN');
+      const out = build('aider', 'omniroute');
+      expect(out).toContain('--openai-api-base http://localhost:8000/v1');
+      expect(out).toContain('--model openai/gemini-2.5-flash');
+      expect(out).not.toContain('export OPENAI_API_KEY');
     });
   });
 
