@@ -4,6 +4,8 @@ import {
   Code2,
   Copy,
   Check,
+  Eye,
+  EyeOff,
   Terminal,
   FileCode,
   Laptop,
@@ -17,6 +19,8 @@ import {
   Play
 } from 'lucide-react';
 import { StoredApiKey } from '../types';
+import { openExternal } from '../lib/tauri';
+import { PROVIDER_PRESETS, TargetToolId, buildConfigSnippet } from '../lib/configSnippet';
 
 interface IDEConfigExporterModalProps {
   isOpen: boolean;
@@ -27,16 +31,6 @@ interface IDEConfigExporterModalProps {
   /** Render as a normal page section (no overlay, no close buttons). */
   inline?: boolean;
 }
-
-type TargetToolId =
-  | 'continue'
-  | 'cline'
-  | 'cursor'
-  | 'aider'
-  | 'windsurf'
-  | 'python'
-  | 'typescript'
-  | 'curl';
 
 interface TargetTool {
   id: TargetToolId;
@@ -105,124 +99,7 @@ const TARGET_TOOLS: TargetTool[] = [
   },
 ];
 
-interface ProviderPreset {
-  id: string;
-  name: string;
-  defaultModel: string;
-  availableModels: { id: string; name: string; notes: string }[];
-  baseUrl: string;
-  envVarName: string;
-  docsUrl: string;
-  getKeyUrl: string;
-  freeTierTag: string;
-}
-
-const PROVIDER_PRESETS: ProviderPreset[] = [
-  {
-    id: 'gemini',
-    name: 'Google Gemini (AI Studio)',
-    defaultModel: 'gemini-2.5-flash',
-    availableModels: [
-      { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', notes: 'Fast, 1M context, 15 RPM, 1,500 RPD' },
-      { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', notes: 'Elite reasoning, 1M context, 2 RPM' },
-      { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', notes: 'High throughput, zero latency' },
-    ],
-    baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai/',
-    envVarName: 'GEMINI_API_KEY',
-    docsUrl: 'https://ai.google.dev/gemini-api/docs',
-    getKeyUrl: 'https://aistudio.google.com/app/apikey',
-    freeTierTag: '1,500 RPD • 1M Context • No CC',
-  },
-  {
-    id: 'groq',
-    name: 'Groq Cloud',
-    defaultModel: 'llama-3.3-70b-versatile',
-    availableModels: [
-      { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B Versatile', notes: 'Fastest 70B, 30 RPM, 14,400 RPD' },
-      { id: 'qwen-2.5-coder-32b', name: 'Qwen 2.5 Coder 32B', notes: 'Specialized for programming' },
-      { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B Instant', notes: '750+ tokens/sec autocomplete' },
-    ],
-    baseUrl: 'https://api.groq.com/openai/v1',
-    envVarName: 'GROQ_API_KEY',
-    docsUrl: 'https://console.groq.com/docs/models',
-    getKeyUrl: 'https://console.groq.com/keys',
-    freeTierTag: '30 RPM • 14,400 RPD • No CC',
-  },
-  {
-    id: 'openrouter',
-    name: 'OpenRouter Free Tier',
-    defaultModel: 'meta-llama/llama-3.3-70b-instruct:free',
-    availableModels: [
-      { id: 'meta-llama/llama-3.3-70b-instruct:free', name: 'Llama 3.3 70B (Free)', notes: '20 RPM, No cost' },
-      { id: 'deepseek/deepseek-r1:free', name: 'DeepSeek R1 (Free)', notes: 'High reasoning chain-of-thought' },
-      { id: 'google/gemma-3-12b-it:free', name: 'Gemma 3 12B (Free)', notes: 'Google lightweight open model' },
-      { id: 'stepfun/step-3.5-flash:free', name: 'StepFun 3.5 Flash (Free)', notes: 'Free model router' },
-    ],
-    baseUrl: 'https://openrouter.ai/api/v1',
-    envVarName: 'OPENROUTER_API_KEY',
-    docsUrl: 'https://openrouter.ai/docs',
-    getKeyUrl: 'https://openrouter.ai/keys',
-    freeTierTag: '20 RPM • 25+ Free Models • No CC',
-  },
-  {
-    id: 'mistral',
-    name: 'Mistral AI (Codestral)',
-    defaultModel: 'codestral-latest',
-    availableModels: [
-      { id: 'codestral-latest', name: 'Codestral Latest', notes: 'State of the art code gen & FIM' },
-      { id: 'mistral-small-latest', name: 'Mistral Small', notes: 'General reasoning & speed' },
-    ],
-    baseUrl: 'https://api.mistral.ai/v1',
-    envVarName: 'MISTRAL_API_KEY',
-    docsUrl: 'https://docs.mistral.ai/api/',
-    getKeyUrl: 'https://console.mistral.ai/api-keys/',
-    freeTierTag: '1 RPS • Free Dev Access • No CC',
-  },
-  {
-    id: 'github',
-    name: 'GitHub Models',
-    defaultModel: 'gpt-4o-mini',
-    availableModels: [
-      { id: 'gpt-4o-mini', name: 'GPT-4o Mini', notes: 'Free via personal access token, 15 RPM' },
-      { id: 'Meta-Llama-3.3-70B-Instruct', name: 'Llama 3.3 70B', notes: '150 requests/day free' },
-    ],
-    baseUrl: 'https://models.inference.ai.azure.com',
-    envVarName: 'GITHUB_TOKEN',
-    docsUrl: 'https://github.com/marketplace/models',
-    getKeyUrl: 'https://github.com/settings/tokens',
-    freeTierTag: '150 RPD • Free with GitHub Account',
-  },
-  {
-    id: 'omniroute',
-    name: 'OmniRoute Daemon (Local Router)',
-    defaultModel: 'gemini-2.5-flash',
-    availableModels: [
-      { id: 'gemini-2.5-flash', name: 'OmniRoute -> Gemini 2.5 Flash', notes: 'Routed through local proxy' },
-      { id: 'groq-llama-70b', name: 'OmniRoute -> Groq 70B', notes: 'Fast fallback' },
-      { id: 'auto-free-coder', name: 'OmniRoute -> Auto-Coder Rotation', notes: 'Rotates when rate limited' },
-    ],
-    baseUrl: 'http://localhost:8000/v1',
-    envVarName: 'OPENAI_API_KEY',
-    docsUrl: 'http://localhost:8000/docs',
-    getKeyUrl: 'http://localhost:8000',
-    freeTierTag: 'Local Daemon • Auto Rate-Limit Retry',
-  },
-  {
-    id: 'ollama',
-    name: 'Local Ollama (Offline)',
-    defaultModel: 'qwen2.5-coder:7b',
-    availableModels: [
-      { id: 'qwen2.5-coder:7b', name: 'Qwen 2.5 Coder 7B', notes: 'Best local coding model for 8GB VRAM' },
-      { id: 'deepseek-r1:8b', name: 'DeepSeek R1 8B Distill', notes: 'Local reasoning on CPU/GPU' },
-      { id: 'llama3.2:3b', name: 'Llama 3.2 3B', notes: 'Super lightweight for laptops' },
-    ],
-    baseUrl: 'http://localhost:11434/v1',
-    envVarName: 'OPENAI_API_KEY',
-    docsUrl: 'https://github.com/ollama/ollama/blob/main/docs/openai.md',
-    getKeyUrl: 'https://ollama.com',
-    freeTierTag: '100% Free • Unlimited • 100% Offline',
-  },
-];
+const KEY_MASK = '••••••••••••••••';
 
 export const IDEConfigExporterModal: React.FC<IDEConfigExporterModalProps> = ({
   isOpen,
@@ -234,12 +111,17 @@ export const IDEConfigExporterModal: React.FC<IDEConfigExporterModalProps> = ({
 }) => {
   const [selectedToolId, setSelectedToolId] = useState<TargetToolId>('continue');
   const [selectedProviderId, setSelectedProviderId] = useState<string>(() => {
-    return initialProvider || 'gemini';
+    return PROVIDER_PRESETS.some((p) => p.id === initialProvider) ? initialProvider! : 'gemini';
   });
-  const [selectedModel, setSelectedModel] = useState<string>('gemini-2.5-flash');
+  const [selectedModel, setSelectedModel] = useState<string>(() => {
+    return (PROVIDER_PRESETS.find((p) => p.id === initialProvider) ?? PROVIDER_PRESETS[0]).defaultModel;
+  });
   const [useRealKey, setUseRealKey] = useState<boolean>(true);
   const [manualKeyInput, setManualKeyInput] = useState<string>('');
-  const [copied, setCopied] = useState<boolean>(false);
+  // Secrets stay masked on screen until the user asks to see them; copying always uses the real value.
+  const [revealManualKey, setRevealManualKey] = useState<boolean>(false);
+  const [revealConfig, setRevealConfig] = useState<boolean>(false);
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
 
   // Sync provider change
   const currentProvider = useMemo(() => {
@@ -249,6 +131,8 @@ export const IDEConfigExporterModal: React.FC<IDEConfigExporterModalProps> = ({
   // Sync default model when provider changes
   const handleSelectProvider = (provId: string) => {
     setSelectedProviderId(provId);
+    setRevealConfig(false);
+    setRevealManualKey(false);
     const prov = PROVIDER_PRESETS.find((p) => p.id === provId);
     if (prov) {
       setSelectedModel(prov.defaultModel);
@@ -280,200 +164,29 @@ export const IDEConfigExporterModal: React.FC<IDEConfigExporterModalProps> = ({
     return TARGET_TOOLS.find((t) => t.id === selectedToolId) || TARGET_TOOLS[0];
   }, [selectedToolId]);
 
-  // Generate configuration snippet based on tool + provider + key
-  const generatedSnippet = useMemo(() => {
-    const key = activeKeyString;
-    const model = selectedModel;
-    const baseUrl = currentProvider.baseUrl;
+  // True when the snippet embeds a real key (not a placeholder or the dummy local key).
+  const hasSecret = useRealKey && Boolean(manualKeyInput.trim() || matchedVaultKey?.key);
 
-    switch (selectedToolId) {
-      case 'continue':
-        return `// Add this entry to your ~/.continue/config.json in the "models" array:
-{
-  "models": [
-    {
-      "title": "${currentProvider.name} (${model})",
-      "provider": "${selectedProviderId === 'gemini' ? 'gemini' : selectedProviderId === 'ollama' ? 'ollama' : 'openai'}",
-      "model": "${model}",
-      "apiKey": "${key}",
-      ${selectedProviderId !== 'gemini' && selectedProviderId !== 'ollama' ? `"apiBase": "${baseUrl}",\n      ` : ''}"contextLength": 128000
+  const generatedSnippet = useMemo(
+    () => buildConfigSnippet({ toolId: selectedToolId, provider: currentProvider, model: selectedModel, key: activeKeyString }),
+    [selectedToolId, currentProvider, selectedModel, activeKeyString],
+  );
+
+  const displaySnippet = useMemo(
+    () => (hasSecret && !revealConfig
+      ? buildConfigSnippet({ toolId: selectedToolId, provider: currentProvider, model: selectedModel, key: KEY_MASK })
+      : generatedSnippet),
+    [hasSecret, revealConfig, selectedToolId, currentProvider, selectedModel, generatedSnippet],
+  );
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedSnippet);
+      setCopyState('copied');
+    } catch {
+      setCopyState('failed');
     }
-  ],
-  "tabAutocompleteModel": {
-    "title": "Groq Fast Autocomplete",
-    "provider": "openai",
-    "model": "llama-3.1-8b-instant",
-    "apiBase": "https://api.groq.com/openai/v1",
-    "apiKey": "${savedKeys.find(k => k.provider === 'groq')?.key || 'YOUR_GROQ_API_KEY'}"
-  }
-}`;
-
-      case 'cline':
-        if (selectedProviderId === 'gemini') {
-          return `// In VS Code Cline Extension Settings:
-1. Open Cline side-panel in VS Code
-2. Click the ⚙️ Settings gear icon
-3. Set API Provider: "Google Gemini"
-4. Enter Gemini API Key:
-   ${key}
-5. Model ID: "${model}"
-6. Context Window: 1,000,000 tokens (Supports whole codebase indexing!)`;
-        }
-        return `// In VS Code Cline Extension Settings:
-1. Open Cline side-panel in VS Code
-2. Click the ⚙️ Settings gear icon
-3. Set API Provider: "OpenAI Compatible"
-4. Base URL:
-   ${baseUrl}
-5. API Key:
-   ${key}
-6. Model ID:
-   ${model}
-7. Max Tokens: 8192`;
-
-      case 'cursor':
-        return `// Cursor IDE Configuration:
-// Step 1: Open Cursor Settings (Cmd+, or Ctrl+,) → "Models"
-// Step 2: Under "OpenAI API Key", toggle "Override OpenAI Base URL"
-// Set Base URL:
-${baseUrl}
-
-// API Key:
-${key}
-
-// Step 3: Add Model name in the model list:
-${model}
-
-// Step 4 (Optional): Put this in your project's .cursorrules file:
-You are an expert full-stack developer running with free-tier model ${model}.
-Prioritize modular, concise, type-safe solutions with high signal-to-noise ratio.`;
-
-      case 'aider':
-        return `# Option A: Run Aider directly in your terminal
-export ${currentProvider.envVarName}="${key}"
-${
-  selectedProviderId === 'gemini'
-    ? `aider --model gemini/${model}`
-    : selectedProviderId === 'groq'
-    ? `aider --openai-api-base ${baseUrl} --openai-api-key ${key} --model groq/${model}`
-    : selectedProviderId === 'openrouter'
-    ? `aider --model openrouter/${model} --api-key openrouter=${key}`
-    : `aider --openai-api-base ${baseUrl} --openai-api-key ${key} --model openai/${model}`
-}
-
-# Option B: Or save into your repo's .aider.conf.yml file:
-model: ${selectedProviderId === 'gemini' ? `gemini/${model}` : `openai/${model}`}
-${selectedProviderId !== 'gemini' ? `openai-api-base: ${baseUrl}\n` : ''}openai-api-key: ${key}
-auto-commits: true
-stream: true`;
-
-      case 'windsurf':
-        return `// Windsurf (Codeium Cascade) Custom Model Setup:
-// 1. Click Settings → AI Providers → Add Custom OpenAI Endpoint
-// 2. Configure:
-Provider Name: ${currentProvider.name}
-Endpoint URL:  ${baseUrl}
-API Key:       ${key}
-Model Name:    ${model}
-Supports Tools / Function Calling: Yes`;
-
-      case 'python':
-        if (selectedProviderId === 'gemini') {
-          return `# Install: pip install google-genai
-import os
-from google import genai
-
-# Load key from environment or direct string
-client = genai.Client(api_key="${key}")
-
-response = client.models.generate_content(
-    model="${model}",
-    contents="Explain rate-limit rotation strategies for coding agents in 3 bullet points.",
-)
-
-print(response.text)`;
-        }
-        return `# Install: pip install openai
-import os
-from openai import OpenAI
-
-client = OpenAI(
-    base_url="${baseUrl}",
-    api_key="${key}",
-)
-
-completion = client.chat.completions.create(
-    model="${model}",
-    messages=[
-        {"role": "system", "content": "You are a professional software architect."},
-        {"role": "user", "content": "Write a clean TypeScript debounce utility function."}
-    ],
-)
-
-print(completion.choices[0].message.content)`;
-
-      case 'typescript':
-        if (selectedProviderId === 'gemini') {
-          return `// Install: npm install @google/genai
-import { GoogleGenAI } from '@google/genai';
-
-const ai = new GoogleGenAI({ apiKey: '${key}' });
-
-async function main() {
-  const response = await ai.models.generateContent({
-    model: '${model}',
-    contents: 'Explain rate-limit rotation strategies for coding agents in 3 bullet points.',
-  });
-
-  console.log(response.text);
-}
-
-main().catch(console.error);`;
-        }
-        return `// Install: npm install openai
-import OpenAI from 'openai';
-
-const client = new OpenAI({
-  baseURL: '${baseUrl}',
-  apiKey: '${key}',
-});
-
-async function run() {
-  const completion = await client.chat.completions.create({
-    model: '${model}',
-    messages: [
-      { role: 'system', content: 'You are a professional software architect.' },
-      { role: 'user', content: 'Write a clean TypeScript debounce utility function.' },
-    ],
-  });
-
-  console.log(completion.choices[0].message.content);
-}
-
-run().catch(console.error);`;
-
-      case 'curl':
-        return `# Instant Terminal Test:
-curl ${baseUrl}chat/completions \\
-  -H "Content-Type: application/json" \\
-  -H "Authorization: Bearer ${key}" \\
-  -d '{
-    "model": "${model}",
-    "messages": [
-      {"role": "user", "content": "Hello world from terminal! Respond in 1 line."}
-    ],
-    "max_tokens": 100
-  }'`;
-
-      default:
-        return '';
-    }
-  }, [selectedToolId, selectedProviderId, selectedModel, currentProvider, activeKeyString, savedKeys]);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(generatedSnippet);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopyState('idle'), 2000);
   };
 
   const handleSaveManualKeyToVault = () => {
@@ -670,8 +383,10 @@ curl ${baseUrl}chat/completions \\
                   </div>
                   <a
                     href={currentProvider.getKeyUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      void openExternal(currentProvider.getKeyUrl);
+                    }}
                     className="px-2.5 py-1.5 rounded-lg border text-xs font-medium flex items-center gap-1 hover:opacity-85"
                     style={{
                       backgroundColor: 'var(--theme-card)',
@@ -727,18 +442,33 @@ curl ${baseUrl}chat/completions \\
                   </p>
                 ) : (
                   <div className="flex flex-col sm:flex-row items-center gap-2">
-                    <input
-                      type="text"
-                      value={manualKeyInput}
-                      onChange={(e) => setManualKeyInput(e.target.value)}
-                      placeholder={`Paste your ${currentProvider.name} key here to inject...`}
-                      className="w-full px-3 py-2 text-xs rounded-lg border font-mono focus:outline-none"
-                      style={{
-                        backgroundColor: 'var(--theme-card)',
-                        borderColor: 'var(--theme-border)',
-                        color: 'var(--theme-text)',
-                      }}
-                    />
+                    <div className="relative w-full">
+                      <input
+                        type={revealManualKey ? 'text' : 'password'}
+                        value={manualKeyInput}
+                        onChange={(e) => setManualKeyInput(e.target.value)}
+                        placeholder={`Paste your ${currentProvider.name} key here to inject...`}
+                        aria-label={`${currentProvider.name} API key`}
+                        autoComplete="off"
+                        spellCheck={false}
+                        className="w-full pl-3 pr-9 py-2 text-xs rounded-lg border font-mono focus:outline-none"
+                        style={{
+                          backgroundColor: 'var(--theme-card)',
+                          borderColor: 'var(--theme-border)',
+                          color: 'var(--theme-text)',
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setRevealManualKey((v) => !v)}
+                        aria-label={revealManualKey ? 'Hide key' : 'Show key'}
+                        title={revealManualKey ? 'Hide key' : 'Show key'}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded cursor-pointer hover:opacity-80"
+                        style={{ color: 'var(--theme-text-muted)' }}
+                      >
+                        {revealManualKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
                     {manualKeyInput.trim() && onSaveKey && (
                       <button
                         type="button"
@@ -767,19 +497,44 @@ curl ${baseUrl}chat/completions \\
                   Ready-to-Paste Config ({activeTool.configFileName})
                 </span>
               </div>
+              <div className="flex items-center gap-2">
+              {hasSecret && (
+                <button
+                  id="btn-toggle-config-secret"
+                  type="button"
+                  onClick={() => setRevealConfig((v) => !v)}
+                  aria-label={revealConfig ? 'Hide key in config' : 'Show key in config'}
+                  title={revealConfig ? 'Hide key in config' : 'Show key in config'}
+                  className="p-1.5 rounded-lg border cursor-pointer hover:opacity-80"
+                  style={{
+                    backgroundColor: 'var(--theme-raised)',
+                    borderColor: 'var(--theme-border)',
+                    color: 'var(--theme-text-muted)',
+                  }}
+                >
+                  {revealConfig ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+              )}
               <button
                 id="btn-copy-generated-config"
                 onClick={handleCopy}
                 className="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm transition-all active:scale-95"
                 style={{
-                  backgroundColor: copied ? '#10b981' : 'var(--theme-primary)',
-                  color: copied ? '#ffffff' : 'var(--theme-primary-foreground, #000000)',
+                  backgroundColor: copyState === 'copied' ? '#10b981' : copyState === 'failed' ? '#ef4444' : 'var(--theme-primary)',
+                  color: copyState === 'idle' ? 'var(--theme-primary-foreground, #000000)' : '#ffffff',
                 }}
               >
-                {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? 'Copied to Clipboard!' : 'Copy Config'}</span>
+                {copyState === 'copied' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copyState === 'copied' ? 'Copied to Clipboard!' : copyState === 'failed' ? 'Copy failed: select the text manually' : 'Copy Config'}</span>
               </button>
+              </div>
             </div>
+
+            {hasSecret && !revealConfig && (
+              <p className="text-[11px] mb-2" style={{ color: 'var(--theme-text-muted)' }}>
+                Your key is hidden here. <strong>Copy Config</strong> still copies the real key; use the eye to view it.
+              </p>
+            )}
 
             <div
               className="rounded-xl border p-4 font-mono text-xs overflow-x-auto relative"
@@ -790,7 +545,7 @@ curl ${baseUrl}chat/completions \\
                 lineHeight: 1.6,
               }}
             >
-              <pre className="whitespace-pre-wrap">{generatedSnippet}</pre>
+              <pre className="whitespace-pre-wrap">{displaySnippet}</pre>
             </div>
           </div>
         </div>

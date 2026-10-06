@@ -17,6 +17,7 @@ import {
   RefreshCw,
   HardDrive
 } from 'lucide-react';
+import { openExternal } from '../lib/tauri';
 
 interface RateLimitItem {
   id: string;
@@ -34,14 +35,14 @@ interface RateLimitItem {
   category: 'cloud-api' | 'router' | 'local';
 }
 
-const RATE_LIMIT_DATA: RateLimitItem[] = [
+export const RATE_LIMIT_DATA: RateLimitItem[] = [
   {
     id: 'gemini',
     provider: 'Google AI Studio',
     bestModel: 'Gemini 2.5 Flash',
-    rpm: 15,
-    rpd: 1500,
-    tpm: '1,000,000 TPM',
+    rpm: '10-15',
+    rpd: 'Varies (often 250 or less)',
+    tpm: '250,000 TPM',
     contextWindow: '1,048,576 tokens',
     creditCardRequired: false,
     renewalCycle: 'Daily (Resets midnight UTC)',
@@ -55,11 +56,11 @@ const RATE_LIMIT_DATA: RateLimitItem[] = [
     provider: 'Groq Cloud',
     bestModel: 'Llama 3.3 70B Versatile',
     rpm: 30,
-    rpd: 14400,
-    tpm: '30,000 TPM',
+    rpd: 1000,
+    tpm: '12,000 TPM',
     contextWindow: '128,000 tokens',
     creditCardRequired: false,
-    renewalCycle: 'Daily (Perpetual high quota)',
+    renewalCycle: 'Daily (limits are per model)',
     role: 'Fast In-line Diffs & Code Autocomplete',
     speed: 'Ultra Fast (<200ms)',
     getKeyUrl: 'https://console.groq.com/keys',
@@ -114,12 +115,12 @@ const RATE_LIMIT_DATA: RateLimitItem[] = [
     id: 'deepseek',
     provider: 'DeepSeek API',
     bestModel: 'DeepSeek R1 / V3',
-    rpm: 60,
-    rpd: 'Unlimited (until credits)',
+    rpm: 'No fixed limit',
+    rpd: 'Pay-as-you-go',
     tpm: 'Variable',
     contextWindow: '64,000 tokens',
-    creditCardRequired: false,
-    renewalCycle: '5M Free Tokens on Signup (30-day trial)',
+    creditCardRequired: true,
+    renewalCycle: 'No free tier: very low per-token price',
     role: 'Elite Mathematical & Algorithmic Debugging',
     speed: 'Standard (2-4s)',
     getKeyUrl: 'https://platform.deepseek.com/api_keys',
@@ -208,7 +209,7 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
                 Rate-Limit & Rotation Strategy Matrix
               </h2>
               <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-                Comprehensive RPM, RPD & context benchmarks for unlimited zero-cost development
+                Free-tier quotas per provider, and the order to fall back through them when one runs out
               </p>
             </div>
           </div>
@@ -302,6 +303,9 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
         <div className={`p-5 sm:p-6 space-y-6 ${inline ? '' : 'overflow-y-auto'}`}>
           {activeTab === 'matrix' ? (
             <>
+              <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
+                RPM = requests per minute, RPD = requests per day. These numbers are a snapshot and providers change them often, so check the provider before relying on one.
+              </p>
               {/* Filter controls */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="relative w-full sm:w-72">
@@ -373,6 +377,13 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y" style={{ borderColor: 'var(--theme-border)' }}>
+                    {filteredItems.length === 0 && (
+                      <tr>
+                        <td colSpan={7} className="py-8 px-4 text-center text-xs" style={{ color: 'var(--theme-text-muted)' }}>
+                          No providers match your search.
+                        </td>
+                      </tr>
+                    )}
                     {filteredItems.map((item) => (
                       <tr
                         key={item.id}
@@ -471,8 +482,10 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
                             )}
                             <a
                               href={item.getKeyUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                void openExternal(item.getKeyUrl);
+                              }}
                               className="p-1.5 rounded-lg border text-[11px] hover:opacity-80"
                               style={{
                                 backgroundColor: 'var(--theme-raised)',
@@ -506,7 +519,7 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
                   The "Zero-Cost Daily Coding Chain" Architecture
                 </h3>
                 <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
-                  By chaining complementary free tiers into a single tiered workflow, developers can code 8+ hours a day without paying API fees or hitting throttling stops.
+                  When one free tier runs out or rate-limits you, the next one takes over. Quotas change, so treat this as a starting plan, not a guarantee.
                 </p>
               </div>
 
@@ -533,7 +546,7 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
                     </p>
                   </div>
                   <div className="mt-3 pt-2 border-t text-[10px] font-mono text-emerald-500" style={{ borderColor: 'var(--theme-border)' }}>
-                    1M Token Context • 1,500 Daily
+                    1M Token Context • Daily cap varies
                   </div>
                 </div>
 
@@ -558,7 +571,7 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
                     </p>
                   </div>
                   <div className="mt-3 pt-2 border-t text-[10px] font-mono text-emerald-500" style={{ borderColor: 'var(--theme-border)' }}>
-                    750 tokens/sec • 14,400 Daily
+                    Very fast • ~1,000 Daily (70B)
                   </div>
                 </div>
 
@@ -579,11 +592,11 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
                     </div>
                     <h4 className="text-xs font-bold mb-1">OpenRouter Free & Mistral</h4>
                     <p className="text-[11px] leading-relaxed" style={{ color: 'var(--theme-text-muted)' }}>
-                      <strong>Role:</strong> If you burst over 15 or 30 RPM during intensive edits, route requests here automatically.
+                      <strong>Role:</strong> If you burst over your per-minute limit during intensive edits, route requests here (a router like OmniRoute can do this for you).
                     </p>
                   </div>
                   <div className="mt-3 pt-2 border-t text-[10px] font-mono text-emerald-500" style={{ borderColor: 'var(--theme-border)' }}>
-                    DeepSeek R1 :free • Zero Pause
+                    DeepSeek R1 :free • Fallback
                   </div>
                 </div>
 
@@ -622,7 +635,7 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
                 }}
               >
                 <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text)' }}>
-                  3 Golden Rules to Never Hit Rate Limits:
+                  3 Tips to Hit Rate Limits Less Often:
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                   <div className="p-3 rounded-lg border" style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)' }}>
@@ -635,14 +648,14 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
                   <div className="p-3 rounded-lg border" style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)' }}>
                     <div className="font-bold text-sky-500 mb-1">2. Keep Index Files Clean</div>
                     <p className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
-                      Add <code>node_modules/</code>, <code>dist/</code>, and lockfiles to <code>.aiderrules</code> / <code>.continueignore</code> to conserve token windows.
+                      Add <code>node_modules/</code>, <code>dist/</code>, and lockfiles to <code>.aiderignore</code> / <code>.continueignore</code> to conserve token windows.
                     </p>
                   </div>
 
                   <div className="p-3 rounded-lg border" style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)' }}>
                     <div className="font-bold text-emerald-500 mb-1">3. Run Local Proxy Router</div>
                     <p className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
-                      Use <strong>OmniRoute</strong> on <code>localhost:8000</code>. It automatically intercepts HTTP 429 rate limits and retries using your next key.
+                      Use <strong>OmniRoute</strong> on <code>localhost:8000</code>. A local router can retry on HTTP 429 rate limits using your next key.
                     </p>
                   </div>
                 </div>
@@ -663,7 +676,7 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
             <span>
-              All cataloged tiers are verified active without mandatory credit card verification.
+              Quotas reviewed Oct 2026 and not checked live. Providers change free tiers often.
             </span>
           </div>
           <button
