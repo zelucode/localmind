@@ -146,10 +146,9 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 - **Status**: Provider data done; rest planned.
 
 ### [ ] Task 22: New sections suggested by the gap-finder (prompt H)
-Source: four LLM replies in `docs/data-collection/h-prompt-*.json` (untracked). The prompt itself listed most of the ideas, so agreement between the models says little. Treat the output as a to-do list of areas, not as data. Sources are blogs, not provider pages: verify before use.
-- **Sections all four proposed**: free GPU / notebook compute, free datasets, MCP servers, vector databases, free hosting tiers, student / OSS credit programs, free AI courses, local TTS / voice models, system-prompt and cursor-rules collections, benchmark leaderboards, AI newsletters and changelogs, free CI, free auth / DB / storage tiers, browser extensions.
-- **Cheapest first step**: most of these are bookmarks, not a new page. Add new Bookmarks categories (for example compute, datasets, benchmarks, MCP) and fill them with prompt B runs.
+Everything useful from the four LLM replies is kept in [research/gap-finder-findings.md](research/gap-finder-findings.md): section ideas with entries, proposed categories, offline-data ideas and free-tier change leads. The raw reply files are no longer needed. The prompt itself listed most of the ideas, so treat that page as a to-do list of areas, not as verified data.
+- **Cheapest first step**: most sections are bookmark categories, not pages. Add the categories (compute, datasets, benchmarks, MCP, prompts and rules, learning, backend tiers, voice) and fill them with prompt B runs.
 - **Needs a decision**: whether a separate "free dev services" page (hosting, DB, auth, CI, vector DB) with quota fields is worth building, given Task 21 (these quotas change often).
-- **Stale-entry leads** (unverified, from secondary sources): Hugging Face Inference free credit reduced to about $0.10/month, AWS SageMaker Studio Lab closed to new sign-ups (2026-07-30), Neon free plan raised to 1 GB per project (2026-10-02). Check each against the provider's own page before touching `providers.ts` or the catalog.
-- **Not done**: the ChatGPT file wraps 209 URLs as `[url](url)` and would need cleaning; Prompts A, B and C have not been run yet.
+- **Check first** (provider data the app shows today): Groq retiring `llama-3.3-70b-versatile`, Cerebras and OpenRouter free limits, Hugging Face Inference credit, Cloudflare Workers AI model changes. See section 4 of the findings page.
+- **Not done**: prompts A, B and C have not been run yet.
 - **Status**: Planned.
