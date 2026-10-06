@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { X, Search, ExternalLink } from 'lucide-react';
 import { AITool } from '../types';
 import { openExternal } from '../lib/tauri';
+import { copyText } from '../lib/files';
+import { acceptsPromptLink, planQuickQuery } from '../lib/quickQuery';
 
 interface QuickSearchModalProps {
   tool: AITool | null;
@@ -13,23 +15,30 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({
   onClose,
 }) => {
   const [query, setQuery] = useState('');
+  // Shown after a launch that could not carry the prompt in the link (the prompt was copied instead).
+  const [notice, setNotice] = useState<string | null>(null);
 
   if (!tool) return null;
 
-  const handleLaunch = (e?: React.FormEvent) => {
+  const canPrefill = acceptsPromptLink(tool);
+
+  const handleLaunch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!query.trim()) {
-      void openExternal(tool.url);
-      onClose();
+    const plan = planQuickQuery(tool, query);
+
+    if (plan.kind === 'copy') {
+      const copied = await copyText(plan.text);
+      void openExternal(plan.url);
+      const why = plan.reason === 'too-long' ? 'Your prompt is too long to send in a link.' : `${tool.name} cannot take a prompt from a link.`;
+      setNotice(
+        copied
+          ? `${why} It was copied to your clipboard: paste it into ${tool.name} (Ctrl+V).`
+          : `${why} Copying failed, so select your prompt in the box and copy it yourself.`,
+      );
       return;
     }
 
-    if (tool.quickSearchUrlTemplate) {
-      const url = tool.quickSearchUrlTemplate.replace('{query}', encodeURIComponent(query.trim()));
-      void openExternal(url);
-    } else {
-      void openExternal(tool.url);
-    }
+    void openExternal(plan.url);
     onClose();
   };
 
@@ -61,6 +70,11 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({
         </div>
 
         <form onSubmit={handleLaunch} className="p-5 space-y-4">
+          {notice && (
+            <p role="status" className="text-xs font-medium text-emerald-500">
+              {notice}
+            </p>
+          )}
           <div>
             <label className="block text-xs mb-1.5" style={{ color: 'var(--theme-text-secondary)' }}>
               Enter your prompt or search query to launch into {tool.name}:
@@ -70,7 +84,10 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({
               type="text"
               autoFocus
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setNotice(null);
+              }}
               placeholder="e.g. explain quantum computing with citations..."
               className="w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm focus:outline-none"
               style={{
@@ -85,7 +102,7 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({
 
           <div className="flex items-center justify-between pt-1">
             <span className="text-[11px]" style={{ color: 'var(--theme-text-muted)' }}>
-              Press Enter to launch in new tab
+              {canPrefill ? 'Press Enter to launch in new tab' : `${tool.name} cannot take a prompt from a link: Launch copies it for you to paste.`}
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -98,7 +115,7 @@ export const QuickSearchModal: React.FC<QuickSearchModalProps> = ({
                   color: 'var(--theme-text)',
                 }}
               >
-                Cancel
+                {notice ? 'Close' : 'Cancel'}
               </button>
               <button
                 id="btn-launch-search"
