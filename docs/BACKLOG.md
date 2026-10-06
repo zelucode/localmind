@@ -152,3 +152,8 @@ Everything useful from the four LLM replies is kept in [research/gap-finder-find
 - **Check first** (provider data the app shows today): Groq retiring `llama-3.3-70b-versatile`, Cerebras and OpenRouter free limits, Hugging Face Inference credit, Cloudflare Workers AI model changes. See section 4 of the findings page.
 - **Not done**: prompts A, B and C have not been run yet.
 - **Status**: Planned.
+
+### [ ] Task 23: Ask box, one-click setup and a Developer sidebar group
+- **Problem**: the Omnibar has two hard-coded engines and mixes launching with developer shortcuts; setting up CLI and local tools means reading separate guides.
+- **Solution**: see [features/ask-box-and-setup-design.md](features/ask-box-and-setup-design.md): catalog-driven single-engine Ask box (Compare opt-in later), curated install-and-detect recipes in the desktop app, and a Developer sidebar group.
+- **Status**: Design agreed 2026-10-06; not started.
