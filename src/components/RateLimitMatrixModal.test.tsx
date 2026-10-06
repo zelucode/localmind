@@ -10,9 +10,24 @@ vi.mock('../lib/tauri', async (importOriginal) => ({
 import { openExternal } from '../lib/tauri';
 import { RATE_LIMIT_DATA } from '../data/providers';
 import { RateLimitMatrixModal } from './RateLimitMatrixModal';
+import { StoredApiKey } from '../types';
 
-function setup(onOpenExporterWithProvider = vi.fn()) {
-  render(<RateLimitMatrixModal inline isOpen onClose={() => {}} onOpenExporterWithProvider={onOpenExporterWithProvider} />);
+const groqKey: StoredApiKey = {
+  id: 'k1',
+  provider: 'groq',
+  providerName: 'Groq Cloud',
+  key: 'gsk_x',
+  label: 'My Groq',
+  createdAt: '2026-01-01',
+  freeTierNotes: '',
+  getKeyUrl: '',
+  lastTestedStatus: 'unknown',
+};
+
+function setup(onOpenExporterWithProvider = vi.fn(), savedKeys: StoredApiKey[] = []) {
+  render(
+    <RateLimitMatrixModal inline isOpen onClose={() => {}} onOpenExporterWithProvider={onOpenExporterWithProvider} savedKeys={savedKeys} />,
+  );
   return { onOpenExporterWithProvider };
 }
 
@@ -52,6 +67,18 @@ describe('RateLimitMatrixModal', () => {
     await userEvent.clear(box);
     await userEvent.type(box, 'zzzz-nothing');
     expect(screen.getByText(/no providers match/i)).toBeInTheDocument();
+  });
+
+  it('marks only the providers that already have a vault key', () => {
+    setup(vi.fn(), [groqKey]);
+    const groqRow = screen.getByText('Groq Cloud').closest('tr')!;
+    expect(within(groqRow).getByText('Key saved')).toBeInTheDocument();
+    expect(screen.getAllByText('Key saved')).toHaveLength(1);
+  });
+
+  it('shows no badge when the vault is empty', () => {
+    setup();
+    expect(screen.queryByText('Key saved')).not.toBeInTheDocument();
   });
 
   it('opens the exporter for the clicked provider', async () => {

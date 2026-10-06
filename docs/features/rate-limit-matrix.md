@@ -23,10 +23,10 @@ It is reference and planning material. It does not measure the user's real usage
 - No empty state when a search matched nothing.
 
 ## Tests
-`RateLimitMatrixModal.test.tsx`: row/preset consistency, all providers listed, no "verified" claim, category filter, search and empty state, Config callback, key link via `openExternal`, rotation tab.
+`RateLimitMatrixModal.test.tsx`: row/preset consistency, all providers listed, no "verified" claim, category filter, search and empty state, Config callback, Key saved badge, key link via `openExternal`, rotation tab.
 
 ## Limits and ideas
 - **The data is typed in by hand and will go stale.** It now lives in one file (`src/data/providers.ts`) with a `reviewed` month per provider; only Gemini, Groq and DeepSeek were actually re-checked (2026-10). Edit quotas there and nowhere else.
 - The `tpm`, `creditCardRequired` and `role` fields are partly unused or editorial; the table doesn't show the credit-card column.
-- The matrix doesn't know which providers the user already has a key for. Showing a "Key saved" badge, or the user's exhausted providers, would make it actionable rather than just informational.
+- Rows show a **Key saved** badge for providers that already have a vault key. It does not track usage, so it can't tell which providers are exhausted.
 - The "OmniRoute retries on 429" claim comes from the project's own description of the tool and is not verified.

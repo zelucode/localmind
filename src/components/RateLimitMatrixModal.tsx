@@ -19,12 +19,15 @@ import {
 } from 'lucide-react';
 import { openExternal } from '../lib/tauri';
 import { RATE_LIMIT_DATA } from '../data/providers';
+import { StoredApiKey } from '../types';
 
 
 interface RateLimitMatrixModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenExporterWithProvider?: (providerId: string) => void;
+  /** Vault keys, used to show which providers already have a key. */
+  savedKeys?: StoredApiKey[];
   /** Render as a normal page section (no overlay, no close buttons). */
   inline?: boolean;
 }
@@ -34,6 +37,7 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
   onClose,
   inline = false,
   onOpenExporterWithProvider,
+  savedKeys = [],
 }) => {
   const [activeTab, setActiveTab] = useState<'matrix' | 'strategy'>('matrix');
   const [searchQuery, setSearchQuery] = useState('');
@@ -268,8 +272,16 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
                         className="transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                       >
                         <td className="py-3.5 px-4">
-                          <div className="font-bold text-xs" style={{ color: 'var(--theme-text)' }}>
+                          <div className="font-bold text-xs flex items-center gap-2" style={{ color: 'var(--theme-text)' }}>
                             {item.provider}
+                            {savedKeys.some((k) => k.provider === item.id) && (
+                              <span
+                                className="text-[9px] px-1.5 py-0.5 rounded font-medium"
+                                style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}
+                              >
+                                Key saved
+                              </span>
+                            )}
                           </div>
                           <div className="text-[11px] font-mono mt-0.5" style={{ color: 'var(--theme-primary)' }}>
                             {item.bestModel}

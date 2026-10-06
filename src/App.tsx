@@ -927,6 +927,7 @@ export default function App() {
                 isOpen
                 onClose={() => {}}
                 onOpenExporterWithProvider={(provId) => handleOpenConfigExporter(provId)}
+                savedKeys={keys}
               />
             )}
           </main>
