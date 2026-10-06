@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "test:rust": "cargo test --manifest-path src-tauri/Cargo.toml",
     "test:all": "pnpm lint && pnpm test && pnpm test:rust",
+    "feed:build": "node --experimental-strip-types scripts/build-feed.mjs",
     "tauri": "tauri"
   },
   "dependencies": {

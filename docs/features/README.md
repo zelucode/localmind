@@ -14,6 +14,7 @@ One page per feature: what it does for the user, how it works, where the code li
 | [Adding tools and bookmarks, Quick Query, copy](add-tools-and-quick-query.md) | The Add Tool and Add Bookmark forms, prompt launching, and the in-app wording |
 | [Config Exporter](config-exporter.md) | Generating IDE / agent / SDK config snippets for each provider and model |
 | [Rate-Limit Matrix](rate-limit-matrix.md) | Free-tier quota comparison and the fallback (rotation) order |
+| [Live provider data](remote-data-feed.md) | Optional JSON feed that updates quotas and retired providers without a release, cached with a Refresh button |
 | [Advisor](advisor.md) | The Free Tier Advisor (built, currently hidden) |
 | [Startup and window](startup-and-window.md) | Boot splash, loading screen, frameless window and window controls |
 | [Testing](testing.md) | Running and writing the Vitest and Rust tests |

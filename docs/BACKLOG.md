@@ -137,11 +137,13 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 - A passphrase-encrypted backup so API keys can travel safely (the second option of Task 17).
 - **Status**: Planned.
 
-### [ ] Task 21: Remote catalog data (pull, cache, refresh)
+### [~] Task 21: Remote catalog data (pull, cache, refresh)
 - **Problem**: Free-tier facts (quotas, credits, which providers are still free) change weekly. Shipping them inside the app means they are stale until the next release. Example: GitHub Models was retired on 2026-07-30 and the app still listed it as free until 2026-10-06.
 - **Solution (design, not urgent)**: keep the built-in data in `src/data/` as the offline fallback, and add an optional remote feed: versioned JSON files in a public GitHub repo (providers, tools, bookmarks), fetched through a Rust command (the webview hits CORS) with a size limit and a schema check, cached on disk with a fetched-at time. The UI shows "Data from <date>", has a Refresh button, and refreshes on its own at most once a day. Rules: validate every field (reuse `safeHttpUrl`, enum checks); never let a failed or invalid pull replace good data; show the real error; the feed is opt-out and its URL is visible in Settings.
 - **Groundwork**: `src/data/providers.ts` is already the single source for the matrix, exporter and vault, so it is the first thing to load from a feed. Keep `reviewed` per row and add a `status` (`active` / `retired`) so a retired provider can be shown as such instead of removed.
-- **Status**: Planned.
+- **Done (provider data)**: Rust `fetch_feed`, validation, merge, cache, hourly stale check, Refresh button, Settings panel, `status: retired`, `feed/providers.json` + `pnpm feed:build`. See [features/remote-data-feed.md](features/remote-data-feed.md).
+- **Still open**: publish the feed in a public repo and set `DEFAULT_FEED_URL` (empty now); the same pattern for tools and bookmarks; check a real download in the packaged window (Task 19).
+- **Status**: Provider data done; rest planned.
 
 ### [ ] Task 22: New sections suggested by the gap-finder (prompt H)
 Source: four LLM replies in `docs/data-collection/h-prompt-*.json` (untracked). The prompt itself listed most of the ideas, so agreement between the models says little. Treat the output as a to-do list of areas, not as data. Sources are blogs, not provider pages: verify before use.
