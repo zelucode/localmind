@@ -427,7 +427,7 @@ export const ToolsPage: React.FC<ToolsPageProps> = ({
                       <td className="px-3 py-2.5 align-middle">
                         <div className="flex flex-wrap gap-1 max-w-[14rem]">
                           {(tool.scope === 'local-agent' || tool.scope === 'ide-plugin') && (
-                            <span className={`${pill} text-emerald-500`} style={{ borderColor: 'var(--theme-border)' }}>
+                            <span className={pill} style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-success)' }}>
                               Edits local files
                             </span>
                           )}
@@ -437,7 +437,7 @@ export const ToolsPage: React.FC<ToolsPageProps> = ({
                             </span>
                           )}
                           {!tool.freeTier.creditCardRequired && (
-                            <span className={`${pill} text-emerald-500`} style={{ borderColor: 'var(--theme-border)' }}>
+                            <span className={pill} style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-success)' }}>
                               No card
                             </span>
                           )}

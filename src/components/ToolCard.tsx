@@ -200,8 +200,9 @@ export const ToolCard: React.FC<ToolCardProps> = ({
                 {scopeConfig.canEditFiles ? (
                   <span
                     title="Can read, modify, and write files in your local codebase"
-                    className="text-[10px] px-1.5 py-0.5 rounded border font-medium inline-flex items-center gap-0.5 text-emerald-500"
+                    className="text-[10px] px-1.5 py-0.5 rounded border font-medium inline-flex items-center gap-0.5"
                     style={{
+                      color: 'var(--theme-success)',
                       backgroundColor: 'var(--theme-raised)',
                       borderColor: 'var(--theme-border)',
                     }}
@@ -287,8 +288,9 @@ export const ToolCard: React.FC<ToolCardProps> = ({
         <div className="flex items-center gap-1.5 flex-wrap mt-2.5 pt-2 border-t text-[10px]" style={{ borderColor: 'var(--theme-border)' }}>
           {tool.freeTier.hasWebSearch ? (
             <span
-              className="px-1.5 py-0.5 rounded border font-medium text-sky-500"
+              className="px-1.5 py-0.5 rounded border font-medium"
               style={{
+                color: 'var(--theme-info)',
                 backgroundColor: 'var(--theme-card)',
                 borderColor: 'var(--theme-border)',
               }}
@@ -310,8 +312,9 @@ export const ToolCard: React.FC<ToolCardProps> = ({
 
           {!tool.freeTier.creditCardRequired && (
             <span
-              className="px-1.5 py-0.5 rounded border font-medium text-emerald-500"
+              className="px-1.5 py-0.5 rounded border font-medium"
               style={{
+                color: 'var(--theme-success)',
                 backgroundColor: 'var(--theme-card)',
                 borderColor: 'var(--theme-border)',
               }}

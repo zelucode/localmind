@@ -85,7 +85,7 @@ LocalMind puts the catalog, the local runtimes and the keys in one desktop windo
 - Full JSON backup/restore of tools, keys, favorites, bookmarks and theme settings; factory reset.
 
 ### Theming
-- 13 built-in presets, including **Pastel Dusk** (default dark), **Blueprint** (technical navy on cool white) and **Soft Paper** (warm cream with vermillion), plus Cyberpunk Teal, Obsidian Emerald, Midnight Violet, Nordic Ice Blue, Solar Amber, Crimson Rose, Pitch Black OLED, Graphite, Concrete and Pastel Lavender Light.
+- 10 built-in presets, including **Pastel Dusk** (default dark), **Blueprint** (technical navy on cool white) and **Soft Paper** (warm cream with vermillion), plus Aurora Mint, Lavender Night, Ocean Slate, Ember Clay, Pitch Black OLED, Lilac Mist and Rose Quartz. Muted text on every theme meets 4.5:1 contrast on cards (Soft Paper's orange accent is the known exception). Saved choices of retired themes migrate to the closest current one.
 - Custom accent color picker and an editable theme-JSON schema.
 
 ---
