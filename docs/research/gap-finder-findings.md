@@ -1,6 +1,6 @@
 # Gap-finder findings (what else could LocalMind hold?)
 
-Source: prompt H from `docs/data-collection/PROMPTS.md`, answered by four LLMs with web search (ChatGPT, Grok, Kimi, Qwen) on 2026-10-06. This page keeps everything useful from those four replies so the raw files are not needed any more.
+Source: a one-off "gap finder" prompt (what other free resources belong in this app, which categories to add, what to ship for offline use, which free tiers changed recently), answered by four LLMs with web search (ChatGPT, Grok, Kimi, Qwen) on 2026-10-06. The prompt and the raw replies were deleted once everything useful was copied here.
 
 **How far to trust it.** The prompt itself listed most of the section ideas, so the models mostly echoed them back. Every URL and number below comes from the models and was **not** checked by us, except where marked "verified". Sources behind the free-tier events are mostly blogs. Nothing here may be copied into the catalog as a fact before it is checked on the provider's own page. Use it as a to-do list of areas and leads.
 
