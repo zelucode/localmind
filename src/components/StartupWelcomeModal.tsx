@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import pkg from '../../package.json';
 import {
   Sparkles,
   Zap,
@@ -100,7 +101,7 @@ export const StartupWelcomeModal: React.FC<StartupWelcomeModalProps> = ({
                   opacity: 0.8,
                 }}
               >
-                v2.5 Local-First
+                v{pkg.version} Local-First
               </span>
             </div>
 
@@ -109,7 +110,7 @@ export const StartupWelcomeModal: React.FC<StartupWelcomeModalProps> = ({
             </h1>
 
             <p className="text-xs sm:text-sm leading-relaxed opacity-80">
-              Your high-speed launchpad for <strong>{totalTools} frontier AI models</strong>, zero-cost rotation strategies, and <strong>{totalBookmarks}+ curated free online developer utilities</strong>.
+              Your high-speed launchpad for <strong>{totalTools} AI tools</strong>, free-tier fallback strategies, and <strong>{totalBookmarks} free online developer utilities</strong>.
             </p>
           </div>
 
@@ -171,7 +172,7 @@ export const StartupWelcomeModal: React.FC<StartupWelcomeModalProps> = ({
                   <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                 </h3>
                 <p className="text-xs opacity-75 mt-1 leading-relaxed">
-                  Compare frontier models (Gemini 2.5, DeepSeek R1, Groq, OpenRouter), inspect zero-cost tiers, and filter by local file editing permissions.
+                  Compare AI tools and providers (Gemini, DeepSeek, Groq, OpenRouter), inspect their free tiers, and filter by local file editing permissions.
                 </p>
               </div>
 
@@ -181,7 +182,7 @@ export const StartupWelcomeModal: React.FC<StartupWelcomeModalProps> = ({
               </div>
             </div>
 
-            {/* Bento Card 2: 270+ Online Bookmarks */}
+            {/* Bento Card 2: Online Bookmarks */}
             <div
               id="bento-bookmarks-catalog"
               onClick={() => {
@@ -217,7 +218,7 @@ export const StartupWelcomeModal: React.FC<StartupWelcomeModalProps> = ({
 
               <div>
                 <h3 className="font-bold text-sm flex items-center gap-1.5 group-hover:text-emerald-400 transition-colors">
-                  <span>270+ Free Online Tool Bookmarks</span>
+                  <span>{totalBookmarks} Free Online Tool Bookmarks</span>
                   <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                 </h3>
                 <p className="text-xs opacity-75 mt-1 leading-relaxed">
@@ -261,7 +262,7 @@ export const StartupWelcomeModal: React.FC<StartupWelcomeModalProps> = ({
                     borderColor: 'var(--theme-border)',
                   }}
                 >
-                  AES-GCM Encrypted
+                  Encrypted on this device
                 </span>
               </div>
 
@@ -354,7 +355,7 @@ export const StartupWelcomeModal: React.FC<StartupWelcomeModalProps> = ({
             <div className="flex items-center gap-2.5">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span className="opacity-80">
-                <strong>100% Private & Client-Side:</strong> All keys, custom tools, and bookmarks stay in your local browser sandbox.
+                <strong>Stored on this device:</strong> your keys, custom tools and bookmarks are never uploaded. LocalMind only contacts a provider when you test a key.
               </span>
             </div>
 

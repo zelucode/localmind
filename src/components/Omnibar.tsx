@@ -167,7 +167,7 @@ export const Omnibar: React.FC<OmnibarProps> = ({
                 borderColor: 'var(--theme-border)',
                 color: 'var(--theme-text)',
               }}
-              title="View Rate Limits & Zero-Cost Rotation Strategy"
+              title="View free-tier rate limits and a suggested fallback order"
             >
               <Gauge className="w-3.5 h-3.5 text-amber-500" />
               Limits

@@ -215,7 +215,7 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <div className="flex items-center gap-2 min-w-0">
                 <Search className="w-3.5 h-3.5 opacity-50 shrink-0 group-hover:opacity-80 transition-opacity" />
-                <span className="truncate opacity-65 text-xs">Search tools, 270+ bookmarks, actions...</span>
+                <span className="truncate opacity-65 text-xs">Search tools, bookmarks, actions...</span>
               </div>
               <kbd
                 className="px-1.5 py-px rounded border text-[10px] leading-4 font-mono font-semibold shadow-2xs shrink-0 ml-1.5"

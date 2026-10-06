@@ -182,7 +182,7 @@ export const ScopeExplainer: React.FC = () => {
               <div className="mt-3 space-y-1.5 text-xs text-emerald-500 font-medium">
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                  <span>100% free forever; no subscriptions or credit cards</span>
+                  <span>Free to run on your own hardware; no account needed</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />

@@ -48,6 +48,16 @@ function setup() {
   return props;
 }
 
+describe('GlobalSearchModal copy', () => {
+  it('uses the real bookmark count in the tab label and the page subtitle', async () => {
+    setup();
+    expect(screen.getByRole('button', { name: 'Bookmarks (1)' })).toBeInTheDocument();
+    await userEvent.type(document.getElementById('input-global-search')!, 'free online tool');
+    expect(await screen.findByText(/^1 free web & developer utilities/)).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/270\+|frontier/i);
+  });
+});
+
 describe('GlobalSearchModal', () => {
   it('finds a bookmark by its title (regression: results used a missing `name` field)', async () => {
     setup();

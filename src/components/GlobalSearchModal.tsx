@@ -166,7 +166,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       id: 'page-bookmarks',
       type: 'page',
       title: 'Free Online Tool Bookmarks',
-      subtitle: `270+ free web & developer utilities (regex testers, JSON formatters, SVG tools)`,
+      subtitle: `${bookmarks.length} free web & developer utilities (regex testers, JSON formatters, SVG tools)`,
       categoryLabel: 'Navigation',
       icon: <Bookmark className="w-4 h-4 text-emerald-400" />,
       action: () => {
@@ -193,7 +193,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       id: 'action-key-vault',
       type: 'action',
       title: 'API Key Vault',
-      subtitle: 'View, add, or test AES-GCM encrypted local API keys (Gemini, DeepSeek, Groq, OpenRouter)',
+      subtitle: 'View, add or test your saved API keys (encrypted on this device)',
       categoryLabel: 'Security',
       icon: <KeyRound className="w-4 h-4 text-purple-400" />,
       action: () => {
@@ -219,7 +219,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       id: 'action-rate-limits',
       type: 'action',
       title: 'Rate Limit & Quotas Matrix',
-      subtitle: 'Zero-cost rotation strategy, RPM, RPD and TPM allowances across providers',
+      subtitle: 'Free-tier quotas (RPM, RPD) per provider and a suggested fallback order',
       categoryLabel: 'Developer Tool',
       icon: <Gauge className="w-4 h-4 text-amber-400" />,
       action: () => {
@@ -245,7 +245,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       id: 'action-export-import-bookmarks',
       type: 'action',
       title: 'Export & Import Bookmarks',
-      subtitle: 'Backup, restore, or synchronize 270+ online developer tools (JSON, HTML Netscape, Markdown, CSV)',
+      subtitle: 'Back up, restore or move your bookmarks (JSON, browser HTML, Markdown, CSV)',
       categoryLabel: 'Data & Tools',
       icon: <FolderInput className="w-4 h-4 text-emerald-400" />,
       action: () => {
@@ -260,7 +260,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       id: 'action-startup-screen',
       type: 'action',
       title: 'Startup Welcome Launcher',
-      subtitle: 'Overview of 50+ frontier AI models, 270+ tools catalog, and quick start guides',
+      subtitle: `Overview of your ${tools.length} AI tools and ${bookmarks.length} bookmarks, with quick start guides`,
       categoryLabel: 'General',
       icon: <Sparkles className="w-4 h-4 text-amber-400" />,
       action: () => {
@@ -530,7 +530,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
               setQuery(e.target.value);
               setSelectedIndex(0);
             }}
-            placeholder="Search pages, AI tools, 270+ bookmarks, or actions..."
+            placeholder="Search pages, AI tools, bookmarks, or actions..."
             className="w-full bg-transparent text-sm sm:text-base font-medium placeholder:opacity-45 focus:outline-none"
             style={{ color: 'var(--theme-text)' }}
           />
@@ -575,7 +575,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
             { id: 'pages', label: 'Pages' },
             { id: 'actions', label: 'Actions' },
             { id: 'ai-tools', label: 'AI Catalog' },
-            { id: 'bookmarks', label: 'Bookmarks (270+)' },
+            { id: 'bookmarks', label: `Bookmarks (${bookmarks.length})` },
           ].map((tab) => (
             <button
               key={tab.id}
