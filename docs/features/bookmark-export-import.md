@@ -55,4 +55,4 @@ The bookmark list lives only in this device's local storage, so it needs a way o
 - Browser folders are not turned into categories: every imported browser bookmark lands in *utilities* with the `imported` tag.
 - The JSON backup is plain text. It contains bookmarks only, no API keys, so it is safe to share.
 - If `localStorage` is full, the app updates the list on screen but silently fails to save it (existing behavior of `saveBookmarksToStorage`).
-- Other copy buttons (`ToolCard`, `BookmarksPage` copy URL, `ApiKeyVaultModal`, `OmniRouteWidget`) still show success without checking the clipboard result; `copyText` is ready to adopt there.
+- The other copy buttons in the app (tool card, Key Vault, bookmark URL, Runtimes) now report clipboard failures too; see [add-tools-and-quick-query.md](add-tools-and-quick-query.md).

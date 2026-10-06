@@ -9,7 +9,7 @@ pnpm test:all      # type-check, then frontend tests, then Rust tests
 | Command | What it runs |
 |---|---|
 | `pnpm lint` | `tsc --noEmit`: the type check (clean; keep it clean) |
-| `pnpm test` | Vitest + React Testing Library in jsdom (18 files, 180 tests) |
+| `pnpm test` | Vitest + React Testing Library in jsdom (41 files, 400 tests) |
 | `pnpm test:watch` | Vitest in watch mode |
 | `pnpm test:rust` | `cargo test` for `src-tauri` (31 tests, 1 opt-in) |
 | `pnpm test:all` | all of the above, in order |

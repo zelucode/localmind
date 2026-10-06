@@ -11,6 +11,7 @@ One page per feature: what it does for the user, how it works, where the code li
 | [Key Vault](key-vault.md) | Storing keys encrypted, verifying them with each provider |
 | [Bookmark export / import](bookmark-export-import.md) | Backing up, restoring and moving bookmarks (JSON, browser HTML, CSV, Markdown) |
 | [Settings, backup and reset](settings-and-backup.md) | Themes, preferences, workspace backup and restore, factory reset |
+| [Adding tools and bookmarks, Quick Query, copy](add-tools-and-quick-query.md) | The Add Tool and Add Bookmark forms, prompt launching, and the in-app wording |
 | [Config Exporter](config-exporter.md) | Generating IDE / agent / SDK config snippets for each provider and model |
 | [Rate-Limit Matrix](rate-limit-matrix.md) | Free-tier quota comparison and the fallback (rotation) order |
 | [Advisor](advisor.md) | The Free Tier Advisor (built, currently hidden) |

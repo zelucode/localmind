@@ -60,16 +60,17 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 - **Solution**: Add `tauri-plugin-updater`, signing keys and an update endpoint, then a "Check for Updates" button.
 - **Status**: Planned.
 
-### [ ] Task 9: Audit that every UI feature actually works
+### [x] Task 9: Audit that every UI feature actually works
 - **Problem**: The UI came from AI Studio; some controls may not be wired up.
 - **Done so far**: Rust commands + unit tests for local port probing, API key verification (Gemini, OpenRouter, Groq, OpenAI, DeepSeek, Mistral, Anthropic) and the Advisor. Removed the fake "OmniRoute online (3 ms)" fallback and the length-based "valid key" check. External links use the opener plugin. Vitest + RTL set up with tests for the shell, Tools, Bookmarks, Home, Runtimes, Vault, Advisor, Ctrl+K and `lib/`.
 - **Audited**: Config Exporter (fixed 6 bugs, see `docs/features/config-exporter.md`; preset model IDs and endpoints still need a manual check against provider docs).
 - **Audited**: Rate-Limit Matrix (wrong quota numbers and a false "verified" claim fixed, see `docs/features/rate-limit-matrix.md`; the data now has one source of truth, `src/data/providers.ts`, with review dates; only Gemini, Groq and DeepSeek have actually been re-checked).
 - **Audited**: Bookmark Export/Import center and Export Markdown (merge duplication, data loss, unsafe links and false copy fixed, CSV import added, see `docs/features/bookmark-export-import.md`; downloads and the file picker still need a check in the real Tauri window).
+- **Audited**: Add Tool and Add Bookmark forms, Quick Query templates, the Welcome screen and the search/tooltip wording, custom-tool deletion and all copy buttons (see `docs/features/add-tools-and-quick-query.md`).
 - **Audited**: Settings (backup omitted bookmarks and themes, restore silently replaced keys and falsely reported success, reset deleted keys without saying so, theme editor accepted invalid presets; see `docs/features/settings-and-backup.md`).
-- **Still to audit** (walk each, tag working / UI-only / broken, then fix with tests): AddTool / AddBookmark modals, Quick Query URL templates, Welcome screen copy.
-- **Known wrong copy**: welcome screen and Ctrl+K say keys are "AES-GCM encrypted" and "v2.5", but keys are stored as plain JSON in localStorage and the app is v0.1.0. Either implement encryption (Task 13) or fix the text.
-- **Status**: In progress.
+- **Result**: every feature in the list was walked, tagged, fixed with tests and written up in its feature doc. The bugs fixed include several silent data-loss ones (bookmark merge duplicates, restore replacing saved keys, the browser import overwriting descriptions, a backup that left bookmarks out).
+- **Not verifiable without the real app** (see Task 19): file downloads, the file picker, and `window.confirm` in the remaining places.
+- **Status**: Completed (2026-10-06).
 
 ### [x] Task 13: Encrypt stored API keys
 - **Problem**: Keys sat in localStorage as plain JSON; any code in the webview could read them.
@@ -122,4 +123,16 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 ### [ ] Task 18: Tests that drive the real desktop app
 - **Problem**: Frontend tests mock the Rust backend, and Rust tests don't touch the UI. Nothing covers the real IPC boundary (command names, argument shapes, permissions) end to end.
 - **Solution**: add a small WebDriver (`tauri-driver`) or Playwright-against-`tauri dev` smoke suite: launch the app, scan ports against a local listener, add a key, restart, confirm it persists encrypted.
+- **Status**: Planned.
+
+### [ ] Task 19: Check in the real desktop window what tests cannot
+- **Problem**: jsdom tests cannot show how the Tauri webview behaves. Found during Task 9 and still unchecked: (1) file downloads via a blob link (bookmark export, workspace backup) and the file picker; if downloads fail or are silent, switch to the Tauri dialog + fs plugins (needs Rust capabilities); (2) the remaining `window.confirm` calls (delete a bookmark, Restore defaults on the Bookmarks page); (3) Quick Query links for Perplexity and ChatGPT still prefilling the prompt; (4) the preset model IDs and endpoints in `src/data/providers.ts` (only Gemini, Groq and DeepSeek were re-checked).
+- **Solution**: one manual pass with `pnpm tauri dev`, ticking each item off here; fix what fails. Part of this can become Task 18 smoke tests.
+- **Status**: Planned.
+
+### [ ] Task 20: Small gaps found in the audit
+- Custom tools cannot be edited, and the Add Tool form has no Quick Query template field.
+- The Add Tool and Add Bookmark forms have labels that are not linked to their inputs (screen readers do not announce the field names).
+- Browser bookmark folders are not turned into categories on import.
+- A passphrase-encrypted backup so API keys can travel safely (the second option of Task 17).
 - **Status**: Planned.
