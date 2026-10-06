@@ -28,6 +28,11 @@ export function askAdvisor(query: string, apiKey: string): Promise<string> {
   return callBackend<string>('ask_advisor', { request: { query, apiKey } }, 'The Advisor');
 }
 
+/** Download the remote data feed as text (HTTPS only, size-limited). The caller validates the content. */
+export function fetchFeed(url: string): Promise<string> {
+  return callBackend<string>('fetch_feed', { url }, 'Updating the data feed');
+}
+
 export interface DecryptResult {
   value: string | null;
   error: string | null;

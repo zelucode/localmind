@@ -1,4 +1,5 @@
 mod advisor;
+mod feed;
 mod keys;
 mod probe;
 mod secrets;
@@ -11,6 +12,7 @@ pub fn run() {
             probe::probe_ports,
             keys::verify_api_key,
             advisor::ask_advisor,
+            feed::fetch_feed,
             secrets::encrypt_secrets,
             secrets::decrypt_secrets,
         ])
