@@ -20,6 +20,7 @@ import { StoredApiKey } from '../types';
 import { POPULAR_API_PROVIDERS } from '../data/providers';
 import { verifyApiKey, VerifyStatus } from '../lib/backend';
 import { keyProblem } from '../lib/secureKeys';
+import { CopyStatusIcon, useCopyFeedback } from '../lib/useCopy';
 
 interface ApiKeyVaultModalProps {
   isOpen: boolean;
@@ -51,7 +52,7 @@ export const ApiKeyVaultModal: React.FC<ApiKeyVaultModalProps> = ({
   const [keyInput, setKeyInput] = useState('');
   const [labelInput, setLabelInput] = useState('');
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const { copy, statusOf } = useCopyFeedback();
   const [isVerifying, setIsVerifying] = useState<string | null>(null);
   const [verificationFeedback, setVerificationFeedback] = useState<Record<string, { status: VerifyStatus; message: string }>>({});
 
@@ -85,9 +86,7 @@ export const ApiKeyVaultModal: React.FC<ApiKeyVaultModalProps> = ({
   };
 
   const copyKey = (keyString: string, id: string) => {
-    navigator.clipboard.writeText(keyString);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+    void copy(keyString, id);
   };
 
   const testKey = async (keyItem: StoredApiKey) => {
@@ -408,13 +407,10 @@ export const ApiKeyVaultModal: React.FC<ApiKeyVaultModalProps> = ({
                               borderColor: 'var(--theme-border)',
                               color: 'var(--theme-text-muted)',
                             }}
-                            title="Copy Key"
+                            title={statusOf(k.id) === 'failed' ? 'Copy failed' : 'Copy Key'}
+                            aria-label="Copy Key"
                           >
-                            {copiedId === k.id ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-500" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5" />
-                            )}
+                            <CopyStatusIcon status={statusOf(k.id)} />
                           </button>
 
                           <button

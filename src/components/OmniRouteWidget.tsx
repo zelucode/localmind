@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Network, RefreshCw, CheckCircle, XCircle, ExternalLink, Copy, Check, Play, HelpCircle, Settings2 } from 'lucide-react';
+import { CopyStatusIcon, useCopyFeedback } from '../lib/useCopy';
 
 import { probePorts, indexProbeResults } from '../lib/backend';
 
@@ -55,7 +56,7 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
 
   const [isScanning, setIsScanning] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
-  const [copiedCmd, setCopiedCmd] = useState<string | null>(null);
+  const { copy, statusOf } = useCopyFeedback();
   const [showConfigHelp, setShowConfigHelp] = useState(false);
   const [customPortText, setCustomPortText] = useState('8000');
   const [customPortError, setCustomPortError] = useState<string | null>(null);
@@ -92,9 +93,7 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
   }, []);
 
   const copyToClipboard = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedCmd(id);
-    setTimeout(() => setCopiedCmd(null), 2000);
+    void copy(text, id);
   };
 
   const testCustomPort = async () => {
@@ -243,7 +242,7 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
                   style={{ color: 'var(--theme-text)' }}
                   title="Copy command"
                 >
-                  {copiedCmd === 'install-omni' ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                  <CopyStatusIcon status={statusOf('install-omni')} className="w-3 h-3" />
                 </button>
               </div>
             </div>
@@ -264,7 +263,7 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
                   style={{ color: 'var(--theme-text)' }}
                   title="Copy command"
                 >
-                  {copiedCmd === 'start-omni' ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                  <CopyStatusIcon status={statusOf('start-omni')} className="w-3 h-3" />
                 </button>
               </div>
             </div>
@@ -345,11 +344,7 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
                   style={{ color: 'var(--theme-text)' }}
                   title="Copy start command"
                 >
-                  {copiedCmd === svc.id ? (
-                    <Check className="w-3 h-3 text-emerald-500" />
-                  ) : (
-                    <Copy className="w-3 h-3" />
-                  )}
+                  <CopyStatusIcon status={statusOf(svc.id)} className="w-3 h-3" />
                 </button>
               </div>
             </div>

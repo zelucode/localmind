@@ -27,6 +27,7 @@ import { ExportMarkdownModal } from './ExportMarkdownModal';
 import { FORMAT_INFO, exportBookmarks, exportFilename } from '../lib/bookmarkTransfer';
 import { downloadTextFile } from '../lib/files';
 import { openExternal } from '../lib/tauri';
+import { CopyStatusIcon, useCopyFeedback } from '../lib/useCopy';
 
 interface BookmarksPageProps {
   bookmarks: ToolBookmark[];
@@ -131,7 +132,7 @@ export const BookmarksPage: React.FC<BookmarksPageProps> = ({
   );
   const [view, setViewState] = useState<ViewMode>(() => readPref(STORAGE_VIEW_KEY, ['list', 'grid'] as const, 'list'));
   const [visibleCount, setVisibleCount] = useState(PAGE_STEP);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const { copy, statusOf } = useCopyFeedback(1800);
   const [isExportMarkdownOpen, setIsExportMarkdownOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -225,9 +226,7 @@ export const BookmarksPage: React.FC<BookmarksPageProps> = ({
   };
 
   const handleCopy = (bookmark: ToolBookmark) => {
-    navigator.clipboard.writeText(bookmark.url);
-    setCopiedId(bookmark.id);
-    setTimeout(() => setCopiedId(null), 1800);
+    void copy(bookmark.url, bookmark.id);
   };
 
   const handleOpenTool = (bookmark: ToolBookmark) => {
@@ -275,12 +274,12 @@ export const BookmarksPage: React.FC<BookmarksPageProps> = ({
       </button>
       <button
         onClick={() => handleCopy(bm)}
-        title="Copy URL"
+        title={statusOf(bm.id) === 'failed' ? 'Copy failed' : 'Copy URL'}
         aria-label={`Copy URL for ${bm.title}`}
         className={iconBtn}
-        style={{ ...iconBtnStyle, color: copiedId === bm.id ? '#10b981' : iconBtnStyle.color }}
+        style={iconBtnStyle}
       >
-        {copiedId === bm.id ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+        <CopyStatusIcon status={statusOf(bm.id)} />
       </button>
       {bm.githubUrl && (
         <a
