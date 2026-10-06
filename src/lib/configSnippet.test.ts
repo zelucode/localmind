@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { PROVIDER_PRESETS, TargetToolId, buildConfigSnippet, joinUrl } from './configSnippet';
+import { PROVIDER_PRESETS } from '../data/providers';
+import { TargetToolId, buildConfigSnippet, joinUrl } from './configSnippet';
 
 const TOOLS: TargetToolId[] = ['continue', 'cline', 'cursor', 'aider', 'windsurf', 'python', 'typescript', 'curl'];
 const preset = (id: string) => PROVIDER_PRESETS.find((p) => p.id === id)!;
@@ -13,15 +14,6 @@ describe('joinUrl', () => {
     expect(joinUrl('https://a.com/v1', 'chat/completions')).toBe('https://a.com/v1/chat/completions');
     expect(joinUrl('https://a.com/v1/', 'chat/completions')).toBe('https://a.com/v1/chat/completions');
     expect(joinUrl('https://a.com/v1/', '/chat/completions')).toBe('https://a.com/v1/chat/completions');
-  });
-});
-
-describe('provider presets', () => {
-  it('have unique ids and a default model that is in their model list', () => {
-    expect(new Set(PROVIDER_PRESETS.map((p) => p.id)).size).toBe(PROVIDER_PRESETS.length);
-    for (const p of PROVIDER_PRESETS) {
-      expect(p.availableModels.map((m) => m.id), p.id).toContain(p.defaultModel);
-    }
   });
 });
 

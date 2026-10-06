@@ -17,7 +17,7 @@ import {
   Code2
 } from 'lucide-react';
 import { StoredApiKey } from '../types';
-import { POPULAR_API_PROVIDERS } from '../data/defaultTools';
+import { POPULAR_API_PROVIDERS } from '../data/providers';
 import { verifyApiKey, VerifyStatus } from '../lib/backend';
 import { keyProblem } from '../lib/secureKeys';
 

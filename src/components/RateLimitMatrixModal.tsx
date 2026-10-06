@@ -18,130 +18,8 @@ import {
   HardDrive
 } from 'lucide-react';
 import { openExternal } from '../lib/tauri';
+import { RATE_LIMIT_DATA } from '../data/providers';
 
-interface RateLimitItem {
-  id: string;
-  provider: string;
-  bestModel: string;
-  rpm: number | string;
-  rpd: number | string;
-  tpm: string;
-  contextWindow: string;
-  creditCardRequired: boolean;
-  renewalCycle: string;
-  role: string;
-  speed: 'Ultra Fast (<200ms)' | 'Fast (1-2s)' | 'Standard (2-4s)' | 'Local Hardware';
-  getKeyUrl: string;
-  category: 'cloud-api' | 'router' | 'local';
-}
-
-export const RATE_LIMIT_DATA: RateLimitItem[] = [
-  {
-    id: 'gemini',
-    provider: 'Google AI Studio',
-    bestModel: 'Gemini 2.5 Flash',
-    rpm: '10-15',
-    rpd: 'Varies (often 250 or less)',
-    tpm: '250,000 TPM',
-    contextWindow: '1,048,576 tokens',
-    creditCardRequired: false,
-    renewalCycle: 'Daily (Resets midnight UTC)',
-    role: 'Primary Reasoning & Whole-Codebase Context',
-    speed: 'Fast (1-2s)',
-    getKeyUrl: 'https://aistudio.google.com/app/apikey',
-    category: 'cloud-api',
-  },
-  {
-    id: 'groq',
-    provider: 'Groq Cloud',
-    bestModel: 'Llama 3.3 70B Versatile',
-    rpm: 30,
-    rpd: 1000,
-    tpm: '12,000 TPM',
-    contextWindow: '128,000 tokens',
-    creditCardRequired: false,
-    renewalCycle: 'Daily (limits are per model)',
-    role: 'Fast In-line Diffs & Code Autocomplete',
-    speed: 'Ultra Fast (<200ms)',
-    getKeyUrl: 'https://console.groq.com/keys',
-    category: 'cloud-api',
-  },
-  {
-    id: 'openrouter',
-    provider: 'OpenRouter Free Tier',
-    bestModel: 'DeepSeek R1 / Llama 3.3 (:free)',
-    rpm: 20,
-    rpd: '50-1,000',
-    tpm: 'Provider limits',
-    contextWindow: '32,000 - 128,000 tokens',
-    creditCardRequired: false,
-    renewalCycle: 'Rolling 24-hour window',
-    role: 'Fallback Failover & Novel Model Trials',
-    speed: 'Standard (2-4s)',
-    getKeyUrl: 'https://openrouter.ai/keys',
-    category: 'router',
-  },
-  {
-    id: 'mistral',
-    provider: 'Mistral AI',
-    bestModel: 'Codestral Latest',
-    rpm: '60 (1 RPS)',
-    rpd: 'Generous Dev Cap',
-    tpm: '500,000 TPM',
-    contextWindow: '32,000 - 256,000 tokens',
-    creditCardRequired: false,
-    renewalCycle: 'Perpetual free development access',
-    role: 'Dedicated Coding Agent & FIM (Fill-in-Middle)',
-    speed: 'Fast (1-2s)',
-    getKeyUrl: 'https://console.mistral.ai/api-keys/',
-    category: 'cloud-api',
-  },
-  {
-    id: 'github',
-    provider: 'GitHub Models',
-    bestModel: 'GPT-4o-mini / Llama 3.3',
-    rpm: 15,
-    rpd: 150,
-    tpm: '8,000 TPM',
-    contextWindow: '128,000 tokens',
-    creditCardRequired: false,
-    renewalCycle: 'Daily with any GitHub user token',
-    role: 'CI/CD & Git Prototyping Without Extra Signups',
-    speed: 'Fast (1-2s)',
-    getKeyUrl: 'https://github.com/marketplace/models',
-    category: 'cloud-api',
-  },
-  {
-    id: 'deepseek',
-    provider: 'DeepSeek API',
-    bestModel: 'DeepSeek R1 / V3',
-    rpm: 'No fixed limit',
-    rpd: 'Pay-as-you-go',
-    tpm: 'Variable',
-    contextWindow: '64,000 tokens',
-    creditCardRequired: true,
-    renewalCycle: 'No free tier: very low per-token price',
-    role: 'Elite Mathematical & Algorithmic Debugging',
-    speed: 'Standard (2-4s)',
-    getKeyUrl: 'https://platform.deepseek.com/api_keys',
-    category: 'cloud-api',
-  },
-  {
-    id: 'ollama',
-    provider: 'Local Ollama / LM Studio',
-    bestModel: 'Qwen 2.5 Coder 7B / DeepSeek 8B',
-    rpm: 'Unlimited',
-    rpd: 'Unlimited',
-    tpm: 'Hardware Bound',
-    contextWindow: '4,096 - 32,768 tokens',
-    creditCardRequired: false,
-    renewalCycle: 'Perpetual (100% Offline & Private)',
-    role: 'Air-Gapped Privacy & Offline Failover',
-    speed: 'Local Hardware',
-    getKeyUrl: 'https://ollama.com',
-    category: 'local',
-  },
-];
 
 interface RateLimitMatrixModalProps {
   isOpen: boolean;
@@ -398,6 +276,9 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
                           </div>
                           <div className="text-[10px] opacity-70 mt-1 max-w-xs" style={{ color: 'var(--theme-text-muted)' }}>
                             {item.role}
+                          </div>
+                          <div className="text-[10px] mt-1" style={{ color: 'var(--theme-text-muted)' }}>
+                            {item.reviewed ? `Checked ${item.reviewed}` : 'Not re-checked'}
                           </div>
                         </td>
 

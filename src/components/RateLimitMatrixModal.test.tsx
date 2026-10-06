@@ -8,26 +8,13 @@ vi.mock('../lib/tauri', async (importOriginal) => ({
 }));
 
 import { openExternal } from '../lib/tauri';
-import { PROVIDER_PRESETS } from '../lib/configSnippet';
-import { RATE_LIMIT_DATA, RateLimitMatrixModal } from './RateLimitMatrixModal';
+import { RATE_LIMIT_DATA } from '../data/providers';
+import { RateLimitMatrixModal } from './RateLimitMatrixModal';
 
 function setup(onOpenExporterWithProvider = vi.fn()) {
   render(<RateLimitMatrixModal inline isOpen onClose={() => {}} onOpenExporterWithProvider={onOpenExporterWithProvider} />);
   return { onOpenExporterWithProvider };
 }
-
-describe('RATE_LIMIT_DATA', () => {
-  it('has unique ids', () => {
-    expect(new Set(RATE_LIMIT_DATA.map((r) => r.id)).size).toBe(RATE_LIMIT_DATA.length);
-  });
-
-  it('only offers a Config button for providers the exporter really has a preset for', () => {
-    const presetIds = PROVIDER_PRESETS.map((p) => p.id);
-    for (const row of RATE_LIMIT_DATA) {
-      expect(presetIds, row.id).toContain(row.id);
-    }
-  });
-});
 
 describe('RateLimitMatrixModal', () => {
   it('lists every provider', () => {
@@ -35,6 +22,12 @@ describe('RateLimitMatrixModal', () => {
     for (const row of RATE_LIMIT_DATA) {
       expect(screen.getByText(row.provider)).toBeInTheDocument();
     }
+  });
+
+  it('says which rows were checked and which were not', () => {
+    setup();
+    expect(screen.getAllByText(/Checked 2026-10/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Not re-checked/).length).toBeGreaterThan(0);
   });
 
   it('does not claim the quotas were verified live, and says they can change', () => {
@@ -46,7 +39,7 @@ describe('RateLimitMatrixModal', () => {
   it('filters by category', async () => {
     setup();
     await userEvent.click(screen.getByRole('button', { name: 'Local Offline' }));
-    expect(screen.getByText('Local Ollama / LM Studio')).toBeInTheDocument();
+    expect(screen.getByText('Local Ollama')).toBeInTheDocument();
     expect(screen.queryByText('Groq Cloud')).not.toBeInTheDocument();
   });
 

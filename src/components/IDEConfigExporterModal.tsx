@@ -20,7 +20,8 @@ import {
 } from 'lucide-react';
 import { StoredApiKey } from '../types';
 import { openExternal } from '../lib/tauri';
-import { PROVIDER_PRESETS, TargetToolId, buildConfigSnippet } from '../lib/configSnippet';
+import { TargetToolId, buildConfigSnippet } from '../lib/configSnippet';
+import { PROVIDER_PRESETS } from '../data/providers';
 
 interface IDEConfigExporterModalProps {
   isOpen: boolean;

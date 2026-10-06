@@ -10,7 +10,7 @@ Free AI tiers are only free up to a quota, and the quotas differ per provider (r
 It is reference and planning material. It does not measure the user's real usage and does not call any provider.
 
 ## How it works
-- `src/components/RateLimitMatrixModal.tsx`: a static `RATE_LIMIT_DATA` array rendered as a table, plus the rotation text. Rendered as the "Rate Limits" tab of the Configs & Limits page (`inline`).
+- Data comes from `src/data/providers.ts` (`RATE_LIMIT_DATA`, derived from `PROVIDERS`). `src/components/RateLimitMatrixModal.tsx` renders it as a table, with "Checked <month>" or "Not re-checked" under each row, plus the rotation text. Rendered as the "Rate Limits" tab of the Configs & Limits page (`inline`).
 - "Config" calls `onOpenExporterWithProvider(id)`; `App.tsx` switches to the exporter tab with that provider.
 
 ## Bugs found and fixed in the audit
@@ -26,7 +26,7 @@ It is reference and planning material. It does not measure the user's real usage
 `RateLimitMatrixModal.test.tsx`: row/preset consistency, all providers listed, no "verified" claim, category filter, search and empty state, Config callback, key link via `openExternal`, rotation tab.
 
 ## Limits and ideas
-- **The data is typed in by hand and will go stale.** The same facts also live in `PROVIDER_PRESETS` (`configSnippet.ts`) and `defaultTools.ts`, so they can disagree. Ideally one source of truth with a "last reviewed" date per row (Backlog).
+- **The data is typed in by hand and will go stale.** It now lives in one file (`src/data/providers.ts`) with a `reviewed` month per provider; only Gemini, Groq and DeepSeek were actually re-checked (2026-10). Edit quotas there and nowhere else.
 - The `tpm`, `creditCardRequired` and `role` fields are partly unused or editorial; the table doesn't show the credit-card column.
 - The matrix doesn't know which providers the user already has a key for. Showing a "Key saved" badge, or the user's exhausted providers, would make it actionable rather than just informational.
 - The "OmniRoute retries on 429" claim comes from the project's own description of the tool and is not verified.
