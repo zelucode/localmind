@@ -39,7 +39,6 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
   onOpenExporterWithProvider,
   savedKeys = [],
 }) => {
-  const [activeTab, setActiveTab] = useState<'matrix' | 'strategy'>('matrix');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState<'all' | 'cloud-api' | 'router' | 'local'>('all');
 
@@ -97,39 +96,6 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* View Switcher Tabs */}
-            <div
-              className="hidden sm:flex items-center p-1 rounded-xl border text-xs"
-              style={{
-                backgroundColor: 'var(--theme-raised)',
-                borderColor: 'var(--theme-border)',
-              }}
-            >
-              <button
-                onClick={() => setActiveTab('matrix')}
-                className="px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer"
-                style={{
-                  backgroundColor: activeTab === 'matrix' ? 'var(--theme-card)' : 'transparent',
-                  color: activeTab === 'matrix' ? 'var(--theme-primary)' : 'var(--theme-text-muted)',
-                  boxShadow: activeTab === 'matrix' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                }}
-              >
-                Quota Matrix
-              </button>
-              <button
-                onClick={() => setActiveTab('strategy')}
-                className="px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer flex items-center gap-1"
-                style={{
-                  backgroundColor: activeTab === 'strategy' ? 'var(--theme-card)' : 'transparent',
-                  color: activeTab === 'strategy' ? 'var(--theme-primary)' : 'var(--theme-text-muted)',
-                  boxShadow: activeTab === 'strategy' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                }}
-              >
-                <Workflow className="w-3.5 h-3.5" />
-                Rotation Chain
-              </button>
-            </div>
-
             <button
               id="btn-close-rate-limit"
               onClick={onClose}
@@ -145,46 +111,9 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
           </div>
         </div>
 
-        {/* Tab Switcher for mobile */}
-        <div
-          className="sm:hidden flex items-center px-4 py-2 border-b text-xs gap-2 shrink-0"
-          style={{
-            backgroundColor: 'var(--theme-raised)',
-            borderColor: 'var(--theme-border)',
-          }}
-        >
-          <button
-            onClick={() => setActiveTab('matrix')}
-            className={`flex-1 py-1.5 text-center font-medium rounded-lg border ${
-              activeTab === 'matrix' ? 'font-bold' : 'opacity-70'
-            }`}
-            style={{
-              backgroundColor: activeTab === 'matrix' ? 'var(--theme-card)' : 'transparent',
-              borderColor: activeTab === 'matrix' ? 'var(--theme-primary)' : 'transparent',
-              color: activeTab === 'matrix' ? 'var(--theme-primary)' : 'var(--theme-text)',
-            }}
-          >
-            Quota Matrix
-          </button>
-          <button
-            onClick={() => setActiveTab('strategy')}
-            className={`flex-1 py-1.5 text-center font-medium rounded-lg border ${
-              activeTab === 'strategy' ? 'font-bold' : 'opacity-70'
-            }`}
-            style={{
-              backgroundColor: activeTab === 'strategy' ? 'var(--theme-card)' : 'transparent',
-              borderColor: activeTab === 'strategy' ? 'var(--theme-primary)' : 'transparent',
-              color: activeTab === 'strategy' ? 'var(--theme-primary)' : 'var(--theme-text)',
-            }}
-          >
-            Rotation Chain
-          </button>
-        </div>
-
         {/* Modal Body */}
         <div className={`p-5 sm:p-6 space-y-6 ${inline ? '' : 'overflow-y-auto'}`}>
-          {activeTab === 'matrix' ? (
-            <>
+          <>
               <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
                 RPM = requests per minute, RPD = requests per day. These numbers are a snapshot and providers change them often, so check the provider before relying on one.
               </p>
@@ -396,10 +325,7 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
                   </tbody>
                 </table>
               </div>
-            </>
-          ) : (
-            /* Strategic Rotation Blueprint View */
-            <div className="space-y-6">
+            <div className="space-y-6 pt-6 border-t" style={{ borderColor: 'var(--theme-border)' }}>
               <div
                 className="p-4 rounded-xl border"
                 style={{
@@ -409,7 +335,7 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
               >
                 <h3 className="text-sm font-bold flex items-center gap-2 mb-1" style={{ color: 'var(--theme-text)' }}>
                   <Workflow className="w-4 h-4 text-amber-500" />
-                  The "Zero-Cost Daily Coding Chain" Architecture
+                  Suggested fallback order
                 </h3>
                 <p className="text-xs" style={{ color: 'var(--theme-text-muted)' }}>
                   When one free tier runs out or rate-limits you, the next one takes over. Quotas change, so treat this as a starting plan, not a guarantee.
@@ -554,7 +480,7 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
                 </div>
               </div>
             </div>
-          )}
+          </>
         </div>
 
         {/* Modal Footer */}

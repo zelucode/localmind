@@ -95,10 +95,12 @@ describe('RateLimitMatrixModal', () => {
     expect(openExternal).toHaveBeenCalledWith('https://console.groq.com/keys');
   });
 
-  it('shows the rotation chain on the second tab', async () => {
+  it('shows the quota table and the fallback order together on one page, with no inner tabs', () => {
     setup();
-    await userEvent.click(screen.getAllByRole('button', { name: /rotation chain/i })[0]);
+    expect(screen.getByRole('table')).toBeInTheDocument();
+    expect(screen.getByText('Suggested fallback order')).toBeInTheDocument();
     expect(screen.getByText(/Tier 1: Big Context/)).toBeInTheDocument();
     expect(screen.getByText(/Tier 4: Offline Core/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /quota matrix|rotation chain/i })).not.toBeInTheDocument();
   });
 });

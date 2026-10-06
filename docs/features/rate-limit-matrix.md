@@ -4,8 +4,8 @@
 
 ## Why it exists (what it does for the user)
 Free AI tiers are only free up to a quota, and the quotas differ per provider (requests per minute, requests per day, context size, whether a card is needed). When a quota runs out, the coding assistant just starts failing. This page answers two questions:
-1. **Which provider fits this job?** The *Quota Matrix* tab compares providers side by side (searchable, filterable by Cloud / Router / Local). A **Config** button on each row jumps to the Config Exporter with that provider preselected, and a link opens the provider's key page.
-2. **What do I do when one runs out?** The *Rotation Chain* tab suggests a fallback order (big-context cloud model, fast cloud model, burst buffer, offline local model) and three tips to hit limits less often.
+1. **Which provider fits this job?** The table compares providers side by side (searchable, filterable by Cloud / Router / Local). A **Config** button on each row jumps to the Config Exporter with that provider preselected, and a link opens the provider's key page.
+2. **What do I do when one runs out?** Under it, *Suggested fallback order* suggests a fallback order (big-context cloud model, fast cloud model, burst buffer, offline local model) and three tips to hit limits less often.
 
 It is reference and planning material. It does not measure the user's real usage and does not call any provider.
 
@@ -23,7 +23,7 @@ It is reference and planning material. It does not measure the user's real usage
 - No empty state when a search matched nothing.
 
 ## Tests
-`RateLimitMatrixModal.test.tsx`: row/preset consistency, all providers listed, no "verified" claim, category filter, search and empty state, Config callback, Key saved badge, key link via `openExternal`, rotation tab.
+`RateLimitMatrixModal.test.tsx`: row/preset consistency, all providers listed, no "verified" claim, category filter, search and empty state, Config callback, Key saved badge, key link via `openExternal`, table and fallback order shown together (no inner tabs).
 
 ## Limits and ideas
 - **The data is typed in by hand and will go stale.** It now lives in one file (`src/data/providers.ts`) with a `reviewed` month per provider; only Gemini, Groq and DeepSeek were actually re-checked (2026-10). Edit quotas there and nowhere else.
