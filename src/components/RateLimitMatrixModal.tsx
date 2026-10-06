@@ -18,7 +18,8 @@ import {
   HardDrive
 } from 'lucide-react';
 import { openExternal } from '../lib/tauri';
-import { RATE_LIMIT_DATA } from '../data/providers';
+import { useProviderData } from '../lib/ProviderDataContext';
+import { FeedStatus } from './FeedStatus';
 import { StoredApiKey } from '../types';
 
 
@@ -39,6 +40,7 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
   onOpenExporterWithProvider,
   savedKeys = [],
 }) => {
+  const { rateLimits: RATE_LIMIT_DATA } = useProviderData();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState<'all' | 'cloud-api' | 'router' | 'local'>('all');
 
@@ -51,7 +53,7 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
         item.role.toLowerCase().includes(searchQuery.toLowerCase());
       return matchCat && matchSearch;
     });
-  }, [filterCategory, searchQuery]);
+  }, [RATE_LIMIT_DATA, filterCategory, searchQuery]);
 
   if (!isOpen && !inline) return null;
 
@@ -203,6 +205,14 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
                         <td className="py-3.5 px-4">
                           <div className="font-bold text-xs flex items-center gap-2" style={{ color: 'var(--theme-text)' }}>
                             {item.provider}
+                            {item.retired && (
+                              <span
+                                className="text-[9px] px-1.5 py-0.5 rounded font-medium"
+                                style={{ backgroundColor: 'rgba(244, 63, 94, 0.15)', color: '#f43f5e' }}
+                              >
+                                Retired
+                              </span>
+                            )}
                             {savedKeys.some((k) => k.provider === item.id) && (
                               <span
                                 className="text-[9px] px-1.5 py-0.5 rounded font-medium"
@@ -284,7 +294,7 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
 
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
-                            {onOpenExporterWithProvider && (
+                            {onOpenExporterWithProvider && !item.retired && (
                               <button
                                 onClick={() => {
                                   onClose();
@@ -494,9 +504,10 @@ export const RateLimitMatrixModal: React.FC<RateLimitMatrixModalProps> = ({
         >
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-            <span>
-              Quotas reviewed Oct 2026 and not checked live. Providers change free tiers often.
-            </span>
+            <div className="space-y-0.5">
+              <FeedStatus />
+              <span className="block text-[11px]">Quotas are a snapshot and are not checked against the provider live. Providers change free tiers often.</span>
+            </div>
           </div>
           <button
             onClick={onClose}

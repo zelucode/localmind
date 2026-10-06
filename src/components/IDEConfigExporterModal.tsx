@@ -21,7 +21,7 @@ import {
 import { StoredApiKey } from '../types';
 import { openExternal } from '../lib/tauri';
 import { TargetToolId, buildConfigSnippet } from '../lib/configSnippet';
-import { PROVIDER_PRESETS } from '../data/providers';
+import { useProviderData } from '../lib/ProviderDataContext';
 
 interface IDEConfigExporterModalProps {
   isOpen: boolean;
@@ -110,11 +110,12 @@ export const IDEConfigExporterModal: React.FC<IDEConfigExporterModalProps> = ({
   onSaveKey,
   initialProvider,
 }) => {
+  const { presets: PROVIDER_PRESETS } = useProviderData();
   const [selectedToolId, setSelectedToolId] = useState<TargetToolId>('continue');
   const [selectedProviderId, setSelectedProviderId] = useState<string>(() => {
     return PROVIDER_PRESETS.some((p) => p.id === initialProvider) ? initialProvider! : 'gemini';
   });
-  const [selectedModel, setSelectedModel] = useState<string>(() => {
+  const [chosenModel, setSelectedModel] = useState<string>(() => {
     return (PROVIDER_PRESETS.find((p) => p.id === initialProvider) ?? PROVIDER_PRESETS[0]).defaultModel;
   });
   const [useRealKey, setUseRealKey] = useState<boolean>(true);
@@ -127,7 +128,12 @@ export const IDEConfigExporterModal: React.FC<IDEConfigExporterModalProps> = ({
   // Sync provider change
   const currentProvider = useMemo(() => {
     return PROVIDER_PRESETS.find((p) => p.id === selectedProviderId) || PROVIDER_PRESETS[0];
-  }, [selectedProviderId]);
+  }, [PROVIDER_PRESETS, selectedProviderId]);
+
+  // The chosen model, unless a data update removed it from this provider's list.
+  const selectedModel = currentProvider.availableModels.some((m) => m.id === chosenModel)
+    ? chosenModel
+    : currentProvider.defaultModel;
 
   // Sync default model when provider changes
   const handleSelectProvider = (provId: string) => {

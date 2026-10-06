@@ -17,7 +17,7 @@ import {
   Code2
 } from 'lucide-react';
 import { StoredApiKey } from '../types';
-import { POPULAR_API_PROVIDERS } from '../data/providers';
+import { useProviderData } from '../lib/ProviderDataContext';
 import { verifyApiKey, VerifyStatus } from '../lib/backend';
 import { keyProblem } from '../lib/secureKeys';
 import { CopyStatusIcon, useCopyFeedback } from '../lib/useCopy';
@@ -48,6 +48,7 @@ export const ApiKeyVaultModal: React.FC<ApiKeyVaultModalProps> = ({
   onKeyTested,
   storageError,
 }) => {
+  const { vaultProviders: POPULAR_API_PROVIDERS } = useProviderData();
   const [selectedProvider, setSelectedProvider] = useState<StoredApiKey['provider']>('gemini');
   const [keyInput, setKeyInput] = useState('');
   const [labelInput, setLabelInput] = useState('');

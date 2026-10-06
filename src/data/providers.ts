@@ -43,6 +43,8 @@ export interface ProviderInfo {
   docsUrl: string;
   /** 'YYYY-MM' of the last real check against the provider's pages. */
   reviewed?: string;
+  /** 'retired' = the provider shut its free access down. Shown as retired, left out of the exporter and vault. */
+  status?: 'active' | 'retired';
   isFree: boolean;
   /** One line for the Key Vault. */
   freeQuota: string;
@@ -299,31 +301,26 @@ export const PROVIDERS: ProviderInfo[] = [
 
 // ---- Derived views (what the three features consume) ----
 
-/** Key Vault provider list. */
-export const POPULAR_API_PROVIDERS = PROVIDERS.filter((p) => p.inVault).map((p) => ({
-  provider: p.id as 'gemini' | 'openrouter' | 'groq' | 'deepseek' | 'openai' | 'anthropic' | 'mistral',
-  name: p.name,
-  getKeyUrl: p.getKeyUrl,
-  freeQuota: p.freeQuota,
-  isFree: p.isFree,
-  setupGuide: p.setupGuide,
-}));
+/** Providers that can hold a key in the Key Vault (a `StoredApiKey['provider']`). */
+export const VAULT_PROVIDER_IDS = ['gemini', 'openrouter', 'groq', 'deepseek', 'openai', 'anthropic', 'mistral'] as const;
+export type VaultProviderId = (typeof VAULT_PROVIDER_IDS)[number];
+
+export interface VaultProvider {
+  provider: VaultProviderId;
+  name: string;
+  getKeyUrl: string;
+  freeQuota: string;
+  isFree: boolean;
+  setupGuide: string;
+}
 
 export interface RateLimitItem extends ProviderLimits {
   id: string;
   provider: string;
   getKeyUrl: string;
   reviewed?: string;
+  retired?: boolean;
 }
-
-/** Rate-Limit Matrix rows. */
-export const RATE_LIMIT_DATA: RateLimitItem[] = PROVIDERS.filter((p) => p.limits).map((p) => ({
-  id: p.id,
-  provider: p.name,
-  getKeyUrl: p.getKeyUrl,
-  reviewed: p.reviewed,
-  ...p.limits!,
-}));
 
 export interface ProviderPreset extends ProviderApi {
   id: string;
@@ -332,11 +329,50 @@ export interface ProviderPreset extends ProviderApi {
   getKeyUrl: string;
 }
 
+const isActive = (p: ProviderInfo) => p.status !== 'retired';
+
+/** Key Vault provider list. */
+export function deriveVaultProviders(providers: ProviderInfo[]): VaultProvider[] {
+  return providers
+    .filter((p) => p.inVault && isActive(p))
+    .map((p) => ({
+      provider: p.id as VaultProviderId,
+      name: p.name,
+      getKeyUrl: p.getKeyUrl,
+      freeQuota: p.freeQuota,
+      isFree: p.isFree,
+      setupGuide: p.setupGuide,
+    }));
+}
+
+/** Rate-Limit Matrix rows. Retired providers stay in the table, marked as retired. */
+export function deriveRateLimits(providers: ProviderInfo[]): RateLimitItem[] {
+  return providers
+    .filter((p) => p.limits)
+    .map((p) => ({
+      id: p.id,
+      provider: p.name,
+      getKeyUrl: p.getKeyUrl,
+      reviewed: p.reviewed,
+      retired: !isActive(p) || undefined,
+      ...p.limits!,
+    }));
+}
+
 /** Config Exporter presets. */
-export const PROVIDER_PRESETS: ProviderPreset[] = PROVIDERS.filter((p) => p.api).map((p) => ({
-  id: p.id,
-  name: p.name,
-  docsUrl: p.docsUrl,
-  getKeyUrl: p.getKeyUrl,
-  ...p.api!,
-}));
+export function derivePresets(providers: ProviderInfo[]): ProviderPreset[] {
+  return providers
+    .filter((p) => p.api && isActive(p))
+    .map((p) => ({
+      id: p.id,
+      name: p.name,
+      docsUrl: p.docsUrl,
+      getKeyUrl: p.getKeyUrl,
+      ...p.api!,
+    }));
+}
+
+/** The same three views over the built-in data (the offline fallback). */
+export const POPULAR_API_PROVIDERS = deriveVaultProviders(PROVIDERS);
+export const RATE_LIMIT_DATA = deriveRateLimits(PROVIDERS);
+export const PROVIDER_PRESETS = derivePresets(PROVIDERS);

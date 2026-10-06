@@ -24,6 +24,7 @@ import {
   resolveThemeTokens,
   validateThemePresets,
 } from '../theme';
+import { FeedSettingsPanel } from './FeedStatus';
 import { BackupParseResult, ParsedBackup, describeRestore, parseBackup } from '../lib/backup';
 
 interface SettingsPageProps {
@@ -938,6 +939,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   </div>
                 )}
               </div>
+
+              <FeedSettingsPanel />
 
               {/* Dedicated Bookmarks Export / Import Center */}
               {onOpenExportImportBookmarks && (

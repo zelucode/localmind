@@ -10,6 +10,9 @@ vi.mock('../lib/tauri', async (importOriginal) => ({
 import { openExternal } from '../lib/tauri';
 import { RATE_LIMIT_DATA } from '../data/providers';
 import { RateLimitMatrixModal } from './RateLimitMatrixModal';
+import { ProviderDataProvider } from '../lib/ProviderDataContext';
+import { PROVIDERS } from '../data/providers';
+import { STORAGE_FEED_CACHE_KEY, STORAGE_FEED_SETTINGS_KEY } from '../lib/feed';
 import { StoredApiKey } from '../types';
 
 const groqKey: StoredApiKey = {
@@ -30,6 +33,27 @@ function setup(onOpenExporterWithProvider = vi.fn(), savedKeys: StoredApiKey[] =
   );
   return { onOpenExporterWithProvider };
 }
+
+describe('RateLimitMatrixModal with a live feed', () => {
+  it('shows a provider the feed retired as retired, without a Config button, and says where the data is from', () => {
+    const url = 'https://x.test/providers.json';
+    localStorage.setItem(STORAGE_FEED_SETTINGS_KEY, JSON.stringify({ enabled: true, url }));
+    const groq = { ...structuredClone(PROVIDERS.find((p) => p.id === 'groq')!), status: 'retired' };
+    localStorage.setItem(
+      STORAGE_FEED_CACHE_KEY,
+      JSON.stringify({ fetchedAt: Date.now(), url, updated: '2026-10-07', providers: [groq], skipped: [] }),
+    );
+    render(
+      <ProviderDataProvider>
+        <RateLimitMatrixModal inline isOpen onClose={() => {}} onOpenExporterWithProvider={vi.fn()} />
+      </ProviderDataProvider>,
+    );
+    const row = screen.getByText('Groq Cloud').closest('tr')!;
+    expect(within(row).getByText('Retired')).toBeInTheDocument();
+    expect(within(row).queryByRole('button', { name: /config/i })).not.toBeInTheDocument();
+    expect(screen.getByText(/Live data from 2026-10-07/)).toBeInTheDocument();
+  });
+});
 
 describe('RateLimitMatrixModal', () => {
   it('lists every provider', () => {
