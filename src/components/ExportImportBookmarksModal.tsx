@@ -17,18 +17,32 @@ import {
   FolderInput,
   Info
 } from 'lucide-react';
-import { ToolBookmark, BookmarkCategory } from '../types';
+import { ToolBookmark } from '../types';
+import {
+  FORMAT_INFO,
+  ImportMode,
+  ImportResult,
+  ImportSource,
+  ImportedBookmark,
+  ParseResult,
+  TransferFormat,
+  exportBookmarks,
+  exportFilename,
+  parseImport,
+  previewImport,
+} from '../lib/bookmarkTransfer';
+import { copyText, downloadTextFile } from '../lib/files';
+import { DEFAULT_BOOKMARKS } from '../data/defaultBookmarks';
 
 interface ExportImportBookmarksModalProps {
   isOpen: boolean;
   onClose: () => void;
   bookmarks: ToolBookmark[];
-  onImportBookmarks: (newBookmarks: ToolBookmark[], mode: 'merge' | 'replace' | 'skip') => void;
+  onImportBookmarks: (items: ImportedBookmark[], mode: ImportMode, source: ImportSource) => ImportResult;
   onResetToDefaults?: () => void;
 }
 
-type ExportFormat = 'json' | 'html' | 'markdown' | 'csv';
-type ImportMode = 'merge' | 'replace' | 'skip';
+const MAX_IMPORT_BYTES = 5 * 1024 * 1024;
 
 export const ExportImportBookmarksModal: React.FC<ExportImportBookmarksModalProps> = ({
   isOpen,
@@ -40,20 +54,17 @@ export const ExportImportBookmarksModal: React.FC<ExportImportBookmarksModalProp
   const [activeTab, setActiveTab] = useState<'export' | 'import'>('export');
   
   // Export State
-  const [exportFormat, setExportFormat] = useState<ExportFormat>('json');
+  const [exportFormat, setExportFormat] = useState<TransferFormat>('json');
   const [exportFilter, setExportFilter] = useState<'all' | 'favorites'>('all');
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
 
   // Import State
   const [importText, setImportText] = useState('');
   const [importMode, setImportMode] = useState<ImportMode>('merge');
-  const [parsedPreview, setParsedPreview] = useState<{
-    valid: boolean;
-    items: ToolBookmark[];
-    error?: string;
-    sourceType?: 'json' | 'html';
-  } | null>(null);
+  const [parsed, setParsed] = useState<ParseResult | null>(null);
   const [importSuccessMsg, setImportSuccessMsg] = useState<string | null>(null);
+  // Destructive actions ask for a second click inside the modal instead of window.confirm.
+  const [confirming, setConfirming] = useState<'replace' | 'reset' | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Bookmarks to export
@@ -64,263 +75,70 @@ export const ExportImportBookmarksModal: React.FC<ExportImportBookmarksModalProp
     return bookmarks;
   }, [bookmarks, exportFilter]);
 
-  // Generate Export String
-  const exportContent = useMemo(() => {
-    if (exportFormat === 'json') {
-      const payload = {
-        app: 'LocalMind & Developer Tools Hub',
-        version: 1,
-        exportedAt: new Date().toISOString(),
-        totalCount: exportItems.length,
-        bookmarks: exportItems,
-      };
-      return JSON.stringify(payload, null, 2);
-    }
+  const exportContent = useMemo(() => exportBookmarks(exportItems, exportFormat), [exportItems, exportFormat]);
 
-    if (exportFormat === 'html') {
-      // Netscape Bookmark Format compatible with Chrome, Firefox, Safari, Edge, Arc
-      const now = Math.floor(Date.now() / 1000);
-      let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
-<!-- This is an automatically generated file.
-     It will be read and overwritten.
-     DO NOT EDIT! -->
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
-<TITLE>Bookmarks - LocalMind</TITLE>
-<H1>Bookmarks</H1>
-<DL><p>
-    <DT><H3 ADD_DATE="${now}" LAST_MODIFIED="${now}">LocalMind & Developer Tools</H3>
-    <DL><p>
-`;
-      exportItems.forEach((b) => {
-        const tags = (b.tags || []).join(',');
-        html += `        <DT><A HREF="${escapeHtml(b.url)}" ADD_DATE="${now}" TAGS="${escapeHtml(tags)}">${escapeHtml(b.title)}</A>\n`;
-        if (b.description) {
-          html += `        <DD>${escapeHtml(b.description)}\n`;
-        }
-      });
-      html += `    </DL><p>
-</DL><p>`;
-      return html;
-    }
+  const importItems = parsed && 'items' in parsed ? parsed.items : [];
+  const importCounts = useMemo(() => previewImport(bookmarks, importItems), [bookmarks, importItems]);
 
-    if (exportFormat === 'markdown') {
-      let md = `# LocalMind Bookmarks (${exportItems.length} tools)\n\n`;
-      md += `*Exported on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}*\n\n`;
-      
-      const byCategory: Record<string, ToolBookmark[]> = {};
-      exportItems.forEach((b) => {
-        const cat = b.category || 'other';
-        if (!byCategory[cat]) byCategory[cat] = [];
-        byCategory[cat].push(b);
-      });
-
-      Object.entries(byCategory).forEach(([cat, list]) => {
-        md += `## ${cat.toUpperCase()} (${list.length})\n\n`;
-        list.forEach((b) => {
-          md += `- [**${b.title}**](${b.url}) - ${b.description || 'No description'}\n`;
-          if (b.tags && b.tags.length > 0) {
-            md += `  *Tags: \`${b.tags.join('`, `')}\`*\n`;
-          }
-        });
-        md += `\n`;
-      });
-      return md;
-    }
-
-    if (exportFormat === 'csv') {
-      const headers = ['Title', 'URL', 'Category', 'Is AI', 'Badge', 'Tags', 'Description', 'GitHub URL', 'Stars'];
-      const rows = exportItems.map((b) => [
-        escapeCsv(b.title),
-        escapeCsv(b.url),
-        escapeCsv(b.category),
-        b.isAi ? 'true' : 'false',
-        escapeCsv(b.freeTierBadge || ''),
-        escapeCsv((b.tags || []).join(', ')),
-        escapeCsv(b.description || ''),
-        escapeCsv(b.githubUrl || ''),
-        b.stars ? String(b.stars) : '0',
-      ]);
-      return [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    }
-
-    return '';
-  }, [exportItems, exportFormat]);
-
-  // Copy to clipboard
-  const handleCopy = () => {
-    navigator.clipboard.writeText(exportContent);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopy = async () => {
+    setCopyState((await copyText(exportContent)) ? 'copied' : 'failed');
+    setTimeout(() => setCopyState('idle'), 2000);
   };
 
-  // Download File
   const handleDownload = () => {
-    const dateStr = new Date().toISOString().split('T')[0];
-    let ext = 'json';
-    let mime = 'application/json';
-
-    if (exportFormat === 'html') {
-      ext = 'html';
-      mime = 'text/html';
-    } else if (exportFormat === 'markdown') {
-      ext = 'md';
-      mime = 'text/markdown';
-    } else if (exportFormat === 'csv') {
-      ext = 'csv';
-      mime = 'text/csv';
-    }
-
-    const filename = `ai_nexus_bookmarks_${exportFilter}_${dateStr}.${ext}`;
-    const blob = new Blob([exportContent], { type: `${mime};charset=utf-8` });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadTextFile(exportFilename(exportFormat, exportFilter), exportContent, FORMAT_INFO[exportFormat].mime, exportFormat === 'csv');
   };
 
-  // Parse Raw Text (JSON or HTML)
-  const parseRawContent = (content: string) => {
-    const trimmed = content.trim();
-    if (!trimmed) {
-      setParsedPreview(null);
-      return;
-    }
-
-    // Attempt 1: JSON
-    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
-      try {
-        const parsed = JSON.parse(trimmed);
-        let list: any[] = [];
-        if (Array.isArray(parsed)) {
-          list = parsed;
-        } else if (parsed && Array.isArray(parsed.bookmarks)) {
-          list = parsed.bookmarks;
-        } else {
-          setParsedPreview({
-            valid: false,
-            items: [],
-            error: 'JSON must be an array of bookmarks or an object with a "bookmarks" array.',
-          });
-          return;
-        }
-
-        // Normalize bookmarks
-        const normalized: ToolBookmark[] = list
-          .filter((item) => item && (item.url || item.href) && (item.title || item.name))
-          .map((item, idx) => ({
-            id: item.id || `bm-import-${Date.now()}-${idx}`,
-            title: item.title || item.name || 'Untitled Tool',
-            url: item.url || item.href || '',
-            description: item.description || item.desc || '',
-            category: (item.category as BookmarkCategory) || 'utilities',
-            isAi: typeof item.isAi === 'boolean' ? item.isAi : false,
-            freeTierBadge: item.freeTierBadge || 'Free Web Tool',
-            tags: Array.isArray(item.tags) ? item.tags : [],
-            isFavorite: !!item.isFavorite,
-            createdAt: item.createdAt || new Date().toISOString().split('T')[0],
-            githubUrl: item.githubUrl || undefined,
-            stars: typeof item.stars === 'number' ? item.stars : undefined,
-          }));
-
-        if (normalized.length === 0) {
-          setParsedPreview({
-            valid: false,
-            items: [],
-            error: 'No valid bookmarks found in JSON. Each bookmark needs at least a title and url.',
-          });
-          return;
-        }
-
-        setParsedPreview({
-          valid: true,
-          items: normalized,
-          sourceType: 'json',
-        });
-        return;
-      } catch (err: any) {
-        // Fall through or set error
-      }
-    }
-
-    // Attempt 2: HTML Netscape Bookmarks
-    if (trimmed.includes('<A HREF=') || trimmed.includes('<a href=')) {
-      try {
-        const normalized: ToolBookmark[] = [];
-        const regex = /<a\s+[^>]*href=["']([^"']+)["'][^>]*>(.*?)<\/a>/gi;
-        let match;
-        let idx = 0;
-        while ((match = regex.exec(trimmed)) !== null) {
-          const url = match[1];
-          const rawTitle = match[2].replace(/<[^>]*>/g, '').trim();
-          if (url && rawTitle && !url.startsWith('javascript:')) {
-            normalized.push({
-              id: `bm-html-${Date.now()}-${idx++}`,
-              title: rawTitle,
-              url: url,
-              description: 'Imported from browser bookmarks',
-              category: 'utilities',
-              isAi: false,
-              freeTierBadge: 'Browser Bookmark',
-              tags: ['imported'],
-              createdAt: new Date().toISOString().split('T')[0],
-            });
-          }
-        }
-
-        if (normalized.length > 0) {
-          setParsedPreview({
-            valid: true,
-            items: normalized,
-            sourceType: 'html',
-          });
-          return;
-        }
-      } catch (err) {
-        // Fall through
-      }
-    }
-
-    setParsedPreview({
-      valid: false,
-      items: [],
-      error: 'Unrecognized format. Please provide a valid JSON array or standard HTML bookmarks file.',
-    });
+  const parseText = (text: string) => {
+    setConfirming(null);
+    setImportSuccessMsg(null);
+    setParsed(text.trim() ? parseImport(text) : null);
   };
 
-  // Handle File Upload
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = ''; // lets the same file be chosen again
     if (!file) return;
-
+    if (file.size > MAX_IMPORT_BYTES) {
+      setParsed({ ok: false, error: `${file.name} is too large (limit 5 MB).` });
+      return;
+    }
     const reader = new FileReader();
     reader.onload = (ev) => {
-      const text = ev.target?.result as string;
+      const text = String(ev.target?.result ?? '');
       setImportText(text);
-      parseRawContent(text);
+      parseText(text);
     };
+    reader.onerror = () => setParsed({ ok: false, error: `Could not read ${file.name}.` });
     reader.readAsText(file);
   };
 
-  // Trigger Import
-  const handleApplyImport = () => {
-    if (!parsedPreview || !parsedPreview.valid || parsedPreview.items.length === 0) return;
-
-    onImportBookmarks(parsedPreview.items, importMode);
-
-    const count = parsedPreview.items.length;
-    setImportSuccessMsg(`Successfully imported ${count} bookmarks (${importMode} mode)!`);
-    setParsedPreview(null);
+  const runImport = () => {
+    if (!parsed || !('items' in parsed)) return;
+    const result = onImportBookmarks(parsed.items, importMode, parsed.source);
+    setImportSuccessMsg(
+      importMode === 'replace'
+        ? `Replaced your list with ${result.added} bookmarks.`
+        : `Imported: ${result.added} added${result.updated ? `, ${result.updated} updated` : ''}${result.skipped ? `, ${result.skipped} skipped` : ''}.`,
+    );
+    setParsed(null);
     setImportText('');
-
+    setConfirming(null);
     setTimeout(() => {
       setImportSuccessMsg(null);
       onClose();
     }, 1500);
   };
+
+  const handleApplyImport = () => {
+    if (importMode === 'replace' && confirming !== 'replace') {
+      setConfirming('replace');
+      return;
+    }
+    runImport();
+  };
+
+  const canImport = importItems.length > 0;
 
   if (!isOpen) return null;
 
@@ -647,8 +465,8 @@ export const ExportImportBookmarksModal: React.FC<ExportImportBookmarksModalProp
                     borderColor: 'var(--theme-border)',
                   }}
                 >
-                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copied ? 'Copied to Clipboard!' : 'Copy to Clipboard'}</span>
+                  {copyState === 'copied' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copyState === 'copied' ? 'Copied to Clipboard!' : copyState === 'failed' ? 'Copy failed: use Download instead' : 'Copy to Clipboard'}</span>
                 </button>
 
                 <button
@@ -691,16 +509,16 @@ export const ExportImportBookmarksModal: React.FC<ExportImportBookmarksModalProp
                 </div>
                 <div>
                   <span className="font-semibold block text-xs">
-                    Click to browse or drop file here
+                    Click to choose a file
                   </span>
                   <span className="text-[11px] opacity-70">
-                    Supports JSON backups (.json) or browser bookmarks (.html)
+                    LocalMind JSON backup, browser bookmarks (.html) or CSV
                   </span>
                 </div>
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".json,.html,.txt"
+                  accept=".json,.html,.htm,.csv,.txt"
                   onChange={handleFileUpload}
                   className="hidden"
                 />
@@ -709,15 +527,15 @@ export const ExportImportBookmarksModal: React.FC<ExportImportBookmarksModalProp
               {/* Raw Text Input */}
               <div>
                 <label className="block font-semibold mb-1 opacity-90">
-                  Or Paste JSON or HTML Bookmarks Text:
+                  Or paste JSON, HTML or CSV text:
                 </label>
                 <textarea
                   value={importText}
                   onChange={(e) => {
                     setImportText(e.target.value);
-                    parseRawContent(e.target.value);
+                    parseText(e.target.value);
                   }}
-                  placeholder="Paste JSON array or browser bookmarks HTML here..."
+                  placeholder="Paste a JSON backup, browser bookmarks HTML or CSV here..."
                   className="w-full h-28 p-3 rounded-xl border font-mono text-[11px] focus:outline-hidden"
                   style={{
                     backgroundColor: 'var(--theme-raised)',
@@ -728,68 +546,55 @@ export const ExportImportBookmarksModal: React.FC<ExportImportBookmarksModalProp
               </div>
 
               {/* Parsing status & preview */}
-              {parsedPreview && (
+              {parsed && (
                 <div
                   className="p-3.5 rounded-xl border space-y-2.5 animate-in fade-in"
                   style={
-                    parsedPreview.valid
-                      ? {
-                          backgroundColor: 'rgba(16, 185, 129, 0.08)',
-                          borderColor: 'rgba(16, 185, 129, 0.25)',
-                        }
-                      : {
-                          backgroundColor: 'rgba(239, 68, 68, 0.08)',
-                          borderColor: 'rgba(239, 68, 68, 0.25)',
-                        }
+                    canImport
+                      ? { backgroundColor: 'rgba(16, 185, 129, 0.08)', borderColor: 'rgba(16, 185, 129, 0.25)' }
+                      : { backgroundColor: 'rgba(239, 68, 68, 0.08)', borderColor: 'rgba(239, 68, 68, 0.25)' }
                   }
                 >
                   <div className="flex items-center gap-2">
-                    {parsedPreview.valid ? (
+                    {canImport ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                     ) : (
                       <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
                     )}
                     <span className="font-semibold text-xs">
-                      {parsedPreview.valid
-                        ? `Detected ${parsedPreview.items.length} valid bookmarks (${parsedPreview.sourceType?.toUpperCase()} format)`
-                        : 'Invalid bookmark payload'}
+                      {canImport && 'source' in parsed
+                        ? `Found ${importItems.length} bookmarks (${parsed.source.toUpperCase()} format)`
+                        : 'Cannot import this'}
                     </span>
                   </div>
 
-                  {parsedPreview.error && (
-                    <p className="text-[11px] text-rose-400 pl-6">{parsedPreview.error}</p>
-                  )}
+                  {'error' in parsed && <p className="text-[11px] text-rose-400 pl-6">{parsed.error}</p>}
 
-                  {parsedPreview.valid && (
+                  {canImport && 'rejected' in parsed && (
                     <div className="space-y-2 pl-6">
+                      <p className="text-[11px] opacity-90">
+                        {importCounts.fresh} new • {importCounts.duplicates} already in your list
+                        {parsed.rejected > 0 && ` • ${parsed.rejected} left out (no title, or not an http/https link)`}
+                      </p>
                       <div className="flex items-center gap-3 text-[11px] opacity-80 flex-wrap">
-                        <span>
-                          AI Utilities: {parsedPreview.items.filter((b) => b.isAi).length}
-                        </span>
+                        <span>AI Utilities: {importItems.filter((b) => b.isAi === true).length}</span>
                         <span>•</span>
-                        <span>
-                          Developer / Web Tools: {parsedPreview.items.filter((b) => !b.isAi).length}
-                        </span>
+                        <span>Other tools: {importItems.filter((b) => b.isAi !== true).length}</span>
                       </div>
 
                       {/* Sample preview pills */}
                       <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                        {parsedPreview.items.slice(0, 6).map((item, idx) => (
+                        {importItems.slice(0, 6).map((item, idx) => (
                           <span
                             key={`preview-${idx}`}
                             className="px-2 py-0.5 rounded-md border text-[10px] font-medium"
-                            style={{
-                              backgroundColor: 'var(--theme-card)',
-                              borderColor: 'var(--theme-border)',
-                            }}
+                            style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)' }}
                           >
                             {item.title}
                           </span>
                         ))}
-                        {parsedPreview.items.length > 6 && (
-                          <span className="text-[10px] opacity-60">
-                            +{parsedPreview.items.length - 6} more
-                          </span>
+                        {importItems.length > 6 && (
+                          <span className="text-[10px] opacity-60">+{importItems.length - 6} more</span>
                         )}
                       </div>
                     </div>
@@ -822,7 +627,7 @@ export const ExportImportBookmarksModal: React.FC<ExportImportBookmarksModalProp
                   >
                     <span className="font-semibold block text-xs">Merge & Update</span>
                     <span className="text-[10px] opacity-70 block mt-0.5">
-                      Combines new items & updates duplicates (recommended)
+                      Adds new links and fills in details for ones you have (recommended)
                     </span>
                   </button>
 
@@ -845,7 +650,7 @@ export const ExportImportBookmarksModal: React.FC<ExportImportBookmarksModalProp
                   >
                     <span className="font-semibold block text-xs">Add Only New</span>
                     <span className="text-[10px] opacity-70 block mt-0.5">
-                      Ignores any bookmark with matching URL
+                      Leaves bookmarks you already have untouched
                     </span>
                   </button>
 
@@ -868,33 +673,68 @@ export const ExportImportBookmarksModal: React.FC<ExportImportBookmarksModalProp
                   >
                     <span className="font-semibold block text-xs text-rose-400">Replace All</span>
                     <span className="text-[10px] opacity-70 block mt-0.5">
-                      Overwrites entire current bookmarks list
+                      Deletes your current list first
                     </span>
                   </button>
                 </div>
               </div>
 
+              {/* Confirmation for destructive actions */}
+              {confirming && (
+                <div
+                  role="alert"
+                  className="p-3.5 rounded-xl border space-y-2.5"
+                  style={{ backgroundColor: 'rgba(239, 68, 68, 0.08)', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+                >
+                  <p className="text-xs font-medium">
+                    {confirming === 'replace'
+                      ? `This deletes all ${bookmarks.length} current bookmarks (custom ones and favorites included) and uses the ${importItems.length} from the file instead. Export a backup first if you are not sure.`
+                      : `Replace your list with the ${DEFAULT_BOOKMARKS.length} default bookmarks? Custom bookmarks and favorites will be lost. Export a backup first if you are not sure.`}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      id="btn-confirm-destructive"
+                      onClick={() => {
+                        if (confirming === 'replace') {
+                          runImport();
+                        } else {
+                          onResetToDefaults?.();
+                          setConfirming(null);
+                          onClose();
+                        }
+                      }}
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer"
+                      style={{ backgroundColor: '#ef4444', color: '#ffffff' }}
+                    >
+                      {confirming === 'replace' ? 'Yes, replace everything' : 'Yes, reset to defaults'}
+                    </button>
+                    <button
+                      onClick={() => setConfirming(null)}
+                      className="px-3 py-1.5 rounded-lg border text-xs font-medium cursor-pointer"
+                      style={{ backgroundColor: 'var(--theme-raised)', borderColor: 'var(--theme-border)' }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Apply Import Button */}
               <div className="flex items-center justify-between pt-2">
                 {onResetToDefaults && (
                   <button
-                    onClick={() => {
-                      if (window.confirm('Reset bookmarks back to default 270+ tools?')) {
-                        onResetToDefaults();
-                        onClose();
-                      }
-                    }}
+                    onClick={() => setConfirming('reset')}
                     className="text-xs text-rose-400 hover:underline cursor-pointer opacity-80 hover:opacity-100 flex items-center gap-1"
                   >
                     <RefreshCw className="w-3 h-3" />
-                    <span>Reset to 270+ Defaults</span>
+                    <span>Reset to {DEFAULT_BOOKMARKS.length} Defaults</span>
                   </button>
                 )}
 
                 <button
                   id="btn-confirm-import"
                   onClick={handleApplyImport}
-                  disabled={!parsedPreview || !parsedPreview.valid || parsedPreview.items.length === 0}
+                  disabled={!canImport || confirming !== null}
                   className="px-4 py-2 rounded-xl font-bold flex items-center gap-2 shadow-sm cursor-pointer hover:opacity-90 transition-opacity ml-auto disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{
                     backgroundColor: 'var(--theme-primary)',
@@ -902,9 +742,7 @@ export const ExportImportBookmarksModal: React.FC<ExportImportBookmarksModalProp
                   }}
                 >
                   <Upload className="w-4 h-4" />
-                  <span>
-                    Import {parsedPreview?.valid ? `${parsedPreview.items.length} Bookmarks` : 'Bookmarks'}
-                  </span>
+                  <span>Import {canImport ? `${importItems.length} Bookmarks` : 'Bookmarks'}</span>
                 </button>
               </div>
             </div>
@@ -921,29 +759,10 @@ export const ExportImportBookmarksModal: React.FC<ExportImportBookmarksModalProp
         >
           <Info className="w-3.5 h-3.5 shrink-0" />
           <span>
-            Bookmarks are saved in browser localStorage and will not be sent to any third-party server.
+            Bookmarks are stored on this device and are never sent to a server. Importing from a file or pasted text happens locally.
           </span>
         </div>
       </div>
     </div>
   );
 };
-
-// Helper utilities for export escaping
-function escapeHtml(str: string): string {
-  return (str || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-function escapeCsv(field: string): string {
-  if (!field) return '""';
-  const str = String(field);
-  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-    return `"${str.replace(/"/g, '""')}"`;
-  }
-  return `"${str}"`;
-}

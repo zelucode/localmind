@@ -24,6 +24,8 @@ import {
 } from 'lucide-react';
 import { ToolBookmark, BookmarkCategory } from '../types';
 import { ExportMarkdownModal } from './ExportMarkdownModal';
+import { FORMAT_INFO, exportBookmarks, exportFilename } from '../lib/bookmarkTransfer';
+import { downloadTextFile } from '../lib/files';
 import { openExternal } from '../lib/tauri';
 
 interface BookmarksPageProps {
@@ -234,13 +236,7 @@ export const BookmarksPage: React.FC<BookmarksPageProps> = ({
   };
 
   const handleExportJson = () => {
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(bookmarks, null, 2));
-    const a = document.createElement('a');
-    a.setAttribute('href', dataStr);
-    a.setAttribute('download', `ai_nexus_bookmarks_${new Date().toISOString().split('T')[0]}.json`);
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    downloadTextFile(exportFilename('json', 'all'), exportBookmarks(bookmarks, 'json'), FORMAT_INFO.json.mime);
   };
 
   const handleDelete = (bm: ToolBookmark) => {
