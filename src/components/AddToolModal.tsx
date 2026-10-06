@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, Plus, Globe, Terminal, Palette, Network, Sparkles, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { X, Plus, ChevronDown } from 'lucide-react';
 import { AITool, CapabilityScope, ToolCategory } from '../types';
 import { toWebUrl } from '../lib/url';
 import { normalizeUrl } from '../lib/bookmarkTransfer';
@@ -11,6 +11,43 @@ interface AddToolModalProps {
   /** Tools already in the catalog, used to warn about a link that is already there. */
   existingTools?: AITool[];
 }
+
+type Field = 'name' | 'url' | 'downloadUrl' | 'description' | 'badge' | 'summary' | 'tags';
+type FieldError = { field: Field; message: string };
+
+const LIMITS = { name: 60, description: 300, badge: 40, summary: 200, tags: 8, tagLength: 24 };
+
+const inputClass =
+  'w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] border bg-[var(--theme-raised)] border-[var(--theme-border)] text-[var(--theme-text)] placeholder:opacity-50 transition-shadow';
+// Inside the raised free-tier panel, inputs use the card colour so they stand out.
+const onRaised = '!bg-[var(--theme-card)]';
+const invalidClass = 'border-rose-500/70';
+
+function parseTags(input: string): string[] {
+  const seen = new Set<string>();
+  for (const t of input.split(',')) {
+    const tag = t.trim().toLowerCase();
+    if (tag) seen.add(tag);
+  }
+  return [...seen];
+}
+
+const Label: React.FC<{ htmlFor: string; optional?: boolean; children: React.ReactNode }> = ({
+  htmlFor,
+  optional,
+  children,
+}) => (
+  <label htmlFor={htmlFor} className="flex items-baseline gap-1.5 text-xs font-medium mb-1.5" style={{ color: 'var(--theme-text)' }}>
+    {children}
+    {optional ? (
+      <span className="font-normal opacity-50">optional</span>
+    ) : (
+      <span aria-hidden="true" className="text-rose-400">
+        *
+      </span>
+    )}
+  </label>
+);
 
 export const AddToolModal: React.FC<AddToolModalProps> = ({
   isOpen,
@@ -30,7 +67,8 @@ export const AddToolModal: React.FC<AddToolModalProps> = ({
   const [creditCardRequired, setCreditCardRequired] = useState(false);
   const [allowCustomApiKey, setAllowCustomApiKey] = useState(false);
   const [tagsInput, setTagsInput] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [showMore, setShowMore] = useState(false);
+  const [error, setError] = useState<FieldError | null>(null);
 
   // Start every opening with an empty form (the component stays mounted while closed).
   useEffect(() => {
@@ -47,43 +85,53 @@ export const AddToolModal: React.FC<AddToolModalProps> = ({
     setCreditCardRequired(false);
     setAllowCustomApiKey(false);
     setTagsInput('');
+    setShowMore(false);
     setError(null);
   }, [isOpen]);
 
   if (!isOpen) return null;
 
+  const fail = (field: Field, message: string, optionalField = false) => {
+    if (optionalField) setShowMore(true);
+    setError({ field, message });
+    requestAnimationFrame(() => document.getElementById(`field-${field}`)?.focus());
+  };
+
+  const clearOn = (field: Field) => (error?.field === field ? setError(null) : undefined);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !url.trim()) return;
+
+    if (!name.trim()) return fail('name', 'Give the tool a name.');
+    if (name.trim().length > LIMITS.name) return fail('name', `Keep the name under ${LIMITS.name} characters.`);
 
     const checked = toWebUrl(url);
-    if ('error' in checked) {
-      setError(checked.error);
-      return;
-    }
+    if (checked.ok === false) return fail('url', checked.error);
     const formattedUrl = checked.url;
+
+    const duplicate = existingTools.find((t) => normalizeUrl(t.url) === normalizeUrl(formattedUrl));
+    if (duplicate) return fail('url', `"${duplicate.name}" already uses this link.`);
 
     let formattedDownload: string | undefined;
     if (downloadUrl.trim()) {
       const download = toWebUrl(downloadUrl);
-      if ('error' in download) {
-        setError(`Download link: ${download.error}`);
-        return;
-      }
+      if (download.ok === false) return fail('downloadUrl', `Download link: ${download.error}`, true);
       formattedDownload = download.url;
     }
 
-    const duplicate = existingTools.find((t) => normalizeUrl(t.url) === normalizeUrl(formattedUrl));
-    if (duplicate) {
-      setError(`"${duplicate.name}" already uses this link.`);
-      return;
-    }
-    setError(null);
+    if (description.trim().length > LIMITS.description)
+      return fail('description', `Keep the description under ${LIMITS.description} characters.`, true);
+    if (freeCreditValue.trim().length > LIMITS.badge)
+      return fail('badge', `Keep the badge under ${LIMITS.badge} characters.`, true);
+    if (freeQuotaSummary.trim().length > LIMITS.summary)
+      return fail('summary', `Keep the explanation under ${LIMITS.summary} characters.`, true);
 
-    const tags = tagsInput
-      .split(',')
-      .map((t) => t.trim().toLowerCase())
-      .filter(Boolean);
+    const tags = parseTags(tagsInput);
+    if (tags.length > LIMITS.tags) return fail('tags', `Use at most ${LIMITS.tags} tags.`, true);
+    if (tags.some((t) => t.length > LIMITS.tagLength))
+      return fail('tags', `Each tag must be under ${LIMITS.tagLength} characters.`, true);
+
+    setError(null);
 
     const newTool: AITool = {
       id: `custom_${Date.now()}`,
@@ -111,22 +159,39 @@ export const AddToolModal: React.FC<AddToolModalProps> = ({
     onClose();
   };
 
+  const fieldError = (field: Field) =>
+    error?.field === field ? (
+      <p id={`error-${field}`} role="alert" className="mt-1.5 text-xs text-rose-400">
+        {error.message}
+      </p>
+    ) : null;
+
+  const fieldProps = (field: Field) => ({
+    id: `field-${field}`,
+    'aria-invalid': error?.field === field || undefined,
+    'aria-describedby': error?.field === field ? `error-${field}` : undefined,
+  });
+
+  const checkbox = 'w-4 h-4 rounded cursor-pointer accent-[var(--theme-primary)]';
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
       <div
         id="modal-add-tool"
-        className="border rounded-2xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden transition-colors"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="add-tool-title"
+        className="border rounded-2xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
         style={{
           backgroundColor: 'var(--theme-card)',
           borderColor: 'var(--theme-border)',
           color: 'var(--theme-text)',
         }}
       >
-        {/* Modal Header */}
-        <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: 'var(--theme-border)' }}>
-          <div className="flex items-center gap-2">
+        <div className="px-6 py-4 border-b flex items-center justify-between gap-4" style={{ borderColor: 'var(--theme-border)' }}>
+          <div className="flex items-center gap-3 min-w-0">
             <div
-              className="p-2 rounded-lg border"
+              className="p-2 rounded-lg border shrink-0"
               style={{
                 backgroundColor: 'var(--theme-raised)',
                 borderColor: 'var(--theme-border)',
@@ -135,284 +200,259 @@ export const AddToolModal: React.FC<AddToolModalProps> = ({
             >
               <Plus className="w-5 h-5" />
             </div>
-            <div>
-              <h2 className="text-base font-semibold" style={{ color: 'var(--theme-text)' }}>
-                Add Custom AI Platform or Link
+            <div className="min-w-0">
+              <h2 id="add-tool-title" className="text-base font-semibold">
+                Add a tool
               </h2>
               <p className="text-xs" style={{ color: 'var(--theme-text-secondary)' }}>
-                Bookmark any new LLM, local agent, or tool with free quota tracking.
+                Only a name and a link are needed. Everything else is optional.
               </p>
             </div>
           </div>
           <button
             id="btn-close-add-modal"
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg transition-colors cursor-pointer opacity-70 hover:opacity-100"
-            style={{ color: 'var(--theme-text)' }}
+            aria-label="Close"
+            className="p-1.5 rounded-lg transition-opacity cursor-pointer opacity-70 hover:opacity-100 shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Modal Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--theme-text)' }}>
-                Tool / Platform Name: *
-              </label>
-              <input
-                id="input-tool-name"
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Cohere Command R+, DeepLX, etc."
-                className="w-full px-3 py-1.5 rounded-lg text-xs focus:outline-none"
-                style={{
-                  backgroundColor: 'var(--theme-raised)',
-                  borderColor: 'var(--theme-border)',
-                  borderWidth: '1px',
-                  borderStyle: 'solid',
-                  color: 'var(--theme-text)',
-                }}
-              />
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col min-h-0">
+          <div className="p-6 overflow-y-auto space-y-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="field-name">Name</Label>
+                <input
+                  {...fieldProps('name')}
+                  type="text"
+                  autoFocus
+                  maxLength={LIMITS.name + 20}
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    clearOn('name');
+                  }}
+                  placeholder="e.g. Cohere Command R+"
+                  className={`${inputClass} ${error?.field === 'name' ? invalidClass : ''}`}
+                />
+                {fieldError('name')}
+              </div>
+              <div>
+                <Label htmlFor="field-url">Website</Label>
+                <input
+                  {...fieldProps('url')}
+                  type="text"
+                  inputMode="url"
+                  value={url}
+                  onChange={(e) => {
+                    setUrl(e.target.value);
+                    clearOn('url');
+                  }}
+                  placeholder="example.com"
+                  className={`${inputClass} font-mono ${error?.field === 'url' ? invalidClass : ''}`}
+                />
+                {fieldError('url')}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="field-category" optional>
+                  Category
+                </Label>
+                <select
+                  id="field-category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as ToolCategory)}
+                  className={`${inputClass} cursor-pointer`}
+                >
+                  <option value="web-llm">Web LLM & Search</option>
+                  <option value="coding-agent">Coding & Local Agent</option>
+                  <option value="design-media">Design & Media</option>
+                  <option value="uniform-proxy">Uniform Router / Proxy</option>
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="field-scope" optional>
+                  Type
+                </Label>
+                <select
+                  id="field-scope"
+                  value={scope}
+                  onChange={(e) => setScope(e.target.value as CapabilityScope)}
+                  className={`${inputClass} cursor-pointer`}
+                >
+                  <option value="web-only">Web only</option>
+                  <option value="local-agent">Local desktop agent</option>
+                  <option value="ide-plugin">IDE plugin / extension</option>
+                  <option value="local-runner">Local runner (Ollama, LM Studio)</option>
+                  <option value="uniform-proxy">Uniform proxy (OmniRoute, OpenRouter)</option>
+                  <option value="cloud-builder">Cloud app builder</option>
+                </select>
+              </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--theme-text)' }}>
-                Website URL: *
-              </label>
-              <input
-                id="input-tool-url"
-                type="text"
-                required
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://..."
-                className="w-full px-3 py-1.5 rounded-lg text-xs focus:outline-none font-mono"
-                style={{
-                  backgroundColor: 'var(--theme-raised)',
-                  borderColor: 'var(--theme-border)',
-                  borderWidth: '1px',
-                  borderStyle: 'solid',
-                  color: 'var(--theme-text)',
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--theme-text)' }}>
-                Category:
-              </label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value as ToolCategory)}
-                className="w-full px-3 py-1.5 rounded-lg text-xs focus:outline-none cursor-pointer"
-                style={{
-                  backgroundColor: 'var(--theme-raised)',
-                  borderColor: 'var(--theme-border)',
-                  borderWidth: '1px',
-                  borderStyle: 'solid',
-                  color: 'var(--theme-text)',
-                }}
+              <button
+                type="button"
+                id="btn-toggle-more-details"
+                onClick={() => setShowMore((v) => !v)}
+                aria-expanded={showMore}
+                className="flex items-center gap-1.5 text-xs font-medium cursor-pointer hover:opacity-80"
+                style={{ color: 'var(--theme-primary)' }}
               >
-                <option value="web-llm">Web LLM & Search</option>
-                <option value="coding-agent">Coding & Local Agent</option>
-                <option value="design-media">Design & Media</option>
-                <option value="uniform-proxy">Uniform Router / Proxy</option>
-              </select>
-            </div>
+                <ChevronDown className={`w-4 h-4 transition-transform ${showMore ? 'rotate-180' : ''}`} />
+                {showMore ? 'Hide optional details' : 'Add optional details (description, free tier, tags)'}
+              </button>
 
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--theme-text)' }}>
-                Architecture & Scope:
-              </label>
-              <select
-                value={scope}
-                onChange={(e) => setScope(e.target.value as CapabilityScope)}
-                className="w-full px-3 py-1.5 rounded-lg text-xs focus:outline-none cursor-pointer"
-                style={{
-                  backgroundColor: 'var(--theme-raised)',
-                  borderColor: 'var(--theme-border)',
-                  borderWidth: '1px',
-                  borderStyle: 'solid',
-                  color: 'var(--theme-text)',
-                }}
-              >
-                <option value="web-only">Web Only (Cannot edit local files)</option>
-                <option value="local-agent">Local Desktop Agent (Edits local files)</option>
-                <option value="ide-plugin">IDE Plugin / Extension (VSCode/JetBrains)</option>
-                <option value="local-runner">Local Runner (Ollama/LM Studio offline)</option>
-                <option value="uniform-proxy">Uniform Proxy (OmniRoute/OpenRouter)</option>
-                <option value="cloud-builder">Cloud App Builder (Full stack online)</option>
-              </select>
+              {showMore && (
+                <div className="mt-4 space-y-4">
+                  <div>
+                    <Label htmlFor="field-description" optional>
+                      Description
+                    </Label>
+                    <textarea
+                      {...fieldProps('description')}
+                      rows={2}
+                      value={description}
+                      onChange={(e) => {
+                        setDescription(e.target.value);
+                        clearOn('description');
+                      }}
+                      placeholder="What does it do? Which models does it offer?"
+                      className={`${inputClass} resize-none ${error?.field === 'description' ? invalidClass : ''}`}
+                    />
+                    {fieldError('description')}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="field-tags" optional>
+                      Tags
+                    </Label>
+                    <input
+                      {...fieldProps('tags')}
+                      type="text"
+                      value={tagsInput}
+                      onChange={(e) => {
+                        setTagsInput(e.target.value);
+                        clearOn('tags');
+                      }}
+                      placeholder="coding, local, reasoning (comma separated)"
+                      className={`${inputClass} ${error?.field === 'tags' ? invalidClass : ''}`}
+                    />
+                    {fieldError('tags')}
+                  </div>
+
+                  <div
+                    className="p-4 rounded-xl border space-y-4"
+                    style={{ backgroundColor: 'var(--theme-raised)', borderColor: 'var(--theme-border)' }}
+                  >
+                    <span className="text-xs font-semibold block" style={{ color: 'var(--theme-primary)' }}>
+                      Free tier
+                    </span>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="field-badge" optional>
+                          Allowance badge
+                        </Label>
+                        <input
+                          {...fieldProps('badge')}
+                          type="text"
+                          value={freeCreditValue}
+                          onChange={(e) => {
+                            setFreeCreditValue(e.target.value);
+                            clearOn('badge');
+                          }}
+                          placeholder="e.g. 50 msgs/day, $5 credit"
+                          className={`${inputClass} ${onRaised} ${error?.field === 'badge' ? invalidClass : ''}`}
+                        />
+                        {fieldError('badge')}
+                      </div>
+                      <div>
+                        <Label htmlFor="field-downloadUrl" optional>
+                          Download link
+                        </Label>
+                        <input
+                          {...fieldProps('downloadUrl')}
+                          type="text"
+                          inputMode="url"
+                          value={downloadUrl}
+                          onChange={(e) => {
+                            setDownloadUrl(e.target.value);
+                            clearOn('downloadUrl');
+                          }}
+                          placeholder="https://.../download or GitHub releases"
+                          className={`${inputClass} ${onRaised} font-mono ${error?.field === 'downloadUrl' ? invalidClass : ''}`}
+                        />
+                        {fieldError('downloadUrl')}
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="field-summary" optional>
+                        What you get for free
+                      </Label>
+                      <input
+                        {...fieldProps('summary')}
+                        type="text"
+                        value={freeQuotaSummary}
+                        onChange={(e) => {
+                          setFreeQuotaSummary(e.target.value);
+                          clearOn('summary');
+                        }}
+                        placeholder="e.g. Daily free renewal, no card required"
+                        className={`${inputClass} ${onRaised} ${error?.field === 'summary' ? invalidClass : ''}`}
+                      />
+                      {fieldError('summary')}
+                    </div>
+
+                    <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className={checkbox}
+                          checked={hasWebSearch}
+                          onChange={(e) => setHasWebSearch(e.target.checked)}
+                        />
+                        Live web search
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className={checkbox}
+                          checked={!creditCardRequired}
+                          onChange={(e) => setCreditCardRequired(!e.target.checked)}
+                        />
+                        No credit card
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className={checkbox}
+                          checked={allowCustomApiKey}
+                          onChange={(e) => setAllowCustomApiKey(e.target.checked)}
+                        />
+                        Free API key
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--theme-text)' }}>
-              Description:
-            </label>
-            <textarea
-              rows={2}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="What does this AI tool do? What models does it provide?"
-              className="w-full px-3 py-1.5 rounded-lg text-xs focus:outline-none resize-none"
-              style={{
-                backgroundColor: 'var(--theme-raised)',
-                borderColor: 'var(--theme-border)',
-                borderWidth: '1px',
-                borderStyle: 'solid',
-                color: 'var(--theme-text)',
-              }}
-            />
-          </div>
-
-          {/* Free Tier Info */}
           <div
-            className="p-3.5 rounded-xl border space-y-3"
-            style={{
-              backgroundColor: 'var(--theme-raised)',
-              borderColor: 'var(--theme-border)',
-            }}
+            className="px-6 py-4 flex items-center justify-end gap-2 border-t"
+            style={{ borderColor: 'var(--theme-border)' }}
           >
-            <span className="text-xs font-semibold block" style={{ color: 'var(--theme-primary)' }}>
-              Free Tier & Allowance Details
-            </span>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--theme-text)' }}>
-                  Allowance Badge (e.g. "Free 50 msgs/day", "$5 credit"):
-                </label>
-                <input
-                  type="text"
-                  value={freeCreditValue}
-                  onChange={(e) => setFreeCreditValue(e.target.value)}
-                  placeholder="e.g. Free Tier, 20 queries/day"
-                  className="w-full px-3 py-1.5 rounded-lg text-xs focus:outline-none"
-                  style={{
-                    backgroundColor: 'var(--theme-card)',
-                    borderColor: 'var(--theme-border)',
-                    borderWidth: '1px',
-                    borderStyle: 'solid',
-                    color: 'var(--theme-text)',
-                  }}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--theme-text)' }}>
-                  Download URL (Optional for Desktop/CLI):
-                </label>
-                <input
-                  type="text"
-                  value={downloadUrl}
-                  onChange={(e) => setDownloadUrl(e.target.value)}
-                  placeholder="https://.../download or GitHub releases"
-                  className="w-full px-3 py-1.5 rounded-lg text-xs focus:outline-none font-mono"
-                  style={{
-                    backgroundColor: 'var(--theme-card)',
-                    borderColor: 'var(--theme-border)',
-                    borderWidth: '1px',
-                    borderStyle: 'solid',
-                    color: 'var(--theme-text)',
-                  }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--theme-text)' }}>
-                Free Allowance Explanation:
-              </label>
-              <input
-                type="text"
-                value={freeQuotaSummary}
-                onChange={(e) => setFreeQuotaSummary(e.target.value)}
-                placeholder="e.g. Daily free renewal on Sonnet 3.5 without card required"
-                className="w-full px-3 py-1.5 rounded-lg text-xs focus:outline-none"
-                style={{
-                  backgroundColor: 'var(--theme-card)',
-                  borderColor: 'var(--theme-border)',
-                  borderWidth: '1px',
-                  borderStyle: 'solid',
-                  color: 'var(--theme-text)',
-                }}
-              />
-            </div>
-
-            {/* Checkboxes */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-xs" style={{ color: 'var(--theme-text)' }}>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={hasWebSearch}
-                  onChange={(e) => setHasWebSearch(e.target.checked)}
-                  className="rounded border"
-                />
-                <span>Live Web Search</span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={!creditCardRequired}
-                  onChange={(e) => setCreditCardRequired(!e.target.checked)}
-                  className="rounded border"
-                />
-                <span>No Credit Card</span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={allowCustomApiKey}
-                  onChange={(e) => setAllowCustomApiKey(e.target.checked)}
-                  className="rounded border"
-                />
-                <span>Free API Key</span>
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium mb-1" style={{ color: 'var(--theme-text)' }}>
-              Tags (comma separated):
-            </label>
-            <input
-              type="text"
-              value={tagsInput}
-              onChange={(e) => setTagsInput(e.target.value)}
-              placeholder="e.g. coding, local, free-tier, reasoning"
-              className="w-full px-3 py-1.5 rounded-lg text-xs focus:outline-none"
-              style={{
-                backgroundColor: 'var(--theme-raised)',
-                borderColor: 'var(--theme-border)',
-                borderWidth: '1px',
-                borderStyle: 'solid',
-                color: 'var(--theme-text)',
-              }}
-            />
-          </div>
-
-          {error && (
-            <div role="alert" className="p-3 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-400 text-xs flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          {/* Form Actions */}
-          <div className="flex items-center justify-end gap-2 pt-2 border-t" style={{ borderColor: 'var(--theme-border)' }}>
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-xs font-medium border transition-colors cursor-pointer hover:opacity-85"
+              className="px-4 py-2 rounded-lg text-sm font-medium border cursor-pointer hover:opacity-85"
               style={{
                 backgroundColor: 'var(--theme-raised)',
                 borderColor: 'var(--theme-border)',
@@ -424,14 +464,14 @@ export const AddToolModal: React.FC<AddToolModalProps> = ({
             <button
               id="btn-submit-add-tool"
               type="submit"
-              className="px-4 py-2 rounded-lg text-xs font-semibold shadow-sm transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
+              className="px-4 py-2 rounded-lg text-sm font-semibold shadow-sm cursor-pointer flex items-center gap-1.5 active:scale-95 transition-transform"
               style={{
                 backgroundColor: 'var(--theme-primary)',
                 color: 'var(--theme-primary-foreground, #000000)',
               }}
             >
-              <Plus className="w-3.5 h-3.5" />
-              Add to Dashboard
+              <Plus className="w-4 h-4" />
+              Add tool
             </button>
           </div>
         </form>

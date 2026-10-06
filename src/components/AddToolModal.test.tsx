@@ -12,8 +12,8 @@ function setup(over: Partial<React.ComponentProps<typeof AddToolModal>> = {}) {
   return { ...props, rerender: (next: Partial<typeof props>) => view.rerender(<AddToolModal {...props} {...next} />) };
 }
 
-const name = () => document.getElementById('input-tool-name') as HTMLInputElement;
-const link = () => document.getElementById('input-tool-url') as HTMLInputElement;
+const name = () => document.getElementById('field-name') as HTMLInputElement;
+const link = () => document.getElementById('field-url') as HTMLInputElement;
 const submit = () => userEvent.click(document.getElementById('btn-submit-add-tool')!);
 
 describe('AddToolModal', () => {
@@ -51,6 +51,7 @@ describe('AddToolModal', () => {
     const props = setup();
     await userEvent.type(name(), 'X');
     await userEvent.type(link(), 'x.com');
+    await userEvent.click(screen.getByRole('button', { name: /optional details/i }));
     await userEvent.type(screen.getByPlaceholderText(/download or github releases/i), 'file:///c:/x.exe');
     await submit();
     expect(screen.getByRole('alert')).toHaveTextContent(/download link/i);
@@ -73,5 +74,26 @@ describe('AddToolModal', () => {
     props.rerender({ isOpen: true });
     expect(name().value).toBe('');
     expect(link().value).toBe('');
+  });
+
+  it('needs only a name and a link, and explains what is missing', async () => {
+    const props = setup();
+    await submit();
+    expect(screen.getByRole('alert')).toHaveTextContent(/name/i);
+    await userEvent.type(name(), 'Foo');
+    await submit();
+    expect(screen.getByRole('alert')).toHaveTextContent(/web address/i);
+    expect(props.onAddTool).not.toHaveBeenCalled();
+  });
+
+  it('rejects too many tags and reveals the optional section to show the error', async () => {
+    const props = setup();
+    await userEvent.type(name(), 'Foo');
+    await userEvent.type(link(), 'foo.com');
+    await userEvent.click(screen.getByRole('button', { name: /optional details/i }));
+    await userEvent.type(document.getElementById('field-tags')!, 'a,b,c,d,e,f,g,h,i');
+    await submit();
+    expect(screen.getByRole('alert')).toHaveTextContent(/at most 8 tags/i);
+    expect(props.onAddTool).not.toHaveBeenCalled();
   });
 });
