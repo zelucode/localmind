@@ -17,6 +17,9 @@ import {
   FolderInput,
   Compass,
   Play,
+  Eye,
+  EyeOff,
+  Lock,
 } from 'lucide-react';
 import {
   ThemePreset,
@@ -25,7 +28,8 @@ import {
   validateThemePresets,
 } from '../theme';
 import { FeedSettingsPanel } from './FeedStatus';
-import { BackupParseResult, ParsedBackup, describeRestore, parseBackup } from '../lib/backup';
+import { BackupParseResult, ParsedBackup, describeRestore, isEncryptedBackup, parseBackup, passphraseProblem } from '../lib/backup';
+import { decryptBackup } from '../lib/backend';
 
 interface SettingsPageProps {
   currentThemeId: string;
@@ -45,7 +49,8 @@ interface SettingsPageProps {
   onToggleShowLoadingAnimation?: (show: boolean) => void;
   onReplayLoadingAnimation?: () => void;
   onOpenExportImportBookmarks?: () => void;
-  onExportBackup: (options: { includeKeys: boolean }) => void;
+  /** May reject (for example when passphrase protection is unavailable); the page shows the message. */
+  onExportBackup: (options: { includeKeys: boolean; passphrase?: string }) => void | Promise<void>;
   onImportBackup: (backup: ParsedBackup) => void;
   onResetFactoryDefaults: () => void;
   /** Current amounts, so confirmations can say what would be lost. */
@@ -87,6 +92,17 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   const [jsonStatus, setJsonStatus] = useState<{ ok: boolean; text: string } | null>(null);
   const [jsonDirty, setJsonDirty] = useState(false);
   const [includeKeys, setIncludeKeys] = useState(false);
+  const [protect, setProtect] = useState(false);
+  const [passphrase, setPassphrase] = useState('');
+  const [confirmation, setConfirmation] = useState('');
+  const [showPassphrase, setShowPassphrase] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportState, setExportState] = useState<{ ok: boolean; text: string } | null>(null);
+  const [locked, setLocked] = useState<{ name: string; text: string } | null>(null);
+  const [unlockPassphrase, setUnlockPassphrase] = useState('');
+  const [showUnlock, setShowUnlock] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
+  const [unlockError, setUnlockError] = useState<string | null>(null);
   const [restoreCheck, setRestoreCheck] = useState<BackupParseResult | null>(null);
   const [restoreMsg, setRestoreMsg] = useState<string | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
@@ -133,20 +149,79 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
     setTimeout(() => setJsonStatus(null), 3000);
   };
 
+  // Including keys turns passphrase protection on; it can still be switched off (the file then holds the keys as plain text).
+  const handleIncludeKeys = (checked: boolean) => {
+    setIncludeKeys(checked);
+    if (checked) setProtect(true);
+    setExportState(null);
+  };
+
+  const handleExport = async () => {
+    setExportState(null);
+    if (protect) {
+      const problem = passphraseProblem(passphrase, confirmation);
+      if (problem) {
+        setExportState({ ok: false, text: problem });
+        return;
+      }
+    }
+    setExporting(true);
+    try {
+      await onExportBackup(protect ? { includeKeys, passphrase } : { includeKeys });
+      setExportState({
+        ok: true,
+        text: protect
+          ? 'The protected backup was prepared and the download started. Keep the passphrase: it cannot be recovered.'
+          : 'The backup was prepared and the download started.',
+      });
+      setPassphrase('');
+      setConfirmation('');
+    } catch (err) {
+      setExportState({ ok: false, text: err instanceof Error ? err.message : 'The backup could not be created.' });
+    } finally {
+      setExporting(false);
+    }
+  };
+
   // Step 1 of a restore: read and check the file, then show what it contains. Nothing changes yet.
   const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = ''; // lets the same file be chosen again
     setRestoreMsg(null);
+    setRestoreCheck(null);
+    setLocked(null);
+    setUnlockError(null);
+    setUnlockPassphrase('');
     if (!file) return;
     if (file.size > 20 * 1024 * 1024) {
       setRestoreCheck({ ok: false, error: `${file.name} is too large to be a backup.` });
       return;
     }
     const reader = new FileReader();
-    reader.onload = (event) => setRestoreCheck(parseBackup(String(event.target?.result ?? '')));
+    reader.onload = (event) => {
+      const text = String(event.target?.result ?? '');
+      // A passphrase-protected file must be opened with its passphrase before it can be read.
+      if (isEncryptedBackup(text)) setLocked({ name: file.name, text });
+      else setRestoreCheck(parseBackup(text));
+    };
     reader.onerror = () => setRestoreCheck({ ok: false, error: `Could not read ${file.name}.` });
     reader.readAsText(file);
+  };
+
+  const handleUnlock = async () => {
+    if (!locked) return;
+    setUnlocking(true);
+    setUnlockError(null);
+    try {
+      const plain = await decryptBackup(locked.text, unlockPassphrase);
+      setLocked(null);
+      setUnlockPassphrase('');
+      setRestoreCheck(parseBackup(plain));
+    } catch (err) {
+      setUnlockError(err instanceof Error ? err.message : 'The backup could not be opened.');
+    } finally {
+      setUnlocking(false);
+    }
   };
 
   // Step 2: the user confirmed.
@@ -821,27 +896,83 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   <input
                     type="checkbox"
                     checked={includeKeys}
-                    onChange={(e) => setIncludeKeys(e.target.checked)}
+                    onChange={(e) => handleIncludeKeys(e.target.checked)}
                     className="mt-0.5"
                   />
                   <span>Include my API keys ({savedKeysCount})</span>
                 </label>
-                {includeKeys && (
+                <label className="flex items-start gap-2 text-xs cursor-pointer" style={{ color: 'var(--theme-text)' }}>
+                  <input
+                    type="checkbox"
+                    checked={protect}
+                    onChange={(e) => {
+                      setProtect(e.target.checked);
+                      setExportState(null);
+                    }}
+                    className="mt-0.5"
+                  />
+                  <span>Protect the file with a passphrase (recommended)</span>
+                </label>
+                {includeKeys && !protect && (
                   <p role="note" className="text-xs leading-relaxed text-rose-500">
                     Keys are written to the file as plain text. Anyone who gets the file can use them, so keep it private and delete it once restored.
                   </p>
                 )}
+                {protect && (
+                  <div className="space-y-2">
+                    <p className="text-xs leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
+                      The whole file is encrypted. There is no recovery: if you forget the passphrase the backup cannot be opened.
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type={showPassphrase ? 'text' : 'password'}
+                        value={passphrase}
+                        onChange={(e) => setPassphrase(e.target.value)}
+                        aria-label="Backup passphrase"
+                        autoComplete="new-password"
+                        placeholder="Passphrase (8+ characters)"
+                        className="flex-1 min-w-0 px-3 py-1.5 text-xs rounded-lg border focus:outline-none"
+                        style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)', color: 'var(--theme-text)' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassphrase((v) => !v)}
+                        aria-label={showPassphrase ? 'Hide passphrase' : 'Show passphrase'}
+                        className="p-1.5 rounded-lg border cursor-pointer hover:opacity-80"
+                        style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}
+                      >
+                        {showPassphrase ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                    <input
+                      type={showPassphrase ? 'text' : 'password'}
+                      value={confirmation}
+                      onChange={(e) => setConfirmation(e.target.value)}
+                      aria-label="Confirm passphrase"
+                      autoComplete="new-password"
+                      placeholder="Type it again"
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border focus:outline-none"
+                      style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)', color: 'var(--theme-text)' }}
+                    />
+                  </div>
+                )}
+                {exportState && (
+                  <p role={exportState.ok ? 'status' : 'alert'} className={`text-xs font-medium ${exportState.ok ? 'text-emerald-500' : 'text-rose-500'}`}>
+                    {exportState.text}
+                  </p>
+                )}
                 <button
                   id="btn-export-backup"
-                  onClick={() => onExportBackup({ includeKeys })}
-                  className="px-4 py-2 text-xs font-semibold rounded-lg shadow-sm transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  onClick={() => void handleExport()}
+                  disabled={exporting}
+                  className="px-4 py-2 text-xs font-semibold rounded-lg shadow-sm transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 disabled:opacity-60"
                   style={{
                     backgroundColor: 'var(--theme-primary)',
                     color: 'var(--theme-primary-foreground, #000000)',
                   }}
                 >
                   <Download className="w-3.5 h-3.5" />
-                  Download Backup JSON
+                  {protect ? 'Download Protected Backup' : 'Download Backup JSON'}
                 </button>
               </div>
 
@@ -879,6 +1010,64 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     className="hidden"
                   />
                 </label>
+
+                {locked && (
+                  <div className="space-y-2 text-xs" style={{ color: 'var(--theme-text)' }}>
+                    <p className="font-semibold flex items-center gap-1.5">
+                      <Lock className="w-3.5 h-3.5" style={{ color: 'var(--theme-primary)' }} />
+                      {locked.name} is protected with a passphrase.
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type={showUnlock ? 'text' : 'password'}
+                        value={unlockPassphrase}
+                        onChange={(e) => setUnlockPassphrase(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && void handleUnlock()}
+                        aria-label="Passphrase for this backup"
+                        autoComplete="off"
+                        className="flex-1 min-w-0 px-3 py-1.5 text-xs rounded-lg border focus:outline-none"
+                        style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)', color: 'var(--theme-text)' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowUnlock((v) => !v)}
+                        aria-label={showUnlock ? 'Hide passphrase' : 'Show passphrase'}
+                        className="p-1.5 rounded-lg border cursor-pointer hover:opacity-80"
+                        style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)', color: 'var(--theme-text-muted)' }}
+                      >
+                        {showUnlock ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                    {unlockError && (
+                      <p role="alert" className="text-rose-500 font-medium">
+                        {unlockError}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void handleUnlock()}
+                        disabled={unlocking || unlockPassphrase === ''}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer disabled:opacity-60"
+                        style={{ backgroundColor: 'var(--theme-primary)', color: 'var(--theme-primary-foreground, #000000)' }}
+                      >
+                        {unlocking ? 'Opening...' : 'Open backup'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLocked(null);
+                          setUnlockPassphrase('');
+                          setUnlockError(null);
+                        }}
+                        className="px-3 py-1.5 rounded-lg border text-xs font-medium cursor-pointer"
+                        style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)' }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {restoreMsg && (
                   <p role="status" className="text-xs text-emerald-500 font-medium">

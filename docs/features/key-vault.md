@@ -46,7 +46,7 @@ The key goes only to its own provider, only in a header (never in the URL). HTTP
 The providers offered when adding a key come from `useProviderData().vaultProviders` (built-in data, or the live feed when set up; retired providers are not offered). Only the providers the Rust side can verify (`VAULT_PROVIDER_IDS`) can be in the vault, whatever a feed says. See [remote-data-feed.md](remote-data-feed.md).
 
 ## Backups
-**Export backup** (Settings) writes keys as plaintext JSON, because the encryption key is tied to this device. Importing re-encrypts them. This is a known risk, tracked as backlog Task 17.
+**Export backup** (Settings) leaves keys out unless the user ticks "Include my API keys". Because the key-encryption key is tied to this device, keys in a backup are readable text unless the file is protected with a passphrase, which Settings recommends and switches on when keys are included (Argon2id + AES-256-GCM, see [settings-and-backup.md](settings-and-backup.md)). Importing re-encrypts keys with this device's key.
 
 ## Tests
 - **Rust** (`secrets::tests`, `keys::tests`): round trip, empty and unicode secrets, unique nonces, wrong master key, tamper detection, malformed tokens, size limits, batch behavior with one bad token, tokens from another device, an unreachable key store, batch limits, request building for every provider (key in a header, HTTPS, never in the URL), status classification. One opt-in test (`cargo test -- --ignored`) exercises the real OS credential store.

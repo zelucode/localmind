@@ -114,12 +114,12 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 - **Solution**: (1) the loading screen and boot splash start below the title bar, so the window controls stay usable; (2) `ErrorBoundary` (wraps `App` in `main.tsx`) shows a recovery screen with its own title bar and window controls, the error message, *Try again*, *Reload app*, *Copy details* and *Close app*; (3) a watchdog in `index.html` adds *Reload* and *Close* buttons to the splash if the app hasn't replaced it after 10 s (covers a bundle that fails to load), and the splash has a drag strip from the start; (4) the loading screen has a visible **Skip (Space)** button in addition to Space / Enter / Esc / click.
 - **Status**: Completed (see `docs/features/startup-and-window.md`). Not covered: errors thrown outside React rendering (event handlers, async code) are only logged to the console.
 
-### [ ] Task 17: Backups and exported keys
+### [x] Task 17: Backups and exported keys
 - **Problem**: "Export backup" writes API keys to a JSON file in plaintext (needed because the encryption key is per device, so an encrypted blob would be useless elsewhere). Anyone with the file has the keys.
 - **Solution options**: exclude keys from backups by default with an opt-in checkbox, or encrypt the backup with a user-chosen passphrase (Argon2 + AES-GCM) so it can be restored on another machine. Add a clear warning in the export UI either way.
 - **Done so far**: the first option. Keys are left out of the workspace backup unless the user ticks "Include my API keys", which shows a plain-text warning (2026-10-06).
-- **Still open**: whether to add the passphrase-encrypted backup so keys can travel safely.
-- **Status**: Partly done; the passphrase option needs a decision.
+- **Done (2026-10-07)**: the passphrase-protected backup (Argon2id + AES-256-GCM in Rust, passphrase entry with confirmation and an eye toggle, restore asks for the passphrase, no recovery warning). Including keys switches the protection on; switching it off shows the plain-text warning. See [features/settings-and-backup.md](features/settings-and-backup.md).
+- **Status**: Completed. Not yet checked in the real window (Task 19).
 
 ### [ ] Task 18: Tests that drive the real desktop app
 - **Problem**: Frontend tests mock the Rust backend, and Rust tests don't touch the UI. Nothing covers the real IPC boundary (command names, argument shapes, permissions) end to end.
@@ -135,7 +135,6 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 - Custom tools cannot be edited, and the Add Tool form has no Quick Query template field.
 - The Add Tool and Add Bookmark forms have labels that are not linked to their inputs (screen readers do not announce the field names).
 - Browser bookmark folders are not turned into categories on import.
-- A passphrase-encrypted backup so API keys can travel safely (the second option of Task 17).
 - **Status**: Planned.
 
 ### [~] Task 21: Remote catalog data (pull, cache, refresh)

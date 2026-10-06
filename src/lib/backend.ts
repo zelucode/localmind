@@ -33,6 +33,16 @@ export function fetchFeed(url: string): Promise<string> {
   return callBackend<string>('fetch_feed', { url }, 'Updating the data feed');
 }
 
+/** Encrypt backup text with a passphrase (Argon2id + AES-256-GCM). Returns the text of the protected file. */
+export function encryptBackup(text: string, passphrase: string): Promise<string> {
+  return callBackend<string>('encrypt_backup', { text, passphrase }, 'Protecting the backup');
+}
+
+/** Open a passphrase-protected backup file and return the backup JSON. Fails with a readable message on a wrong passphrase. */
+export function decryptBackup(text: string, passphrase: string): Promise<string> {
+  return callBackend<string>('decrypt_backup', { text, passphrase }, 'Opening the protected backup');
+}
+
 export interface LogInfo {
   /** Folder that holds app.log. */
   dir: string;

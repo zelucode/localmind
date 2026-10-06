@@ -53,8 +53,32 @@ export type BackupParseResult =
   | { ok: true; backup: ParsedBackup; summary: BackupSummary; warnings: string[] }
   | { ok: false; error: string };
 
-export function backupFilename(now = new Date()): string {
-  return `localmind-backup-${now.toISOString().slice(0, 10)}.json`;
+export function backupFilename(now = new Date(), encrypted = false): string {
+  return `localmind-backup-${now.toISOString().slice(0, 10)}${encrypted ? '-encrypted' : ''}.json`;
+}
+
+/** Marker written by the Rust side (`backupcrypto.rs`) into a passphrase-protected backup. */
+export const ENCRYPTED_BACKUP_FORMAT = 'localmind-encrypted-backup';
+export const MIN_PASSPHRASE_LENGTH = 8;
+export const MAX_PASSPHRASE_LENGTH = 256;
+
+/** True when the file is a passphrase-protected backup (it must be opened with its passphrase first). */
+export function isEncryptedBackup(text: string): boolean {
+  try {
+    const data = JSON.parse(text);
+    return typeof data === 'object' && data !== null && data.format === ENCRYPTED_BACKUP_FORMAT;
+  } catch {
+    return false;
+  }
+}
+
+/** Why a new passphrase can't be used, or null when it is fine. Counted in characters, like the Rust side. */
+export function passphraseProblem(passphrase: string, confirmation: string): string | null {
+  const length = Array.from(passphrase).length;
+  if (length < MIN_PASSPHRASE_LENGTH) return `Use at least ${MIN_PASSPHRASE_LENGTH} characters.`;
+  if (length > MAX_PASSPHRASE_LENGTH) return `Use at most ${MAX_PASSPHRASE_LENGTH} characters.`;
+  if (passphrase !== confirmation) return 'The two passphrases do not match.';
+  return null;
 }
 
 /** The JSON text of a full backup. API keys are included only when asked for (they are written as plain text). */

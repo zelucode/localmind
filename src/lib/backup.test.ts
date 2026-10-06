@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { AITool, StoredApiKey, ToolBookmark } from '../types';
 import { defaultThemePresets } from '../theme';
-import { BackupInput, backupFilename, buildBackup, describeRestore, parseBackup } from './backup';
+import {
+  BackupInput,
+  ENCRYPTED_BACKUP_FORMAT,
+  backupFilename,
+  buildBackup,
+  describeRestore,
+  isEncryptedBackup,
+  parseBackup,
+  passphraseProblem,
+} from './backup';
 
 const NOW = new Date('2026-10-06T12:00:00Z');
 
@@ -144,5 +153,34 @@ describe('parseBackup', () => {
   it('describes what a restore replaces', () => {
     const r = ok(buildBackup(input, { includeKeys: true }, NOW));
     expect(describeRestore(r.summary)).toEqual(['1 custom tool', '1 API key', '1 bookmark', '2 custom themes', 'selected theme', 'preferences']);
+  });
+});
+
+describe('passphrase-protected backups', () => {
+  it('recognises a protected file by its format marker and nothing else', () => {
+    expect(isEncryptedBackup(JSON.stringify({ format: ENCRYPTED_BACKUP_FORMAT, version: 1 }))).toBe(true);
+    expect(isEncryptedBackup(JSON.stringify({ version: 2, bookmarks: [] }))).toBe(false);
+    expect(isEncryptedBackup('not json')).toBe(false);
+    expect(isEncryptedBackup('null')).toBe(false);
+    expect(isEncryptedBackup('[]')).toBe(false);
+  });
+
+  it('names a protected file differently from a plain one', () => {
+    expect(backupFilename(NOW)).toBe('localmind-backup-2026-10-06.json');
+    expect(backupFilename(NOW, true)).toBe('localmind-backup-2026-10-06-encrypted.json');
+  });
+
+  it('checks a new passphrase for length (in characters) and for a matching confirmation', () => {
+    expect(passphraseProblem('short', 'short')).toMatch(/at least 8/);
+    expect(passphraseProblem('éééééé', 'éééééé')).toMatch(/at least 8/); // 6 characters, 12 bytes
+    expect(passphraseProblem('éééééééé', 'éééééééé')).toBeNull();
+    expect(passphraseProblem('a'.repeat(257), 'a'.repeat(257))).toMatch(/at most 256/);
+    expect(passphraseProblem('long enough one', 'long enough two')).toMatch(/do not match/);
+    expect(passphraseProblem('long enough', 'long enough')).toBeNull();
+  });
+
+  it('a protected file is not mistaken for a readable backup', () => {
+    const r = parseBackup(JSON.stringify({ format: ENCRYPTED_BACKUP_FORMAT, version: 1, data: 'x' }));
+    expect(r.ok).toBe(false);
   });
 });

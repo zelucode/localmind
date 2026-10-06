@@ -11,6 +11,14 @@ vi.mock('./lib/backend', async (importOriginal) => ({
   verifyApiKey: vi.fn(),
   encryptSecrets: async (values: string[]) => values.map(enc),
   decryptSecrets: async (tokens: string[]) => tokens.map((t) => ({ value: dec(t), error: null })),
+  // Reversible stand-ins for the Rust Argon2 + AES-GCM commands: the passphrase must match to open the text.
+  encryptBackup: async (text: string, passphrase: string) =>
+    JSON.stringify({ format: 'localmind-encrypted-backup', blob: btoa(unescape(encodeURIComponent(`${passphrase}\n${text}`))) }),
+  decryptBackup: async (file: string, passphrase: string) => {
+    const [pass, ...rest] = decodeURIComponent(escape(atob(JSON.parse(file).blob))).split('\n');
+    if (pass !== passphrase) throw new Error('Wrong passphrase, or the file has been changed.');
+    return rest.join('\n');
+  },
 }));
 
 const download = vi.fn();
@@ -64,9 +72,44 @@ describe('backup and restore in the app', () => {
     expect(text).not.toContain('AIzaMYSECRET');
     expect(JSON.parse(text).bookmarks.length).toBeGreaterThan(100);
 
+    // Including keys switches passphrase protection on; switching it off again exports them as plain text.
     await userEvent.click(screen.getByRole('checkbox', { name: /include my api keys/i }));
+    expect(screen.getByRole('checkbox', { name: /protect the file with a passphrase/i })).toBeChecked();
+    await userEvent.click(screen.getByRole('checkbox', { name: /protect the file with a passphrase/i }));
     await userEvent.click(screen.getByRole('button', { name: /download backup json/i }));
     expect(download.mock.calls[1][1]).toContain('AIzaMYSECRET');
+  });
+
+  it('exports a passphrase-protected backup that does not show the keys, and restores it with the passphrase', async () => {
+    render(<App />);
+    await openDataTab();
+    await userEvent.click(screen.getByRole('checkbox', { name: /include my api keys/i }));
+    await userEvent.type(screen.getByLabelText('Backup passphrase'), 'correct horse battery');
+    await userEvent.type(screen.getByLabelText('Confirm passphrase'), 'correct horse battery');
+    await userEvent.click(screen.getByRole('button', { name: /download protected backup/i }));
+
+    await waitFor(() => expect(download).toHaveBeenCalledTimes(1));
+    const [name, text] = download.mock.calls[0];
+    expect(name).toMatch(/^localmind-backup-\d{4}-\d{2}-\d{2}-encrypted\.json$/);
+    expect(text).not.toContain('AIzaMYSECRET');
+    expect(await screen.findByRole('status')).toHaveTextContent(/cannot be recovered/i);
+
+    // Restore it: the app asks for the passphrase first, and a wrong one restores nothing.
+    localStorage.removeItem(KEYS);
+    await userEvent.upload(screen.getByLabelText('Backup file'), new File([text], name, { type: 'application/json' }));
+    expect(await screen.findByText(/is protected with a passphrase/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /restore and replace/i })).not.toBeInTheDocument();
+    await userEvent.type(screen.getByLabelText('Passphrase for this backup'), 'wrong one');
+    await userEvent.click(screen.getByRole('button', { name: 'Open backup' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(/wrong passphrase/i);
+    expect(localStorage.getItem(KEYS)).toBeNull();
+
+    await userEvent.clear(screen.getByLabelText('Passphrase for this backup'));
+    await userEvent.type(screen.getByLabelText('Passphrase for this backup'), 'correct horse battery');
+    await userEvent.click(screen.getByRole('button', { name: 'Open backup' }));
+    await userEvent.click(await screen.findByRole('button', { name: /restore and replace/i }));
+    await waitFor(() => expect(localStorage.getItem(KEYS)).toContain('enc:v1:'));
+    expect(JSON.parse(localStorage.getItem(KEYS)!)).toHaveLength(1);
   });
 
   it('restores only the sections in the file: bookmarks change, saved keys are kept', async () => {

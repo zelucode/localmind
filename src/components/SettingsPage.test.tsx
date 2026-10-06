@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+vi.mock('../lib/backend', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../lib/backend')>()),
+  decryptBackup: vi.fn(),
+}));
+
+import { decryptBackup } from '../lib/backend';
 import { SettingsPage } from './SettingsPage';
 import { defaultThemePresets } from '../theme';
 
@@ -159,9 +165,114 @@ describe('Settings: backup export', () => {
 
     expect(screen.queryByRole('note')).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('checkbox', { name: /include my api keys \(2\)/i }));
+    // Including keys switches the passphrase on, so there is no plain-text warning yet.
+    expect(screen.getByRole('checkbox', { name: /protect the file with a passphrase/i })).toBeChecked();
+    expect(screen.queryByRole('note')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('checkbox', { name: /protect the file with a passphrase/i }));
     expect(screen.getByRole('note')).toHaveTextContent(/plain text/i);
     await userEvent.click(screen.getByRole('button', { name: /download backup json/i }));
     expect(props.onExportBackup).toHaveBeenLastCalledWith({ includeKeys: true });
+  });
+});
+
+describe('Settings: passphrase-protected backup export', () => {
+  const openProtected = async (over: Partial<React.ComponentProps<typeof SettingsPage>> = {}) => {
+    const props = setup(over);
+    await goTo(/data|backup/i);
+    await userEvent.click(screen.getByRole('checkbox', { name: /protect the file with a passphrase/i }));
+    return props;
+  };
+  const type = async (pass: string, again = pass) => {
+    await userEvent.type(screen.getByLabelText('Backup passphrase'), pass);
+    await userEvent.type(screen.getByLabelText('Confirm passphrase'), again);
+  };
+
+  it('masks the passphrase by default, with an eye toggle, and warns there is no recovery', async () => {
+    await openProtected();
+    expect(screen.getByLabelText('Backup passphrase')).toHaveAttribute('type', 'password');
+    expect(screen.getByLabelText('Confirm passphrase')).toHaveAttribute('type', 'password');
+    expect(screen.getByText(/no recovery/i)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Show passphrase' }));
+    expect(screen.getByLabelText('Backup passphrase')).toHaveAttribute('type', 'text');
+    expect(screen.getByRole('button', { name: /download protected backup/i })).toBeInTheDocument();
+  });
+
+  it('refuses a short passphrase and a mismatch, and exports nothing', async () => {
+    const props = await openProtected();
+    await type('short');
+    await userEvent.click(screen.getByRole('button', { name: /download protected backup/i }));
+    expect(screen.getByRole('alert')).toHaveTextContent(/at least 8 characters/i);
+    await userEvent.clear(screen.getByLabelText('Backup passphrase'));
+    await userEvent.clear(screen.getByLabelText('Confirm passphrase'));
+    await type('long enough one', 'long enough two');
+    await userEvent.click(screen.getByRole('button', { name: /download protected backup/i }));
+    expect(screen.getByRole('alert')).toHaveTextContent(/do not match/i);
+    expect(props.onExportBackup).not.toHaveBeenCalled();
+  });
+
+  it('hands the passphrase to the export, reports it, and clears the fields', async () => {
+    const props = await openProtected();
+    await type('correct horse battery');
+    await userEvent.click(screen.getByRole('button', { name: /download protected backup/i }));
+    expect(props.onExportBackup).toHaveBeenLastCalledWith({ includeKeys: false, passphrase: 'correct horse battery' });
+    expect(await screen.findByRole('status')).toHaveTextContent(/cannot be recovered/i);
+    expect(screen.getByLabelText('Backup passphrase')).toHaveValue('');
+  });
+
+  it('shows the reason when the protected export fails, and does not claim success', async () => {
+    await openProtected({ onExportBackup: vi.fn().mockRejectedValue(new Error('Protecting the backup needs the LocalMind desktop app.')) });
+    await type('correct horse battery');
+    await userEvent.click(screen.getByRole('button', { name: /download protected backup/i }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('needs the LocalMind desktop app');
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+});
+
+describe('Settings: restoring a passphrase-protected backup', () => {
+  const PROTECTED = JSON.stringify({ format: 'localmind-encrypted-backup', version: 1, data: 'x' });
+  const decrypt = vi.mocked(decryptBackup);
+
+  it('asks for the passphrase instead of reading the file, and restores nothing yet', async () => {
+    const props = setup();
+    await goTo(/data|backup/i);
+    await chooseBackup(PROTECTED, 'mine-encrypted.json');
+    expect(await screen.findByText(/mine-encrypted\.json is protected with a passphrase/)).toBeInTheDocument();
+    expect(screen.getByLabelText('Passphrase for this backup')).toHaveAttribute('type', 'password');
+    expect(screen.queryByRole('button', { name: /restore and replace/i })).not.toBeInTheDocument();
+    expect(props.onImportBackup).not.toHaveBeenCalled();
+  });
+
+  it('shows a wrong passphrase as an error and lets the user try again', async () => {
+    decrypt.mockRejectedValueOnce(new Error('Wrong passphrase, or the file has been changed.'));
+    decrypt.mockResolvedValueOnce(BACKUP);
+    const props = setup();
+    await goTo(/data|backup/i);
+    await chooseBackup(PROTECTED);
+    await userEvent.type(await screen.findByLabelText('Passphrase for this backup'), 'nope');
+    await userEvent.click(screen.getByRole('button', { name: 'Open backup' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(/wrong passphrase/i);
+    expect(props.onImportBackup).not.toHaveBeenCalled();
+
+    await userEvent.clear(screen.getByLabelText('Passphrase for this backup'));
+    await userEvent.type(screen.getByLabelText('Passphrase for this backup'), 'right one');
+    await userEvent.click(screen.getByRole('button', { name: 'Open backup' }));
+    expect(await screen.findByText(/1 custom tool • 1 API key • 1 bookmark/)).toBeInTheDocument();
+    expect(decrypt).toHaveBeenLastCalledWith(PROTECTED, 'right one');
+    await userEvent.click(screen.getByRole('button', { name: /restore and replace/i }));
+    expect(props.onImportBackup).toHaveBeenCalledOnce();
+  });
+
+  it('cancel drops the locked file, and choosing another file replaces it', async () => {
+    setup();
+    await goTo(/data|backup/i);
+    await chooseBackup(PROTECTED);
+    await userEvent.click(await screen.findByRole('button', { name: /^cancel$/i }));
+    expect(screen.queryByLabelText('Passphrase for this backup')).not.toBeInTheDocument();
+    await chooseBackup(PROTECTED);
+    await screen.findByLabelText('Passphrase for this backup');
+    await chooseBackup(BACKUP);
+    expect(await screen.findByText(/1 custom tool • 1 API key • 1 bookmark/)).toBeInTheDocument();
+    expect(screen.queryByLabelText('Passphrase for this backup')).not.toBeInTheDocument();
   });
 });
 

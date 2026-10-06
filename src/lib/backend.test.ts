@@ -6,7 +6,9 @@ vi.mock('@tauri-apps/plugin-opener', () => ({ openUrl: vi.fn() }));
 
 import {
   askAdvisor,
+  decryptBackup,
   decryptSecrets,
+  encryptBackup,
   encryptSecrets,
   getLogInfo,
   indexProbeResults,
@@ -99,5 +101,27 @@ describe('logging and diagnostics wrappers', () => {
 
   it('refuse in a plain browser', async () => {
     await expect(previewDiagnostics()).rejects.toThrow('needs the LocalMind desktop app');
+  });
+});
+
+describe('backup encryption wrappers', () => {
+  it('send the text and passphrase the Rust commands expect', async () => {
+    inTauri();
+    invokeMock.mockResolvedValue('{"format":"localmind-encrypted-backup"}');
+    await expect(encryptBackup('{"a":1}', 'a passphrase')).resolves.toContain('encrypted-backup');
+    expect(invokeMock).toHaveBeenCalledWith('encrypt_backup', { text: '{"a":1}', passphrase: 'a passphrase' });
+    invokeMock.mockResolvedValue('{"a":1}');
+    await expect(decryptBackup('file text', 'a passphrase')).resolves.toBe('{"a":1}');
+    expect(invokeMock).toHaveBeenCalledWith('decrypt_backup', { text: 'file text', passphrase: 'a passphrase' });
+  });
+
+  it('surface the Rust error message, such as a wrong passphrase', async () => {
+    inTauri();
+    invokeMock.mockRejectedValue('Wrong passphrase, or the file has been changed.');
+    await expect(decryptBackup('x', 'y')).rejects.toThrow('Wrong passphrase');
+  });
+
+  it('refuse in a plain browser instead of writing an unprotected file', async () => {
+    await expect(encryptBackup('x', 'long enough')).rejects.toThrow('needs the LocalMind desktop app');
   });
 });

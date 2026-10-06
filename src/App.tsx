@@ -28,6 +28,8 @@ import { GlobalSearchModal } from './components/GlobalSearchModal';
 import { ExportImportBookmarksModal } from './components/ExportImportBookmarksModal';
 import { ParsedBackup, backupFilename, buildBackup } from './lib/backup';
 import { downloadTextFile } from './lib/files';
+import { encryptBackup } from './lib/backend';
+import { logInfo } from './lib/errorLog';
 import { applyImport, ImportedBookmark, ImportMode, ImportResult, ImportSource } from './lib/bookmarkTransfer';
 import { StartupWelcomeModal } from './components/StartupWelcomeModal';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -641,7 +643,7 @@ export default function App() {
   };
 
   // Full backup and restore
-  const handleExportBackup = (options: { includeKeys: boolean }) => {
+  const handleExportBackup = async (options: { includeKeys: boolean; passphrase?: string }) => {
     const text = buildBackup(
       {
         customTools: tools.filter((t) => t.isCustom),
@@ -653,9 +655,17 @@ export default function App() {
         customThemeJson,
         preferences: { defaultLaunchSearch, showScopeExplainer, showStartupScreen, showLoadingAnimation },
       },
-      options,
+      { includeKeys: options.includeKeys },
     );
+    if (options.passphrase) {
+      // Throws a readable error (e.g. outside the desktop app); the Settings page shows it and nothing is saved.
+      const protectedText = await encryptBackup(text, options.passphrase);
+      downloadTextFile(backupFilename(new Date(), true), protectedText, 'application/json');
+      logInfo('backup', `Exported a passphrase-protected backup (keys: ${options.includeKeys ? 'yes' : 'no'})`);
+      return;
+    }
     downloadTextFile(backupFilename(), text, 'application/json');
+    logInfo('backup', `Exported a plain backup (keys: ${options.includeKeys ? 'yes, as plain text' : 'no'})`);
   };
 
   // Applies only the sections that are in the (already validated) backup; everything else stays as it is.

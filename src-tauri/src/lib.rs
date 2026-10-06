@@ -1,5 +1,6 @@
 mod advisor;
 mod applog;
+mod backupcrypto;
 mod feed;
 mod keys;
 mod probe;
@@ -44,6 +45,8 @@ pub fn run() {
             applog::log_info,
             applog::preview_diagnostics,
             applog::save_diagnostics,
+            backupcrypto::encrypt_backup,
+            backupcrypto::decrypt_backup,
             secrets::encrypt_secrets,
             secrets::decrypt_secrets,
         ])
