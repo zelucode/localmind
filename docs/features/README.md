@@ -16,6 +16,7 @@ One page per feature: what it does for the user, how it works, where the code li
 | [Rate-Limit Matrix](rate-limit-matrix.md) | Free-tier quota comparison and the fallback (rotation) order |
 | [Live provider data](remote-data-feed.md) | Optional JSON feed that updates quotas and retired providers without a release, cached with a Refresh button |
 | [Advisor](advisor.md) | The Free Tier Advisor (built, currently hidden) |
+| [Logging and Report a Problem](logging-and-diagnostics.md) | One app.log for frontend and backend, key redaction, the diagnostics file |
 | [Startup and window](startup-and-window.md) | Boot splash, loading screen, frameless window and window controls |
 | [Testing](testing.md) | Running and writing the Vitest and Rust tests |
 

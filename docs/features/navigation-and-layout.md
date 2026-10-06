@@ -23,7 +23,7 @@ Logo and "LocalMind" (click for Home) · page title · search box (opens Ctrl+K)
 - Empty title-bar space drags the window; double-click toggles maximize.
 
 ### Help menu (the `?` icon)
-Keyboard Shortcuts · Welcome & Quick Start · About LocalMind · Documentation (disabled, "Soon") · Report a Problem (disabled, "Soon"). The two disabled items are tracked in the backlog (Tasks 6 and 7).
+Keyboard Shortcuts · Welcome & Quick Start · About LocalMind · Documentation (disabled, "Soon") · Report a Problem (opens the diagnostics dialog, see [logging-and-diagnostics.md](logging-and-diagnostics.md)). Documentation is tracked in the backlog (Task 6).
 
 ### Keyboard shortcuts
 `Ctrl/Cmd+K` search palette · `1`–`7` jump to a page · `?` shortcut sheet · `/` focus the page's search · `k` Key Vault · `c` Config Exporter · `l` Rate-Limit Matrix · `b` add a bookmark · `t` toggle light/dark · `Esc` close the top dialog. Single-letter shortcuts are ignored while typing in a field.
@@ -41,5 +41,5 @@ Keyboard Shortcuts · Welcome & Quick Start · About LocalMind · Documentation 
 `Sidebar.test.tsx`, `Header.test.tsx` (titles, contextual buttons, Help menu), `HomePage.test.tsx`, and `App.test.tsx` (navigation through every page, number-key shortcuts, collapse persistence, theme toggle, Help → Shortcuts / About), `App.shortcuts.test.tsx` (every hotkey in the cheat-sheet: 1-7, k, c, l, b, t, /, Ctrl+K, and that letter hotkeys are ignored while typing), `KeyboardShortcutsModal.test.tsx`, `AboutModal.test.tsx` (real version, privacy wording, closing) and `WindowControls.test.tsx` (minimize / maximize / restore / close, drag region, no-op outside the desktop app).
 
 ## Limits
-- Documentation and Report a Problem are placeholders (backlog Tasks 6, 7).
+- Documentation is a placeholder (backlog Task 6).
 - The title bar has no tray or menu bar on macOS; macOS traffic-light handling is not implemented (the app targets Windows first).

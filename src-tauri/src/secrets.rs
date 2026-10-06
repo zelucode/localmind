@@ -144,16 +144,30 @@ pub fn decrypt_all(store: &dyn MasterKeyStore, tokens: &[String]) -> Result<Vec<
 
 #[tauri::command]
 pub async fn encrypt_secrets(values: Vec<String>) -> Result<Vec<String>, String> {
-    tauri::async_runtime::spawn_blocking(move || encrypt_all(&OsKeyStore, &values))
+    let result = tauri::async_runtime::spawn_blocking(move || encrypt_all(&OsKeyStore, &values))
         .await
-        .map_err(|e| e.to_string())?
+        .map_err(|e| e.to_string())?;
+    if let Err(message) = &result {
+        crate::applog::error("secrets", &format!("Encrypting failed: {message}"));
+    }
+    result
 }
 
 #[tauri::command]
 pub async fn decrypt_secrets(tokens: Vec<String>) -> Result<Vec<DecryptResult>, String> {
-    tauri::async_runtime::spawn_blocking(move || decrypt_all(&OsKeyStore, &tokens))
+    let result = tauri::async_runtime::spawn_blocking(move || decrypt_all(&OsKeyStore, &tokens))
         .await
-        .map_err(|e| e.to_string())?
+        .map_err(|e| e.to_string())?;
+    match &result {
+        Err(message) => crate::applog::error("secrets", &format!("Decrypting failed: {message}")),
+        Ok(items) => {
+            let failed = items.iter().filter(|r| r.value.is_none()).count();
+            if failed > 0 {
+                crate::applog::warn("secrets", &format!("{failed} of {} stored keys could not be decrypted", items.len()));
+            }
+        }
+    }
+    result
 }
 
 #[cfg(test)]

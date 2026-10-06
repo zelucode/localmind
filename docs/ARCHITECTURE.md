@@ -68,6 +68,7 @@ API keys are encrypted at rest: AES-256-GCM in Rust, master key in the OS creden
 |---|---|---|
 | `probe_ports` | `probe.rs` | TCP-connect to `127.0.0.1:<port>` for up to 32 ports (the webview can't do this because of CORS) |
 | `verify_api_key` | `keys.rs` | Ask a provider whether a key is accepted (key sent in a header over HTTPS) |
+| `log_event`, `log_info`, `preview_diagnostics`, `save_diagnostics` | `applog.rs` | One `app.log` shared by Rust and the frontend (rotated, keys redacted) and the Report a Problem diagnostics file |
 | `fetch_feed` | `feed.rs` | HTTPS-only, size-limited download of the remote provider-data JSON; the frontend validates, merges and caches it (`src/lib/feed.ts`) |
 | `encrypt_secrets`, `decrypt_secrets` | `secrets.rs` | AES-256-GCM with the master key held in the OS credential store |
 | `ask_advisor` | `advisor.rs` | Gemini-backed "free tier" advice using the user's own key (feature currently hidden) |

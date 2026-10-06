@@ -62,7 +62,10 @@ pub fn sanitize_ports(ports: Vec<u32>) -> Result<Vec<u16>, String> {
 /// Probe several ports concurrently. Results come back in request order.
 #[tauri::command]
 pub async fn probe_ports(ports: Vec<u32>) -> Result<Vec<ProbeResult>, String> {
-    let ports = sanitize_ports(ports)?;
+    let ports = sanitize_ports(ports).map_err(|message| {
+        crate::applog::warn("probe", &message);
+        message
+    })?;
     let handles: Vec<_> = ports
         .into_iter()
         .map(|p| tauri::async_runtime::spawn_blocking(move || probe_port_blocking(p, CONNECT_TIMEOUT)))

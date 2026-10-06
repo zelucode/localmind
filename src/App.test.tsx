@@ -73,6 +73,15 @@ describe('App shell navigation', () => {
     expect(document.getElementById('modal-keyboard-shortcuts')).toBeInTheDocument();
   });
 
+  it('opens Report a Problem from the Help menu and closes it with Escape', async () => {
+    render(<App />);
+    await userEvent.click(screen.getByRole('button', { name: 'Help' }));
+    await userEvent.click(screen.getByRole('menuitem', { name: /Report a Problem/ }));
+    expect(screen.getByRole('dialog', { name: 'Report a Problem' })).toBeInTheDocument();
+    await userEvent.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog', { name: 'Report a Problem' })).not.toBeInTheDocument();
+  });
+
   it('opens About from the Help menu', async () => {
     render(<App />);
     await userEvent.click(screen.getByRole('button', { name: 'Help' }));

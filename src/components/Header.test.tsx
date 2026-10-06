@@ -17,6 +17,7 @@ function setup(activeView: ActiveView = 'home', overrides: Partial<React.Compone
     onOpenShortcuts: vi.fn(),
     onOpenWelcome: vi.fn(),
     onOpenAbout: vi.fn(),
+    onOpenReportProblem: vi.fn(),
     ...overrides,
   };
   render(<Header {...props} />);
@@ -92,13 +93,14 @@ describe('Help menu', () => {
     expect(screen.getByRole('menuitem', { name: /Welcome & Quick Start/ })).toBeEnabled();
     expect(screen.getByRole('menuitem', { name: /About LocalMind/ })).toBeEnabled();
     expect(screen.getByRole('menuitem', { name: /Documentation/ })).toBeDisabled();
-    expect(screen.getByRole('menuitem', { name: /Report a Problem/ })).toBeDisabled();
+    expect(screen.getByRole('menuitem', { name: /Report a Problem/ })).toBeEnabled();
   });
 
   it.each([
     ['Keyboard Shortcuts', 'onOpenShortcuts'],
     ['Welcome & Quick Start', 'onOpenWelcome'],
     ['About LocalMind', 'onOpenAbout'],
+    ['Report a Problem', 'onOpenReportProblem'],
   ] as const)('"%s" runs its handler and closes the menu', async (label, handler) => {
     const props = setup();
     await open();

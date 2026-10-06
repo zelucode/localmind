@@ -39,7 +39,16 @@ fn too_large() -> String {
 /// Download the feed and return its text. Every failure comes back as a readable message.
 #[tauri::command]
 pub async fn fetch_feed(url: String) -> Result<String, String> {
-    let url = validate_feed_url(&url)?;
+    let result = download(&url).await;
+    match &result {
+        Ok(body) => crate::applog::info("feed", &format!("Downloaded {} bytes from {}", body.len(), url.trim())),
+        Err(message) => crate::applog::warn("feed", &format!("{message} ({})", url.trim())),
+    }
+    result
+}
+
+async fn download(url: &str) -> Result<String, String> {
+    let url = validate_feed_url(url)?;
 
     // Follow redirects (GitHub raw links sometimes redirect) but never off HTTPS.
     let policy = reqwest::redirect::Policy::custom(|attempt| {

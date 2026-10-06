@@ -75,6 +75,14 @@ pub fn http_error_message(status: u16) -> String {
 
 #[tauri::command]
 pub async fn ask_advisor(request: AdvisorRequest) -> Result<String, String> {
+    let result = advise(request).await;
+    if let Err(message) = &result {
+        crate::applog::warn("advisor", message);
+    }
+    result
+}
+
+async fn advise(request: AdvisorRequest) -> Result<String, String> {
     let query = validate_query(&request.query)?;
     let key = request.api_key.trim().to_string();
     crate::keys::validate_key_input(&key)

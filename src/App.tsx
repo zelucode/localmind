@@ -9,6 +9,7 @@ import { Header } from './components/Header';
 import { Sidebar, ActiveView, SIDEBAR_WIDTH, SIDEBAR_WIDTH_COLLAPSED } from './components/Sidebar';
 import { HomePage } from './components/HomePage';
 import { AboutModal } from './components/AboutModal';
+import { ReportProblemModal } from './components/ReportProblemModal';
 import { OmniRouteWidget } from './components/OmniRouteWidget';
 import { ToolsPage } from './components/ToolsPage';
 import { SettingsPage } from './components/SettingsPage';
@@ -216,6 +217,7 @@ export default function App() {
   const [configsTab, setConfigsTab] = useState<'exporter' | 'limits'>('exporter');
   const [configExporterProvider, setConfigExporterProvider] = useState<string | undefined>(undefined);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
   const [isExportImportBookmarksOpen, setIsExportImportBookmarksOpen] = useState(false);
@@ -445,6 +447,10 @@ export default function App() {
           setIsAboutOpen(false);
           return;
         }
+        if (isReportOpen) {
+          setIsReportOpen(false);
+          return;
+        }
         if (isAdvisorOpen) {
           setIsAdvisorOpen(false);
           return;
@@ -548,6 +554,7 @@ export default function App() {
     isGlobalSearchOpen,
     isShortcutsOpen,
     isAboutOpen,
+    isReportOpen,
     isAdvisorOpen,
     isAddModalOpen,
     isAddBookmarkModalOpen,
@@ -775,6 +782,7 @@ export default function App() {
         onOpenShortcuts={() => setIsShortcutsOpen(true)}
         onOpenWelcome={() => setIsStartupScreenOpen(true)}
         onOpenAbout={() => setIsAboutOpen(true)}
+        onOpenReportProblem={() => setIsReportOpen(true)}
       />
 
       {/* Content area: the only scrolling region, so the scrollbar stays below the title bar */}
@@ -1008,6 +1016,7 @@ export default function App() {
         )}
 
         <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+        <ReportProblemModal isOpen={isReportOpen} onClose={() => setIsReportOpen(false)} />
       </div>
 
       {/* Advisor: a floating action rather than a sidebar page (hidden by FEATURES.advisor) */}

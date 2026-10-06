@@ -27,6 +27,7 @@ interface HeaderProps {
   onOpenShortcuts: () => void;
   onOpenWelcome: () => void;
   onOpenAbout: () => void;
+  onOpenReportProblem: () => void;
 }
 
 const PAGE_TITLES: Record<ActiveView, string> = {
@@ -74,7 +75,8 @@ const HelpMenu: React.FC<{
   onOpenShortcuts: () => void;
   onOpenWelcome: () => void;
   onOpenAbout: () => void;
-}> = ({ onOpenShortcuts, onOpenWelcome, onOpenAbout }) => {
+  onOpenReportProblem: () => void;
+}> = ({ onOpenShortcuts, onOpenWelcome, onOpenAbout, onOpenReportProblem }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -134,7 +136,7 @@ const HelpMenu: React.FC<{
           <MenuItem icon={<Info className="w-3.5 h-3.5" />} label="About LocalMind" onSelect={pick(onOpenAbout)} />
           <MenuItem icon={<BookOpen className="w-3.5 h-3.5" />} label="Documentation" hint="Soon" disabled />
           <div className="h-px my-1" style={{ backgroundColor: 'var(--theme-border)' }} />
-          <MenuItem icon={<Bug className="w-3.5 h-3.5" />} label="Report a Problem" hint="Soon" disabled />
+          <MenuItem icon={<Bug className="w-3.5 h-3.5" />} label="Report a Problem" onSelect={pick(onOpenReportProblem)} />
         </div>
       )}
     </div>
@@ -153,6 +155,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenShortcuts,
   onOpenWelcome,
   onOpenAbout,
+  onOpenReportProblem,
 }) => {
   const isMac = useMemo(() => {
     return typeof window !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
@@ -286,7 +289,12 @@ export const Header: React.FC<HeaderProps> = ({
             >
               {themeMode === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
-            <HelpMenu onOpenShortcuts={onOpenShortcuts} onOpenWelcome={onOpenWelcome} onOpenAbout={onOpenAbout} />
+            <HelpMenu
+              onOpenShortcuts={onOpenShortcuts}
+              onOpenWelcome={onOpenWelcome}
+              onOpenAbout={onOpenAbout}
+              onOpenReportProblem={onOpenReportProblem}
+            />
           </div>
           <WindowControls />
         </div>

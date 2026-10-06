@@ -4,9 +4,13 @@ const invokeMock = vi.fn();
 const openUrlMock = vi.fn();
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: (...a: unknown[]) => invokeMock(...a) }));
-vi.mock('@tauri-apps/plugin-opener', () => ({ openUrl: (...a: unknown[]) => openUrlMock(...a) }));
+const revealMock = vi.fn();
+vi.mock('@tauri-apps/plugin-opener', () => ({
+  openUrl: (...a: unknown[]) => openUrlMock(...a),
+  revealItemInDir: (...a: unknown[]) => revealMock(...a),
+}));
 
-import { BackendUnavailableError, callBackend, isTauri, openExternal } from './tauri';
+import { BackendUnavailableError, callBackend, isTauri, openExternal, revealInFolder } from './tauri';
 
 function setTauri(on: boolean) {
   if (on) (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {};
@@ -17,6 +21,7 @@ afterEach(() => {
   setTauri(false);
   invokeMock.mockReset();
   openUrlMock.mockReset();
+  revealMock.mockReset();
 });
 
 describe('isTauri', () => {
@@ -75,5 +80,18 @@ describe('openExternal', () => {
     const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
     await openExternal('https://example.com');
     expect(openSpy).toHaveBeenCalled();
+  });
+});
+
+describe('revealInFolder', () => {
+  it('asks the opener plugin to show the file inside the desktop app', async () => {
+    setTauri(true);
+    await revealInFolder('C:/logs/app.log');
+    expect(revealMock).toHaveBeenCalledWith('C:/logs/app.log');
+  });
+
+  it('refuses in a plain browser instead of pretending', async () => {
+    await expect(revealInFolder('x')).rejects.toBeInstanceOf(BackendUnavailableError);
+    expect(revealMock).not.toHaveBeenCalled();
   });
 });

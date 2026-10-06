@@ -50,10 +50,11 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 - **Solution**: Decide the docs location (hosted site, GitHub README, or bundled docs), then open it with the Tauri opener plugin.
 - **Status**: Blocked on a URL.
 
-### [ ] Task 7: Help menu: Report a Problem
+### [x] Task 7: Help menu: Report a Problem
 - **Problem**: Disabled "Report a Problem" item. Needs a diagnostic bundle design.
 - **Solution**: Build on `src/lib/errorLog.ts`: save a `.zip` (app log, version/OS, environment) via a Rust command and a save dialog, with stored API keys redacted before writing. Nothing is sent automatically.
-- **Status**: Planned.
+- **Done**: `app.log` shared by Rust and the frontend, key redaction, rotation, global error and rejection logging, and the Report a Problem dialog (preview, save to Downloads, copy, open log folder). The bundle is one `.txt`, not a `.zip`. See [features/logging-and-diagnostics.md](features/logging-and-diagnostics.md). Still to check in the real window: log location, Downloads, Show in folder (Task 19).
+- **Status**: Completed.
 
 ### [ ] Task 8: About: Check for Updates
 - **Problem**: About shows the version only. No updater is configured.

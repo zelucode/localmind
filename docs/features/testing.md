@@ -9,9 +9,9 @@ pnpm test:all      # type-check, then frontend tests, then Rust tests
 | Command | What it runs |
 |---|---|
 | `pnpm lint` | `tsc --noEmit`: the type check (clean; keep it clean) |
-| `pnpm test` | Vitest + React Testing Library in jsdom (47 files, 456 tests) |
+| `pnpm test` | Vitest + React Testing Library in jsdom (51 files, 489 tests) |
 | `pnpm test:watch` | Vitest in watch mode |
-| `pnpm test:rust` | `cargo test` for `src-tauri` (40 tests, 1 opt-in) |
+| `pnpm test:rust` | `cargo test` for `src-tauri` (51 tests, 1 opt-in) |
 | `pnpm test:all` | all of the above, in order |
 | `cd src-tauri && cargo test -- --ignored` | the opt-in test that uses the real OS credential store |
 
@@ -39,7 +39,7 @@ pnpm test:all      # type-check, then frontend tests, then Rust tests
 
 ## Rust tests
 
-Unit tests live in each module (`probe.rs`, `keys.rs`, `advisor.rs`, `secrets.rs`, `feed.rs`) under `#[cfg(test)]`. Pure logic (validation, request building, response parsing, crypto) is separated from I/O so it can be tested without a network or an OS keychain: the key store is a trait with an in-memory test double, and the probe tests use real loopback sockets, and the `feed.rs` tests run `fetch_feed` itself against a throwaway local server (success, HTTP error, oversized body with and without a declared length, redirect off HTTPS, non-text body, unreachable server).
+Unit tests live in each module (`probe.rs`, `keys.rs`, `advisor.rs`, `secrets.rs`, `feed.rs`, `applog.rs`) under `#[cfg(test)]`. Pure logic (validation, request building, response parsing, crypto) is separated from I/O so it can be tested without a network or an OS keychain: the key store is a trait with an in-memory test double, and the probe tests use real loopback sockets, and the `feed.rs` tests run `fetch_feed` itself against a throwaway local server (success, HTTP error, oversized body with and without a declared length, redirect off HTTPS, non-text body, unreachable server).
 
 ## What is not covered yet
 The real IPC boundary (command names, argument shapes and permissions between the webview and Rust) is only covered by mocks. A smoke suite against the real app is backlog Task 18. Features still to be audited are listed in backlog Task 9.

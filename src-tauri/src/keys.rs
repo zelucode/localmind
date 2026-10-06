@@ -104,6 +104,18 @@ pub fn validate_key_input(key: &str) -> Result<(), String> {
 
 #[tauri::command]
 pub async fn verify_api_key(request: VerifyRequest) -> VerifyResult {
+    let provider = request.provider.clone();
+    let result = verify_inner(request).await;
+    let line = format!("Key check for {provider}: {:?}", result.status);
+    if result.status == VerifyStatus::Error {
+        crate::applog::warn("keys", &format!("{line} ({})", result.message));
+    } else {
+        crate::applog::info("keys", &line);
+    }
+    result
+}
+
+async fn verify_inner(request: VerifyRequest) -> VerifyResult {
     let key = request.key.trim().to_string();
     if let Err(msg) = validate_key_input(&key) {
         return VerifyResult::new(VerifyStatus::Invalid, msg);

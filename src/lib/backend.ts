@@ -33,6 +33,33 @@ export function fetchFeed(url: string): Promise<string> {
   return callBackend<string>('fetch_feed', { url }, 'Updating the data feed');
 }
 
+export interface LogInfo {
+  /** Folder that holds app.log. */
+  dir: string;
+  /** Full path of app.log. */
+  file: string;
+}
+
+/** Add one line to app.log (the same file the Rust side writes to). */
+export function logEvent(level: 'info' | 'warn' | 'error', source: string, message: string): Promise<void> {
+  return callBackend<void>('log_event', { level, source, message }, 'Logging');
+}
+
+/** Where app.log lives. */
+export function getLogInfo(): Promise<LogInfo> {
+  return callBackend<LogInfo>('log_info', undefined, 'The log folder');
+}
+
+/** The text "Report a Problem" would save: version, OS and recent log lines, keys blanked. */
+export function previewDiagnostics(): Promise<string> {
+  return callBackend<string>('preview_diagnostics', undefined, 'Diagnostics');
+}
+
+/** Save the diagnostics file (Downloads folder) and return its path. */
+export function saveDiagnostics(): Promise<string> {
+  return callBackend<string>('save_diagnostics', undefined, 'Diagnostics');
+}
+
 export interface DecryptResult {
   value: string | null;
   error: string | null;

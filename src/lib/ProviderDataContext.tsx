@@ -23,6 +23,7 @@ import {
   saveFeedSettings,
   type FeedSettings,
 } from './feed';
+import { logWarn } from './errorLog';
 
 /** How often a running app checks whether the cached feed has gone stale. */
 const STALE_CHECK_MS = 60 * 60 * 1000;
@@ -95,6 +96,7 @@ export const ProviderDataProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (run !== latestRun.current) return; // a newer refresh or a settings change took over
     setRefreshing(false);
     if ('error' in result) {
+      logWarn('feed', `Live data update failed: ${result.error}`);
       setError(result.error); // the previous cache stays in use
       return;
     }

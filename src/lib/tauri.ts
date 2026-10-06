@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import { openUrl } from '@tauri-apps/plugin-opener';
+import { openUrl, revealItemInDir } from '@tauri-apps/plugin-opener';
 
 /** True when running inside the Tauri webview (false in a plain browser via `pnpm dev`). */
 export function isTauri(): boolean {
@@ -35,4 +35,10 @@ export async function openExternal(url: string): Promise<void> {
     }
   }
   window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+/** Show a file or folder in the system file manager. Throws outside the desktop app. */
+export async function revealInFolder(path: string): Promise<void> {
+  if (!isTauri()) throw new BackendUnavailableError('Showing a file in its folder');
+  await revealItemInDir(path);
 }
