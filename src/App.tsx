@@ -32,6 +32,7 @@ import { DEFAULT_BOOKMARKS } from './data/defaultBookmarks';
 import { AITool, StoredApiKey, ToolBookmark } from './types';
 import {
   defaultThemePresets,
+  migrateThemeId,
   ThemePreset,
   applyThemeToDocument,
   parseCustomThemesJson,
@@ -76,7 +77,7 @@ export default function App() {
 
   // Theme state
   const [themeId, setThemeId] = useState<string>(() => {
-    return localStorage.getItem(STORAGE_THEME_KEY) || 'pastel-dusk';
+    return migrateThemeId(localStorage.getItem(STORAGE_THEME_KEY));
   });
 
   const [customAccentColor, setCustomAccentColor] = useState<string | undefined>(() => {
@@ -710,8 +711,9 @@ export default function App() {
       }
 
       if (parsed.themeId && typeof parsed.themeId === 'string') {
-        setThemeId(parsed.themeId);
-        localStorage.setItem(STORAGE_THEME_KEY, parsed.themeId);
+        const migrated = migrateThemeId(parsed.themeId);
+        setThemeId(migrated);
+        localStorage.setItem(STORAGE_THEME_KEY, migrated);
       }
 
       if (parsed.customAccentColor) {
