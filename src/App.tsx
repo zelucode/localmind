@@ -25,6 +25,7 @@ import { AddBookmarkModal } from './components/AddBookmarkModal';
 import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal';
 import { GlobalSearchModal } from './components/GlobalSearchModal';
 import { ExportImportBookmarksModal } from './components/ExportImportBookmarksModal';
+import { applyImport, ImportedBookmark, ImportMode, ImportResult, ImportSource } from './lib/bookmarkTransfer';
 import { StartupWelcomeModal } from './components/StartupWelcomeModal';
 import { LoadingScreen } from './components/LoadingScreen';
 import { INITIAL_AI_TOOLS } from './data/defaultTools';
@@ -378,42 +379,13 @@ export default function App() {
   };
 
   const handleImportBookmarks = (
-    imported: ToolBookmark[],
-    mode: 'merge' | 'replace' | 'skip' = 'merge'
-  ) => {
-    if (mode === 'replace') {
-      saveBookmarksToStorage(imported);
-      return;
-    }
-    if (mode === 'skip') {
-      const existingUrls = new Set(bookmarks.map((b) => b.url.toLowerCase()));
-      const toAdd = imported.filter((b) => !existingUrls.has(b.url.toLowerCase()));
-      saveBookmarksToStorage([...bookmarks, ...toAdd]);
-      return;
-    }
-    // 'merge' mode by default
-    const map = new Map<string, ToolBookmark>();
-    bookmarks.forEach((b) => {
-      map.set(b.id, b);
-      map.set(b.url.toLowerCase(), b);
-    });
-    imported.forEach((b) => {
-      const existing = map.get(b.id) || map.get(b.url.toLowerCase());
-      if (existing) {
-        const merged: ToolBookmark = {
-          ...existing,
-          ...b,
-          id: existing.id,
-          isFavorite: existing.isFavorite || b.isFavorite,
-          clickCount: Math.max(existing.clickCount || 0, b.clickCount || 0),
-        };
-        map.set(existing.id, merged);
-      } else {
-        map.set(b.id, b);
-      }
-    });
-    const deduped = Array.from(new Set(map.values()));
-    saveBookmarksToStorage(deduped);
+    imported: ImportedBookmark[],
+    mode: ImportMode = 'merge',
+    source: ImportSource = 'json',
+  ): ImportResult => {
+    const result = applyImport(bookmarks, imported, mode, source);
+    saveBookmarksToStorage(result.bookmarks);
+    return result;
   };
 
   const handleOpenAddBookmarkModal = () => {
