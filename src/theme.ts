@@ -388,12 +388,53 @@ export function resolveThemeTokens(
   };
 }
 
+const HEX_COLOR = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+const REQUIRED_COLOR_FIELDS = ['primaryColor', 'primaryHover', 'bgCanvas', 'cardBg', 'borderColor', 'textColor'] as const;
+const OPTIONAL_COLOR_FIELDS = ['surfaceRaised', 'borderStrong', 'textSecondary', 'textMuted', 'primaryForeground'] as const;
+
+export function isHexColor(value: unknown): value is string {
+  return typeof value === 'string' && HEX_COLOR.test(value);
+}
+
+/** Why a theme preset can't be used, or null if it is fine. */
+export function themePresetProblem(preset: unknown): string | null {
+  if (!preset || typeof preset !== 'object' || Array.isArray(preset)) return 'is not an object';
+  const p = preset as Record<string, unknown>;
+  if (typeof p.id !== 'string' || !p.id.trim()) return 'needs a non-empty "id"';
+  if (typeof p.name !== 'string' || !p.name.trim()) return 'needs a non-empty "name"';
+  if (p.mode !== 'dark' && p.mode !== 'light') return '"mode" must be "dark" or "light"';
+  for (const f of REQUIRED_COLOR_FIELDS) {
+    if (!isHexColor(p[f])) return `"${f}" must be a hex color like #1a2b3c`;
+  }
+  for (const f of OPTIONAL_COLOR_FIELDS) {
+    if (p[f] !== undefined && !isHexColor(p[f])) return `"${f}" must be a hex color like #1a2b3c`;
+  }
+  return null;
+}
+
+/** Check a whole preset list (e.g. from the editor or a backup). Returns the first problem, or the cleaned list. */
+export function validateThemePresets(value: unknown): { ok: true; presets: ThemePreset[] } | { ok: false; error: string } {
+  if (!Array.isArray(value) || value.length === 0) return { ok: false, error: 'Must be a non-empty array of theme presets.' };
+  const seen = new Set<string>();
+  for (let i = 0; i < value.length; i++) {
+    const problem = themePresetProblem(value[i]);
+    const label = `Preset ${i + 1}${value[i] && typeof (value[i] as { id?: unknown }).id === 'string' ? ` ("${(value[i] as { id: string }).id}")` : ''}`;
+    if (problem) return { ok: false, error: `${label} ${problem}.` };
+    const id = (value[i] as ThemePreset).id;
+    if (seen.has(id)) return { ok: false, error: `${label} repeats the id "${id}"; ids must be unique.` };
+    seen.add(id);
+  }
+  return { ok: true, presets: value as ThemePreset[] };
+}
+
+/** Saved custom presets, minus any that are invalid; the defaults when nothing usable is left. */
 export function parseCustomThemesJson(jsonString?: string): ThemePreset[] {
   if (!jsonString) return defaultThemePresets;
   try {
     const parsed = JSON.parse(jsonString);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed;
+    if (Array.isArray(parsed)) {
+      const usable = parsed.filter((p) => themePresetProblem(p) === null) as ThemePreset[];
+      if (usable.length > 0) return usable;
     }
   } catch (err) {
     logWarn('themes', 'Failed to parse custom themes JSON, falling back to defaults', err);

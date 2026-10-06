@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { defaultThemePresets, migrateThemeId } from './theme';
+import { defaultThemePresets, isHexColor, migrateThemeId, parseCustomThemesJson, themePresetProblem, validateThemePresets } from './theme';
 
 const ids = new Set(defaultThemePresets.map((p) => p.id));
 
@@ -26,5 +26,43 @@ describe('migrateThemeId', () => {
     for (const old of ['light-minimal', 'sage-linen', 'terracotta-peach', 'light-violet']) {
       expect(mode(migrateThemeId(old))).toBe('light');
     }
+  });
+});
+
+describe('theme preset validation', () => {
+  const good = defaultThemePresets[0];
+
+  it('accepts every built-in preset', () => {
+    for (const p of defaultThemePresets) expect(themePresetProblem(p), p.id).toBeNull();
+    expect(validateThemePresets(defaultThemePresets)).toMatchObject({ ok: true });
+  });
+
+  it('recognizes hex colors only', () => {
+    for (const ok of ['#fff', '#FFFFFF', '#1a2b3c']) expect(isHexColor(ok), ok).toBe(true);
+    for (const bad of ['red', '#12', '#12345', '#gggggg', 'url(x)', '', undefined, 5]) expect(isHexColor(bad), String(bad)).toBe(false);
+  });
+
+  it.each([
+    [{}, /"id"/],
+    [{ ...defaultThemePresets[0], name: '' }, /"name"/],
+    [{ ...defaultThemePresets[0], mode: 'blue' }, /"mode"/],
+    [{ ...defaultThemePresets[0], bgCanvas: 'red' }, /"bgCanvas".*hex/],
+    [{ ...defaultThemePresets[0], textMuted: 'nope' }, /"textMuted".*hex/],
+  ])('rejects a broken preset %#', (preset, message) => {
+    expect(themePresetProblem(preset)).toMatch(message);
+  });
+
+  it('names the failing preset and rejects empty lists, non-arrays and repeated ids', () => {
+    expect(validateThemePresets([good, { id: 'x' }])).toEqual({ ok: false, error: 'Preset 2 ("x") needs a non-empty "name".' });
+    expect(validateThemePresets([])).toMatchObject({ ok: false });
+    expect(validateThemePresets({})).toMatchObject({ ok: false });
+    expect(validateThemePresets([good, good])).toMatchObject({ ok: false, error: expect.stringContaining('repeats the id') });
+  });
+
+  it('never lets saved garbage reach the theme engine: invalid presets are dropped, defaults used if none are left', () => {
+    expect(parseCustomThemesJson(JSON.stringify([{ id: 'x' }]))).toBe(defaultThemePresets);
+    expect(parseCustomThemesJson('not json')).toBe(defaultThemePresets);
+    expect(parseCustomThemesJson(JSON.stringify([good, { id: 'x' }]))).toEqual([good]);
+    expect(parseCustomThemesJson(undefined)).toBe(defaultThemePresets);
   });
 });

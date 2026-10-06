@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Palette,
   Sun,
@@ -22,6 +22,7 @@ import {
   ThemePreset,
   defaultThemePresets,
   resolveThemeTokens,
+  validateThemePresets,
 } from '../theme';
 
 interface SettingsPageProps {
@@ -74,7 +75,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   const [activeTab, setActiveTab] = useState<'themes' | 'preferences' | 'data' | 'custom-json'>('themes');
   const [themeModeFilter, setThemeModeFilter] = useState<'all' | 'dark' | 'light'>('all');
   const [jsonThemeText, setJsonThemeText] = useState(() => JSON.stringify(allPresets, null, 2));
-  const [jsonStatus, setJsonStatus] = useState<string | null>(null);
+  const [jsonStatus, setJsonStatus] = useState<{ ok: boolean; text: string } | null>(null);
+  const [jsonDirty, setJsonDirty] = useState(false);
   const [importStatus, setImportStatus] = useState<string | null>(null);
 
   const activePreset = allPresets.find((p) => p.id === currentThemeId) || defaultThemePresets[0];
@@ -95,19 +97,28 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
     return p.mode === themeModeFilter;
   });
 
+  // Keep the editor in step with the saved presets (e.g. after a reset) unless the user is mid-edit.
+  useEffect(() => {
+    if (!jsonDirty) setJsonThemeText(JSON.stringify(allPresets, null, 2));
+  }, [allPresets, jsonDirty]);
+
   const handleSaveJsonThemes = () => {
+    let parsed: unknown;
     try {
-      const parsed = JSON.parse(jsonThemeText);
-      if (!Array.isArray(parsed) || parsed.length === 0) {
-        setJsonStatus('Error: JSON must be a non-empty array of ThemePresets.');
-        return;
-      }
-      onSaveCustomPresets(parsed);
-      setJsonStatus('Successfully saved custom presets!');
-      setTimeout(() => setJsonStatus(null), 3000);
-    } catch {
-      setJsonStatus('Invalid JSON format. Please check syntax.');
+      parsed = JSON.parse(jsonThemeText);
+    } catch (err) {
+      setJsonStatus({ ok: false, text: `Invalid JSON: ${err instanceof Error ? err.message : 'check the syntax'}` });
+      return;
     }
+    const checked = validateThemePresets(parsed);
+    if ('error' in checked) {
+      setJsonStatus({ ok: false, text: checked.error });
+      return;
+    }
+    onSaveCustomPresets(checked.presets);
+    setJsonDirty(false);
+    setJsonStatus({ ok: true, text: 'Saved. Custom presets applied.' });
+    setTimeout(() => setJsonStatus(null), 3000);
   };
 
   const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -913,7 +924,11 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
             <textarea
               value={jsonThemeText}
-              onChange={(e) => setJsonThemeText(e.target.value)}
+              onChange={(e) => {
+                setJsonThemeText(e.target.value);
+                setJsonDirty(true);
+                setJsonStatus(null);
+              }}
               rows={12}
               placeholder='[ { "id": "my-custom-theme", "name": "Neon Sunset", "mode": "dark", "primaryColor": "#ff6b6b", ... } ]'
               className="w-full font-mono text-xs p-3.5 rounded-xl focus:outline-none"
@@ -928,7 +943,11 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
             <div className="flex items-center justify-between flex-wrap gap-2">
               <button
-                onClick={() => setJsonThemeText(JSON.stringify(defaultThemePresets, null, 2))}
+                onClick={() => {
+                  setJsonThemeText(JSON.stringify(defaultThemePresets, null, 2));
+                  setJsonDirty(true);
+                  setJsonStatus(null);
+                }}
                 className="px-3 py-1.5 text-xs rounded-lg border cursor-pointer hover:opacity-85"
                 style={{
                   backgroundColor: 'var(--theme-raised)',
@@ -941,8 +960,11 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
               <div className="flex items-center gap-3">
                 {jsonStatus && (
-                  <span className="text-xs font-medium text-emerald-500">
-                    {jsonStatus}
+                  <span
+                    role={jsonStatus.ok ? 'status' : 'alert'}
+                    className={`text-xs font-medium ${jsonStatus.ok ? 'text-emerald-500' : 'text-rose-500'}`}
+                  >
+                    {jsonStatus.text}
                   </span>
                 )}
                 <button

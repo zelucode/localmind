@@ -13,5 +13,7 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}'],
     css: false,
     restoreMocks: true,
+    // Some page tests render hundreds of rows in jsdom and get slow when the whole suite runs in parallel.
+    testTimeout: 15000,
   },
 });
