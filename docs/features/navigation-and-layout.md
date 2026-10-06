@@ -38,7 +38,7 @@ Keyboard Shortcuts · Welcome & Quick Start · About LocalMind · Documentation 
 - `WindowControls.tsx` provides the caption buttons and the drag region. The window is frameless (`decorations: false`), so the permissions it needs (minimize, maximize, close, drag) are listed in `src-tauri/capabilities/default.json`.
 
 ## Tests
-`Sidebar.test.tsx`, `Header.test.tsx` (titles, contextual buttons, Help menu), `HomePage.test.tsx`, and `App.test.tsx` (navigation through every page, number-key shortcuts, collapse persistence, theme toggle, Help → Shortcuts / About).
+`Sidebar.test.tsx`, `Header.test.tsx` (titles, contextual buttons, Help menu), `HomePage.test.tsx`, and `App.test.tsx` (navigation through every page, number-key shortcuts, collapse persistence, theme toggle, Help → Shortcuts / About), `App.shortcuts.test.tsx` (every hotkey in the cheat-sheet: 1-7, k, c, l, b, t, /, Ctrl+K, and that letter hotkeys are ignored while typing), `KeyboardShortcutsModal.test.tsx`, `AboutModal.test.tsx` (real version, privacy wording, closing) and `WindowControls.test.tsx` (minimize / maximize / restore / close, drag region, no-op outside the desktop app).
 
 ## Limits
 - Documentation and Report a Problem are placeholders (backlog Tasks 6, 7).

@@ -25,6 +25,8 @@ A file that is not a backup, or has nothing LocalMind can restore, shows an erro
 ### Custom theme JSON
 **Save & Apply** checks the presets before saving: a non-empty array, every preset with a unique `id`, a `name`, a `mode` of `dark` or `light`, and hex colors (`#rgb` or `#rrggbb`) for `primaryColor`, `primaryHover`, `bgCanvas`, `cardBg`, `borderColor`, `textColor` (and for the optional color fields if present). A failure names the preset and the field. Errors show in red and syntax errors show the parser's message.
 
+The Data & Backups tab also holds the **Live provider data** panel (on/off, feed address, Refresh); see [remote-data-feed.md](remote-data-feed.md).
+
 ## How it works
 - `src/lib/backup.ts` (pure, tested): `buildBackup`, `parseBackup` (validation and a summary), `describeRestore`, `backupFilename`. Backups are version 2; version 1 files still import.
 - `App.tsx`: `handleExportBackup` writes the file through `downloadTextFile`; `handleImportBackup` applies only the sections present (restored keys are re-encrypted by the normal `persistKeys` path, and per-device encryption data in a file is discarded); `handleResetFactoryDefaults` clears the stored sections.
@@ -47,6 +49,7 @@ A file that is not a backup, or has nothing LocalMind can restore, shows an erro
 - `backup.test.ts`: keys opt-in, bookmarks and preferences included, round trip, absent sections, version 1 files, non-backup files, unsafe and incomplete entries, themes as array or string.
 - `theme.test.ts`: hex colors, every preset problem, unique ids, stored garbage dropped.
 - `SettingsPage.test.tsx`: theme selection by mouse and keyboard, mode filter, accent, preference toggles, theme editor errors and success styles, follow/never-clobber behavior, keys opt-in and warning, restore preview, confirm and cancel, non-backup and non-JSON files, warnings, reset confirmation with counts.
+- `ProviderDataContext.test.tsx` covers the live-data panel (https-only address check, save, download, switch off clears the cache).
 - `App.backup.test.tsx`: end to end in the app: export without and with keys, restoring bookmarks leaves keys, nothing changes for a useless file, restored keys are re-encrypted, reset only after confirmation.
 
 ## Limits and open items

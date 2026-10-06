@@ -115,4 +115,78 @@ mod tests {
         assert!(check_declared_size(Some(MAX_FEED_BYTES as u64)).is_ok());
         assert!(check_declared_size(Some(MAX_FEED_BYTES as u64 + 1)).is_err());
     }
+
+    // ---- The real download path, against a throwaway server on loopback ----
+
+    use std::io::{Read, Write};
+    use std::net::TcpListener;
+
+    /// Serve one canned HTTP response and return the URL to fetch it from.
+    fn serve_once(response: Vec<u8>) -> String {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let port = listener.local_addr().unwrap().port();
+        std::thread::spawn(move || {
+            if let Ok((mut stream, _)) = listener.accept() {
+                let mut buf = [0u8; 2048];
+                let _ = stream.read(&mut buf);
+                // The client may hang up early (size limit); that is fine.
+                let _ = stream.write_all(&response);
+            }
+        });
+        format!("http://127.0.0.1:{port}/feed.json")
+    }
+
+    fn http(status: &str, headers: &str, body: &[u8]) -> Vec<u8> {
+        let mut out = format!("HTTP/1.1 {status}\r\n{headers}Connection: close\r\n\r\n").into_bytes();
+        out.extend_from_slice(body);
+        out
+    }
+
+    fn fetch(url: String) -> Result<String, String> {
+        tauri::async_runtime::block_on(fetch_feed(url))
+    }
+
+    #[test]
+    fn downloads_a_feed() {
+        let body = br#"{"schema":1}"#;
+        let url = serve_once(http("200 OK", &format!("Content-Length: {}\r\n", body.len()), body));
+        assert_eq!(fetch(url).unwrap(), r#"{"schema":1}"#);
+    }
+
+    #[test]
+    fn reports_an_http_error_status() {
+        let url = serve_once(http("404 Not Found", "Content-Length: 0\r\n", b""));
+        let err = fetch(url).unwrap_err();
+        assert!(err.contains("404"), "{err}");
+    }
+
+    #[test]
+    fn stops_an_oversized_download_with_or_without_a_declared_length() {
+        let big = vec![b'a'; MAX_FEED_BYTES + 10];
+        let declared = serve_once(http("200 OK", &format!("Content-Length: {}\r\n", big.len()), &big));
+        assert!(fetch(declared).unwrap_err().contains("larger"));
+        let undeclared = serve_once(http("200 OK", "", &big));
+        assert!(fetch(undeclared).unwrap_err().contains("larger"));
+    }
+
+    #[test]
+    fn does_not_follow_a_redirect_to_plain_http() {
+        let url = serve_once(http("302 Found", "Location: http://example.com/feed.json\r\nContent-Length: 0\r\n", b""));
+        let err = fetch(url).unwrap_err();
+        assert!(err.contains("302"), "{err}");
+    }
+
+    #[test]
+    fn rejects_a_body_that_is_not_text() {
+        let body = [0xff, 0xfe, 0xfd];
+        let url = serve_once(http("200 OK", &format!("Content-Length: {}\r\n", body.len()), &body));
+        assert!(fetch(url).unwrap_err().contains("not valid text"));
+    }
+
+    #[test]
+    fn reports_an_unreachable_server_and_a_bad_address() {
+        // Nothing listens on port 1.
+        assert!(fetch("http://127.0.0.1:1/feed.json".to_string()).unwrap_err().contains("Could not reach"));
+        assert!(fetch("http://example.com/feed.json".to_string()).unwrap_err().contains("https://"));
+    }
 }

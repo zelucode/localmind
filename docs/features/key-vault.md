@@ -42,6 +42,9 @@ The Home page shows how many keys are unverified.
 
 The key goes only to its own provider, only in a header (never in the URL). HTTP 200–299 is valid; 401/403 (and 400 for Gemini) is rejected; 429 and 5xx are "couldn't check". Providers marked "other" return *unsupported* with an honest message. Keys that are empty, contain whitespace/control characters, or are over 512 characters are rejected before any request.
 
+## Provider list
+The providers offered when adding a key come from `useProviderData().vaultProviders` (built-in data, or the live feed when set up; retired providers are not offered). Only the providers the Rust side can verify (`VAULT_PROVIDER_IDS`) can be in the vault, whatever a feed says. See [remote-data-feed.md](remote-data-feed.md).
+
 ## Backups
 **Export backup** (Settings) writes keys as plaintext JSON, because the encryption key is tied to this device. Importing re-encrypts them. This is a known risk, tracked as backlog Task 17.
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-LocalMind is a Tauri 2 app: a Rust shell hosting a webview that renders a React 19 SPA. There is no backend server. User data lives in the webview's `localStorage` (API keys are encrypted before they get there), and a small set of Rust commands does the things a webview can't or shouldn't: probing localhost ports, verifying keys with providers, and encrypting secrets.
+LocalMind is a Tauri 2 app: a Rust shell hosting a webview that renders a React 19 SPA. There is no backend server. User data lives in the webview's `localStorage` (API keys are encrypted before they get there), and a small set of Rust commands does the things a webview can't or shouldn't: probing localhost ports, verifying keys with providers, encrypting secrets, and downloading the optional live provider-data feed.
 
 ```
 ┌──────────────── Tauri window (1280×800, min 900×600) ────────────────┐
@@ -68,6 +68,7 @@ API keys are encrypted at rest: AES-256-GCM in Rust, master key in the OS creden
 |---|---|---|
 | `probe_ports` | `probe.rs` | TCP-connect to `127.0.0.1:<port>` for up to 32 ports (the webview can't do this because of CORS) |
 | `verify_api_key` | `keys.rs` | Ask a provider whether a key is accepted (key sent in a header over HTTPS) |
+| `fetch_feed` | `feed.rs` | HTTPS-only, size-limited download of the remote provider-data JSON; the frontend validates, merges and caches it (`src/lib/feed.ts`) |
 | `encrypt_secrets`, `decrypt_secrets` | `secrets.rs` | AES-256-GCM with the master key held in the OS credential store |
 | `ask_advisor` | `advisor.rs` | Gemini-backed "free tier" advice using the user's own key (feature currently hidden) |
 

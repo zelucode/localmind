@@ -10,7 +10,7 @@ Free AI tiers are only free up to a quota, and the quotas differ per provider (r
 It is reference and planning material. It does not measure the user's real usage and does not call any provider.
 
 ## How it works
-- Data comes from `src/data/providers.ts` (`RATE_LIMIT_DATA`, derived from `PROVIDERS`). `src/components/RateLimitMatrixModal.tsx` renders it as a table, with "Checked <month>" or "Not re-checked" under each row, plus the rotation text. Rendered as the "Rate Limits" tab of the Configs & Limits page (`inline`).
+- Data comes from `src/data/providers.ts` (`deriveRateLimits(PROVIDERS)`), or from the live feed when one is set up (`useProviderData().rateLimits`, see [remote-data-feed.md](remote-data-feed.md)). A provider the feed marks retired stays in the table with a **Retired** badge and no Config button. The footer says where the data is from and has a Refresh button. `src/components/RateLimitMatrixModal.tsx` renders it as a table, with "Checked <month>" or "Not re-checked" under each row, plus the rotation text. Rendered as the "Rate Limits" tab of the Configs & Limits page (`inline`).
 - "Config" calls `onOpenExporterWithProvider(id)`; `App.tsx` switches to the exporter tab with that provider.
 
 ## Bugs found and fixed in the audit
@@ -23,7 +23,7 @@ It is reference and planning material. It does not measure the user's real usage
 - No empty state when a search matched nothing.
 
 ## Tests
-`RateLimitMatrixModal.test.tsx`: row/preset consistency, all providers listed, no "verified" claim, category filter, search and empty state, Config callback, Key saved badge, key link via `openExternal`, table and fallback order shown together (no inner tabs).
+`RateLimitMatrixModal.test.tsx`: row/preset consistency, all providers listed, no "verified" claim, category filter, search and empty state, Config callback, Key saved badge, key link via `openExternal`, table and fallback order shown together (no inner tabs), and a feed-retired provider shown as Retired with the live-data footer.
 
 ## Limits and ideas
 - **The data is typed in by hand and will go stale.** It now lives in one file (`src/data/providers.ts`) with a `reviewed` month per provider; only Gemini, Groq and DeepSeek were actually re-checked (2026-10). Edit quotas there and nowhere else.

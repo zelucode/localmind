@@ -25,7 +25,7 @@ Each provider has the shape of `ProviderInfo` in `src/data/providers.ts` (`id`, 
 Only the feed URL is requested (with a generic `LocalMind` user agent). No keys, tool lists or other data are sent. The feed is on by default but does nothing until an address is set, and it can be switched off in Settings.
 
 ## Tests
-`src/lib/feed.test.ts` (validation, injection rejection, merge, staleness, cache, the published file), `src/lib/ProviderDataContext.test.tsx` (auto refresh, Refresh button, failures keep old data, retired, Settings panel), `RateLimitMatrixModal.test.tsx` (retired row), and 3 Rust tests for URL and size rules.
+`src/lib/feed.test.ts` (validation, injection rejection, merge, staleness, cache, the published file), `src/lib/ProviderDataContext.test.tsx` (auto refresh, Refresh button, failures keep old data, retired, Settings panel), `RateLimitMatrixModal.test.tsx` (retired row), and 9 Rust tests: URL and size rules, plus `fetch_feed` itself against a local server (success, HTTP error, oversized body, redirect off HTTPS, non-text body, unreachable server).
 
 ## Limits and open points
 - Only provider data is fed. Tools, bookmarks and other catalogs are planned to follow the same pattern (`parse...Feed` + merge + the same cache and refresh).
