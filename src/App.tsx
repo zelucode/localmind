@@ -16,7 +16,7 @@ import { AddToolModal } from './components/AddToolModal';
 import { ApiKeyVaultModal } from './components/ApiKeyVaultModal';
 import { AIAdvisorModal } from './components/AIAdvisorModal';
 import { FEATURES } from './config/features';
-import { parseStoredKeys, unlockKeys, serializeKeys, keysForBackup } from './lib/secureKeys';
+import { parseStoredKeys, unlockKeys, serializeKeys } from './lib/secureKeys';
 import { QuickSearchModal } from './components/QuickSearchModal';
 import { IDEConfigExporterModal } from './components/IDEConfigExporterModal';
 import { RateLimitMatrixModal } from './components/RateLimitMatrixModal';
@@ -25,6 +25,8 @@ import { AddBookmarkModal } from './components/AddBookmarkModal';
 import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal';
 import { GlobalSearchModal } from './components/GlobalSearchModal';
 import { ExportImportBookmarksModal } from './components/ExportImportBookmarksModal';
+import { ParsedBackup, backupFilename, buildBackup } from './lib/backup';
+import { downloadTextFile } from './lib/files';
 import { applyImport, ImportedBookmark, ImportMode, ImportResult, ImportSource } from './lib/bookmarkTransfer';
 import { StartupWelcomeModal } from './components/StartupWelcomeModal';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -632,80 +634,61 @@ export default function App() {
   };
 
   // Full backup and restore
-  const handleExportBackup = () => {
-    const customTools = tools.filter((t) => t.isCustom);
-    const favIds = tools.filter((t) => t.isFavorite).map((t) => t.id);
-    const backupData = {
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      customTools,
-      keys: keysForBackup(keys),
-      favIds,
-      themeId,
-      customAccentColor,
-      customThemeJson,
-      preferences: {
-        defaultLaunchSearch,
-        showScopeExplainer,
+  const handleExportBackup = (options: { includeKeys: boolean }) => {
+    const text = buildBackup(
+      {
+        customTools: tools.filter((t) => t.isCustom),
+        favIds: tools.filter((t) => t.isFavorite).map((t) => t.id),
+        keys,
+        bookmarks,
+        themeId,
+        customAccentColor,
+        customThemeJson,
+        preferences: { defaultLaunchSearch, showScopeExplainer, showStartupScreen, showLoadingAnimation },
       },
-    };
-
-    const blob = new Blob([JSON.stringify(backupData, null, 2)], {
-      type: 'application/json',
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `ai-nexus-backup-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+      options,
+    );
+    downloadTextFile(backupFilename(), text, 'application/json');
   };
 
-  const handleImportBackup = (jsonStr: string): boolean => {
-    try {
-      const parsed = JSON.parse(jsonStr);
-      if (parsed.customTools && Array.isArray(parsed.customTools)) {
-        localStorage.setItem(STORAGE_TOOLS_KEY, JSON.stringify(parsed.customTools));
-        const favIds: string[] = Array.isArray(parsed.favIds) ? parsed.favIds : [];
-        localStorage.setItem(STORAGE_FAVS_KEY, JSON.stringify(favIds));
-
-        setTools([...INITIAL_AI_TOOLS, ...parsed.customTools].map((t) => ({
-          ...t,
-          isFavorite: favIds.includes(t.id),
-        })));
+  // Applies only the sections that are in the (already validated) backup; everything else stays as it is.
+  const handleImportBackup = (backup: ParsedBackup) => {
+    if (backup.customTools) {
+      const favIds = backup.favIds ?? [];
+      localStorage.setItem(STORAGE_TOOLS_KEY, JSON.stringify(backup.customTools));
+      localStorage.setItem(STORAGE_FAVS_KEY, JSON.stringify(favIds));
+      setTools([...INITIAL_AI_TOOLS, ...backup.customTools].map((t) => ({ ...t, isFavorite: favIds.includes(t.id) })));
+    }
+    if (backup.keys) {
+      setKeys(backup.keys);
+      persistKeys(backup.keys);
+    }
+    if (backup.bookmarks) saveBookmarksToStorage(backup.bookmarks);
+    if (backup.customThemeJson) {
+      setCustomThemeJson(backup.customThemeJson);
+      localStorage.setItem(STORAGE_THEMES_JSON_KEY, backup.customThemeJson);
+    }
+    if (backup.themeId) {
+      const migrated = migrateThemeId(backup.themeId);
+      setThemeId(migrated);
+      localStorage.setItem(STORAGE_THEME_KEY, migrated);
+    }
+    if (backup.customAccentColor) {
+      setCustomAccentColor(backup.customAccentColor);
+      localStorage.setItem(STORAGE_ACCENT_KEY, backup.customAccentColor);
+    }
+    const prefs = backup.preferences;
+    if (prefs) {
+      if (prefs.defaultLaunchSearch !== undefined) {
+        setDefaultLaunchSearch(prefs.defaultLaunchSearch);
+        localStorage.setItem(STORAGE_LAUNCH_SEARCH_KEY, String(prefs.defaultLaunchSearch));
       }
-
-      if (parsed.keys && Array.isArray(parsed.keys)) {
-        // Backups hold plaintext keys; drop any per-device encryption data and re-encrypt on save.
-        const imported = (parsed.keys as StoredApiKey[]).map(({ blob: _blob, undecryptable: _u, ...k }) => k);
-        setKeys(imported);
-        persistKeys(imported);
+      if (prefs.showScopeExplainer !== undefined) {
+        setShowScopeExplainer(prefs.showScopeExplainer);
+        localStorage.setItem(STORAGE_SCOPE_EXPLAINER_KEY, String(prefs.showScopeExplainer));
       }
-
-      if (parsed.themeId && typeof parsed.themeId === 'string') {
-        const migrated = migrateThemeId(parsed.themeId);
-        setThemeId(migrated);
-        localStorage.setItem(STORAGE_THEME_KEY, migrated);
-      }
-
-      if (parsed.customAccentColor) {
-        setCustomAccentColor(parsed.customAccentColor);
-        localStorage.setItem(STORAGE_ACCENT_KEY, parsed.customAccentColor);
-      }
-
-      if (parsed.preferences) {
-        if (typeof parsed.preferences.defaultLaunchSearch === 'boolean') {
-          setDefaultLaunchSearch(parsed.preferences.defaultLaunchSearch);
-          localStorage.setItem(STORAGE_LAUNCH_SEARCH_KEY, String(parsed.preferences.defaultLaunchSearch));
-        }
-        if (typeof parsed.preferences.showScopeExplainer === 'boolean') {
-          setShowScopeExplainer(parsed.preferences.showScopeExplainer);
-          localStorage.setItem(STORAGE_SCOPE_EXPLAINER_KEY, String(parsed.preferences.showScopeExplainer));
-        }
-      }
-      return true;
-    } catch {
-      return false;
+      if (prefs.showStartupScreen !== undefined) handleToggleShowStartupScreen(prefs.showStartupScreen);
+      if (prefs.showLoadingAnimation !== undefined) handleToggleShowLoadingAnimation(prefs.showLoadingAnimation);
     }
   };
 
@@ -823,6 +806,9 @@ export default function App() {
               onExportBackup={handleExportBackup}
               onImportBackup={handleImportBackup}
               onResetFactoryDefaults={handleResetFactoryDefaults}
+              customToolsCount={tools.filter((t) => t.isCustom).length}
+              savedKeysCount={keys.length}
+              bookmarksCount={bookmarks.length}
               onBackToDashboard={() => setActiveView('home')}
             />
           </main>

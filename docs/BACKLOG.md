@@ -66,7 +66,8 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 - **Audited**: Config Exporter (fixed 6 bugs, see `docs/features/config-exporter.md`; preset model IDs and endpoints still need a manual check against provider docs).
 - **Audited**: Rate-Limit Matrix (wrong quota numbers and a false "verified" claim fixed, see `docs/features/rate-limit-matrix.md`; the data now has one source of truth, `src/data/providers.ts`, with review dates; only Gemini, Groq and DeepSeek have actually been re-checked).
 - **Audited**: Bookmark Export/Import center and Export Markdown (merge duplication, data loss, unsafe links and false copy fixed, CSV import added, see `docs/features/bookmark-export-import.md`; downloads and the file picker still need a check in the real Tauri window).
-- **Still to audit** (walk each, tag working / UI-only / broken, then fix with tests): Settings (theme editor, backup/restore, factory reset), AddTool / AddBookmark modals, Quick Query URL templates, Welcome screen copy.
+- **Audited**: Settings (backup omitted bookmarks and themes, restore silently replaced keys and falsely reported success, reset deleted keys without saying so, theme editor accepted invalid presets; see `docs/features/settings-and-backup.md`).
+- **Still to audit** (walk each, tag working / UI-only / broken, then fix with tests): AddTool / AddBookmark modals, Quick Query URL templates, Welcome screen copy.
 - **Known wrong copy**: welcome screen and Ctrl+K say keys are "AES-GCM encrypted" and "v2.5", but keys are stored as plain JSON in localStorage and the app is v0.1.0. Either implement encryption (Task 13) or fix the text.
 - **Status**: In progress.
 
@@ -114,7 +115,9 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 ### [ ] Task 17: Backups and exported keys
 - **Problem**: "Export backup" writes API keys to a JSON file in plaintext (needed because the encryption key is per device, so an encrypted blob would be useless elsewhere). Anyone with the file has the keys.
 - **Solution options**: exclude keys from backups by default with an opt-in checkbox, or encrypt the backup with a user-chosen passphrase (Argon2 + AES-GCM) so it can be restored on another machine. Add a clear warning in the export UI either way.
-- **Status**: Needs a decision.
+- **Done so far**: the first option. Keys are left out of the workspace backup unless the user ticks "Include my API keys", which shows a plain-text warning (2026-10-06).
+- **Still open**: whether to add the passphrase-encrypted backup so keys can travel safely.
+- **Status**: Partly done; the passphrase option needs a decision.
 
 ### [ ] Task 18: Tests that drive the real desktop app
 - **Problem**: Frontend tests mock the Rust backend, and Rust tests don't touch the UI. Nothing covers the real IPC boundary (command names, argument shapes, permissions) end to end.

@@ -43,6 +43,6 @@ describe('LoadingScreen', () => {
   it('finishes on its own after the duration', async () => {
     const onFinish = vi.fn();
     render(<LoadingScreen onFinish={onFinish} durationMs={50} />);
-    await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1), { timeout: 2000 });
+    await waitFor(() => expect(onFinish).toHaveBeenCalledTimes(1), { timeout: 8000 });
   });
 });

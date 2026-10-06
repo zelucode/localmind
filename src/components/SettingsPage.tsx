@@ -24,6 +24,7 @@ import {
   resolveThemeTokens,
   validateThemePresets,
 } from '../theme';
+import { BackupParseResult, ParsedBackup, describeRestore, parseBackup } from '../lib/backup';
 
 interface SettingsPageProps {
   currentThemeId: string;
@@ -43,9 +44,13 @@ interface SettingsPageProps {
   onToggleShowLoadingAnimation?: (show: boolean) => void;
   onReplayLoadingAnimation?: () => void;
   onOpenExportImportBookmarks?: () => void;
-  onExportBackup: () => void;
-  onImportBackup: (jsonContent: string) => void;
+  onExportBackup: (options: { includeKeys: boolean }) => void;
+  onImportBackup: (backup: ParsedBackup) => void;
   onResetFactoryDefaults: () => void;
+  /** Current amounts, so confirmations can say what would be lost. */
+  customToolsCount?: number;
+  savedKeysCount?: number;
+  bookmarksCount?: number;
   onBackToDashboard: () => void;
 }
 
@@ -70,6 +75,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   onExportBackup,
   onImportBackup,
   onResetFactoryDefaults,
+  customToolsCount = 0,
+  savedKeysCount = 0,
+  bookmarksCount = 0,
   onBackToDashboard,
 }) => {
   const [activeTab, setActiveTab] = useState<'themes' | 'preferences' | 'data' | 'custom-json'>('themes');
@@ -77,7 +85,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   const [jsonThemeText, setJsonThemeText] = useState(() => JSON.stringify(allPresets, null, 2));
   const [jsonStatus, setJsonStatus] = useState<{ ok: boolean; text: string } | null>(null);
   const [jsonDirty, setJsonDirty] = useState(false);
-  const [importStatus, setImportStatus] = useState<string | null>(null);
+  const [includeKeys, setIncludeKeys] = useState(false);
+  const [restoreCheck, setRestoreCheck] = useState<BackupParseResult | null>(null);
+  const [restoreMsg, setRestoreMsg] = useState<string | null>(null);
+  const [confirmReset, setConfirmReset] = useState(false);
 
   const activePreset = allPresets.find((p) => p.id === currentThemeId) || defaultThemePresets[0];
 
@@ -121,19 +132,28 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
     setTimeout(() => setJsonStatus(null), 3000);
   };
 
+  // Step 1 of a restore: read and check the file, then show what it contains. Nothing changes yet.
   const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = ''; // lets the same file be chosen again
+    setRestoreMsg(null);
     if (!file) return;
+    if (file.size > 20 * 1024 * 1024) {
+      setRestoreCheck({ ok: false, error: `${file.name} is too large to be a backup.` });
+      return;
+    }
     const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target?.result as string;
-      if (content) {
-        onImportBackup(content);
-        setImportStatus('Backup restored successfully!');
-        setTimeout(() => setImportStatus(null), 4000);
-      }
-    };
+    reader.onload = (event) => setRestoreCheck(parseBackup(String(event.target?.result ?? '')));
+    reader.onerror = () => setRestoreCheck({ ok: false, error: `Could not read ${file.name}.` });
     reader.readAsText(file);
+  };
+
+  // Step 2: the user confirmed.
+  const handleConfirmRestore = () => {
+    if (!restoreCheck || !('backup' in restoreCheck)) return;
+    onImportBackup(restoreCheck.backup);
+    setRestoreMsg(`Restored: ${describeRestore(restoreCheck.summary).join(', ')}.`);
+    setRestoreCheck(null);
   };
 
   return (
@@ -466,7 +486,17 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               return (
                 <div
                   key={preset.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={isSelected}
+                  aria-label={`${preset.name} theme`}
                   onClick={() => onSelectTheme(preset.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onSelectTheme(preset.id);
+                    }
+                  }}
                   className={`p-4 rounded-xl border transition-all cursor-pointer relative group flex flex-col justify-between ${
                     isSelected ? 'ring-2 shadow-lg' : 'hover:scale-[1.01]'
                   }`}
@@ -611,6 +641,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 <input
                   type="checkbox"
                   checked={defaultLaunchSearch}
+                  aria-label="Open the prompt box when launching a tool"
                   onChange={(e) => onToggleDefaultLaunchSearch(e.target.checked)}
                   className="sr-only peer"
                 />
@@ -637,6 +668,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 <input
                   type="checkbox"
                   checked={showScopeExplainer}
+                  aria-label="Show the scope explainer"
                   onChange={(e) => onToggleShowScopeExplainer(e.target.checked)}
                   className="sr-only peer"
                 />
@@ -682,7 +714,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     type="checkbox"
                     id="toggle-show-on-startup"
                     checked={showOnStartup}
-                    onChange={(e) => onToggleShowOnStartup(e.target.checked)}
+                    aria-label="Show the welcome screen on startup"
+                  onChange={(e) => onToggleShowOnStartup(e.target.checked)}
                     className="sr-only peer"
                   />
                   <div
@@ -728,7 +761,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     type="checkbox"
                     id="toggle-show-loading-animation"
                     checked={showLoadingAnimation}
-                    onChange={(e) => onToggleShowLoadingAnimation(e.target.checked)}
+                    aria-label="Show the loading animation"
+                  onChange={(e) => onToggleShowLoadingAnimation(e.target.checked)}
                     className="sr-only peer"
                   />
                   <div
@@ -757,10 +791,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             <div>
               <h2 className="text-base font-bold flex items-center gap-2" style={{ color: 'var(--theme-text)' }}>
                 <Database className="w-4 h-4 text-emerald-500" />
-                Data Portability & Vault Backups
+                Data Portability & Backups
               </h2>
               <p className="text-xs mt-1" style={{ color: 'var(--theme-text-secondary)' }}>
-                Your custom AI platforms, tracked API keys, and theme settings are safely stored in your browser's local sandbox.
+                Everything LocalMind stores lives on this device. A backup file lets you move it to another machine or recover after a reinstall.
               </p>
             </div>
 
@@ -780,11 +814,25 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   </span>
                 </div>
                 <p className="text-xs leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
-                  Downloads a comprehensive JSON file with all custom tool links, stored API keys, and theme choices.
+                  Downloads a JSON file with your custom tools, favorites, bookmarks, themes and preferences.
                 </p>
+                <label className="flex items-start gap-2 text-xs cursor-pointer" style={{ color: 'var(--theme-text)' }}>
+                  <input
+                    type="checkbox"
+                    checked={includeKeys}
+                    onChange={(e) => setIncludeKeys(e.target.checked)}
+                    className="mt-0.5"
+                  />
+                  <span>Include my API keys ({savedKeysCount})</span>
+                </label>
+                {includeKeys && (
+                  <p role="note" className="text-xs leading-relaxed text-rose-500">
+                    Keys are written to the file as plain text. Anyone who gets the file can use them, so keep it private and delete it once restored.
+                  </p>
+                )}
                 <button
                   id="btn-export-backup"
-                  onClick={onExportBackup}
+                  onClick={() => onExportBackup({ includeKeys })}
                   className="px-4 py-2 text-xs font-semibold rounded-lg shadow-sm transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
                   style={{
                     backgroundColor: 'var(--theme-primary)',
@@ -810,7 +858,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   </span>
                 </div>
                 <p className="text-xs leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
-                  Select a previous backup JSON file to restore custom bookmarks, keys, and configured themes.
+                  Choose a backup file. You will see what it contains and confirm before anything is replaced.
                 </p>
                 <label
                   className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg border transition-colors cursor-pointer hover:opacity-85"
@@ -825,14 +873,69 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   <input
                     type="file"
                     accept=".json"
+                    aria-label="Backup file"
                     onChange={handleImportFile}
                     className="hidden"
                   />
                 </label>
-                {importStatus && (
-                  <p className="text-xs text-emerald-500 font-medium">
-                    {importStatus}
+
+                {restoreMsg && (
+                  <p role="status" className="text-xs text-emerald-500 font-medium">
+                    {restoreMsg}
                   </p>
+                )}
+
+                {restoreCheck && 'error' in restoreCheck && (
+                  <p role="alert" className="text-xs text-rose-500 font-medium">
+                    {restoreCheck.error}
+                  </p>
+                )}
+
+                {restoreCheck && 'backup' in restoreCheck && (
+                  <div className="space-y-2.5 text-xs" style={{ color: 'var(--theme-text)' }}>
+                    <p className="font-semibold">
+                      Backup{restoreCheck.summary.exportedAt ? ` from ${new Date(restoreCheck.summary.exportedAt).toLocaleString()}` : ''} contains:
+                    </p>
+                    <p>{describeRestore(restoreCheck.summary).join(' • ')}</p>
+                    {restoreCheck.warnings.length > 0 && (
+                      <ul className="list-disc pl-4 text-amber-500 space-y-0.5">
+                        {restoreCheck.warnings.map((w) => (
+                          <li key={w}>{w}</li>
+                        ))}
+                      </ul>
+                    )}
+                    <p role="alert" className="text-rose-500">
+                      Restoring replaces your current{' '}
+                      {[
+                        restoreCheck.summary.has.customTools && `custom tools (${customToolsCount})`,
+                        restoreCheck.summary.has.keys && `API keys (${savedKeysCount})`,
+                        restoreCheck.summary.has.bookmarks && `bookmarks (${bookmarksCount})`,
+                        restoreCheck.summary.has.customThemes && 'custom themes',
+                        restoreCheck.summary.hasTheme && 'theme',
+                        restoreCheck.summary.hasPreferences && 'preferences',
+                      ]
+                        .filter(Boolean)
+                        .join(', ')}
+                      . Anything not listed stays as it is.
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        id="btn-confirm-restore"
+                        onClick={handleConfirmRestore}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer"
+                        style={{ backgroundColor: '#ef4444', color: '#ffffff' }}
+                      >
+                        Restore and replace
+                      </button>
+                      <button
+                        onClick={() => setRestoreCheck(null)}
+                        className="px-3 py-1.5 rounded-lg border text-xs font-medium cursor-pointer"
+                        style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)' }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
 
@@ -849,7 +952,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     <div className="flex items-center gap-2">
                       <FolderInput className="w-4 h-4 text-emerald-400" />
                       <span className="text-xs font-semibold" style={{ color: 'var(--theme-text)' }}>
-                        270+ Developer Bookmarks Export & Import Center
+                        Bookmarks Export & Import Center
                       </span>
                     </div>
                     <span className="text-[10px] px-2 py-0.5 rounded-full border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 font-semibold">
@@ -857,7 +960,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     </span>
                   </div>
                   <p className="text-xs leading-relaxed" style={{ color: 'var(--theme-text-secondary)' }}>
-                    Export your curated collection of 270+ online developer tools or import browser bookmarks with smart merging and duplicate resolution.
+                    Export just your bookmarks, or import a browser bookmarks file with duplicate detection.
                   </p>
                   <button
                     id="btn-settings-open-bookmarks-manager"
@@ -878,25 +981,54 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             </div>
 
             {/* Factory Reset */}
-            <div className="pt-4 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3" style={{ borderColor: 'var(--theme-border)' }}>
-              <div>
-                <span className="text-xs font-semibold text-rose-500 block">
-                  Reset Factory Defaults
-                </span>
-                <span className="text-xs block mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>
-                  Reverts the catalog to standard curated tools and resets custom themes to defaults.
-                </span>
+            <div className="pt-4 border-t space-y-3" style={{ borderColor: 'var(--theme-border)' }}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <span className="text-xs font-semibold text-rose-500 block">Reset Tools, Keys & Themes</span>
+                  <span className="text-xs block mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>
+                    Deletes your custom tools, favorites, saved API keys, custom themes and preferences, and restores the built-in catalog. Bookmarks are not affected (they have their own reset in the Bookmarks exporter).
+                  </span>
+                </div>
+                <button
+                  id="btn-reset-factory"
+                  onClick={() => setConfirmReset(true)}
+                  disabled={confirmReset}
+                  className="px-3.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-xs font-medium rounded-lg border border-rose-500/30 transition-colors cursor-pointer self-start sm:self-auto disabled:opacity-40"
+                >
+                  Reset Tools, Keys & Themes
+                </button>
               </div>
-              <button
-                onClick={() => {
-                  if (window.confirm('Are you sure you want to reset all custom tools and theme settings to factory default?')) {
-                    onResetFactoryDefaults();
-                  }
-                }}
-                className="px-3.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-xs font-medium rounded-lg border border-rose-500/30 transition-colors cursor-pointer self-start sm:self-auto"
-              >
-                Reset Catalog & Themes
-              </button>
+              {confirmReset && (
+                <div
+                  role="alert"
+                  className="p-3.5 rounded-xl border space-y-2.5"
+                  style={{ backgroundColor: 'rgba(239, 68, 68, 0.08)', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+                >
+                  <p className="text-xs font-medium" style={{ color: 'var(--theme-text)' }}>
+                    This permanently deletes {customToolsCount} custom tool{customToolsCount === 1 ? '' : 's'}, {savedKeysCount} saved API key{savedKeysCount === 1 ? '' : 's'}, your favorites, custom themes and preferences. Download a backup first if you might need them.
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      id="btn-confirm-reset-factory"
+                      onClick={() => {
+                        onResetFactoryDefaults();
+                        setConfirmReset(false);
+                      }}
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer"
+                      style={{ backgroundColor: '#ef4444', color: '#ffffff' }}
+                    >
+                      Yes, delete and reset
+                    </button>
+                    <button
+                      onClick={() => setConfirmReset(false)}
+                      className="px-3 py-1.5 rounded-lg border text-xs font-medium cursor-pointer"
+                      style={{ backgroundColor: 'var(--theme-card)', borderColor: 'var(--theme-border)' }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
