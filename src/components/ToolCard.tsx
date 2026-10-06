@@ -35,6 +35,8 @@ import {
   Share2
 } from 'lucide-react';
 import { AITool } from '../types';
+import { ConfirmDeleteButton } from './ConfirmDeleteButton';
+import { copyText } from '../lib/files';
 
 interface ToolCardProps {
   tool: AITool;
@@ -133,14 +135,13 @@ export const ToolCard: React.FC<ToolCardProps> = ({
   onOpenConfigExporter,
   onOpenRateLimitMatrix,
 }) => {
-  const [copiedLink, setCopiedLink] = useState(false);
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const IconComponent = getIconComponent(tool.logo);
   const scopeConfig = getScopeBadgeConfig(tool.scope);
 
-  const copyShareLink = () => {
-    navigator.clipboard.writeText(tool.url);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2000);
+  const copyShareLink = async () => {
+    setCopyState((await copyText(tool.url)) ? 'copied' : 'failed');
+    setTimeout(() => setCopyState('idle'), 2000);
   };
 
   return (
@@ -242,18 +243,16 @@ export const ToolCard: React.FC<ToolCardProps> = ({
             </button>
 
             {tool.isCustom && onDeleteCustom && (
-              <button
+              <ConfirmDeleteButton
                 id={`btn-del-${tool.id}`}
-                onClick={() => onDeleteCustom(tool.id)}
+                name={tool.name}
+                onConfirm={() => onDeleteCustom(tool.id)}
                 className="p-1.5 rounded-lg border transition-colors cursor-pointer text-rose-500 hover:opacity-85"
                 style={{
                   backgroundColor: 'var(--theme-raised)',
                   borderColor: 'var(--theme-border)',
                 }}
-                title="Delete custom tool"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+              />
             )}
           </div>
         </div>
@@ -405,9 +404,10 @@ export const ToolCard: React.FC<ToolCardProps> = ({
             style={{
               backgroundColor: 'var(--theme-raised)',
               borderColor: 'var(--theme-border)',
-              color: copiedLink ? '#10b981' : 'var(--theme-text-muted)',
+              color: copyState === 'copied' ? '#10b981' : copyState === 'failed' ? '#ef4444' : 'var(--theme-text-muted)',
             }}
-            title="Copy website link"
+            title={copyState === 'failed' ? 'Copy failed' : copyState === 'copied' ? 'Link copied' : 'Copy website link'}
+            aria-label="Copy website link"
           >
             <Share2 className="w-3.5 h-3.5" />
           </button>

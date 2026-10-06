@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { AITool, ToolCategory } from '../types';
 import { ToolCard, getIconComponent, getScopeBadgeConfig, canExportConfig } from './ToolCard';
+import { ConfirmDeleteButton } from './ConfirmDeleteButton';
 
 type CategoryFilter = ToolCategory | 'favorites';
 type ViewMode = 'list' | 'grid';
@@ -475,15 +476,12 @@ export const ToolsPage: React.FC<ToolsPageProps> = ({
                             </button>
                           )}
                           {tool.isCustom && (
-                            <button
-                              onClick={() => onDeleteCustom(tool.id)}
-                              title="Delete custom tool"
-                              aria-label={`Delete ${tool.name}`}
+                            <ConfirmDeleteButton
+                              name={tool.name}
+                              onConfirm={() => onDeleteCustom(tool.id)}
                               className={iconBtn}
                               style={iconBtnStyle}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                            />
                           )}
                           <button
                             onClick={() => onToggleFavorite(tool.id)}

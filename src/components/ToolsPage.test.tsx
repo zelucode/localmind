@@ -100,6 +100,9 @@ describe('ToolsPage list', () => {
     const deletes = screen.getAllByRole('button', { name: /^Delete / });
     expect(deletes).toHaveLength(1);
     await userEvent.click(deletes[0]);
+    // One click only arms it; deleting a custom tool needs a second, explicit click.
+    expect(props.onDeleteCustom).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole('button', { name: /^Confirm delete / }));
     expect(props.onDeleteCustom).toHaveBeenCalledWith(tools[0].id);
   });
 
