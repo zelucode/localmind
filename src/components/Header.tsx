@@ -38,6 +38,7 @@ const PAGE_TITLES: Record<ActiveView, string> = {
   bookmarks: 'Bookmarks',
   runtimes: 'Runtimes',
   configs: 'Configs & Limits',
+  setup: 'Setup',
   vault: 'Key Vault',
   settings: 'Settings',
 };

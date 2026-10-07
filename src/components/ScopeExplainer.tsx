@@ -1,8 +1,26 @@
 import React, { useState } from 'react';
+import { CapabilityScope } from '../types';
 import { Globe, HardDrive, Terminal, Info, ChevronDown, ChevronUp, CheckCircle2, AlertCircle } from 'lucide-react';
 
-export const ScopeExplainer: React.FC = () => {
+interface ScopeExplainerProps {
+  /** When given, each column gets a button that shows only the tools of that scope. */
+  onShowScope?: (scope: CapabilityScope) => void;
+}
+
+export const ScopeExplainer: React.FC<ScopeExplainerProps> = ({ onShowScope }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const showButton = (scope: CapabilityScope, label: string) =>
+    onShowScope && (
+      <button
+        type="button"
+        onClick={() => onShowScope(scope)}
+        className="mt-2 self-start text-[11px] font-medium underline cursor-pointer"
+        style={{ color: 'var(--theme-primary)' }}
+      >
+        {label}
+      </button>
+    );
 
   return (
     <div
@@ -111,6 +129,7 @@ export const ScopeExplainer: React.FC = () => {
             >
               Requires manual copy-pasting code into your editor.
             </div>
+            {showButton('web-only', 'Show web-only tools')}
           </div>
 
           {/* Local Agents */}
@@ -151,6 +170,7 @@ export const ScopeExplainer: React.FC = () => {
             >
               Free plans available via VSCode Copilot, Cursor trial, or free Gemini key with Aider.
             </div>
+            {showButton('local-agent', 'Show local agents')}
           </div>
 
           {/* Local Model Runners & Proxies */}
@@ -197,8 +217,9 @@ export const ScopeExplainer: React.FC = () => {
                 color: 'var(--theme-text-muted)',
               }}
             >
-              Check the monitor widget below to test local daemon availability.
+              Use Runtimes in the sidebar to check which local servers are running.
             </div>
+            {showButton('local-runner', 'Show local runners')}
           </div>
         </div>
       )}

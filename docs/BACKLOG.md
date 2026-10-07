@@ -80,7 +80,7 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 
 ### [ ] Task 14: Advisor: re-enable and choose providers
 - **Problem**: The Free Tier Advisor is built (Rust `ask_advisor`, `AIAdvisorModal`, tests) but only supports Gemini with the user's vault key, so it is hidden.
-- **Hidden by**: `FEATURES.advisor = false` in `src/config/features.ts`. This hides the floating button, the `A` shortcut, the Ctrl+K action, the Omnibar "Which Tool?" button and its shortcut-sheet entry. Set it to `true` to bring everything back (`App.advisor.test.tsx` covers the enabled state).
+- **Hidden by**: `FEATURES.advisor = false` in `src/config/features.ts`. This hides the floating button, the `A` shortcut, the Ctrl+K action, the Ask box "Which Tool?" button and its shortcut-sheet entry. Set it to `true` to bring everything back (`App.advisor.test.tsx` covers the enabled state).
 - **To decide**: which providers the Advisor should run on (Gemini, Groq, OpenRouter, local Ollama?), whether the user picks the key, and whether to ship an offline fallback (keyword-matched suggestions from the catalog, like the old Express server had).
 - **Status**: Parked until the provider decision.
 
@@ -156,4 +156,5 @@ Everything useful from the four LLM replies is kept in [research/gap-finder-find
 ### [ ] Task 23: Ask box, one-click setup and a Developer sidebar group
 - **Problem**: the Omnibar has two hard-coded engines and mixes launching with developer shortcuts; setting up CLI and local tools means reading separate guides.
 - **Solution**: see [features/ask-box-and-setup-design.md](features/ask-box-and-setup-design.md): catalog-driven single-engine Ask box (Compare opt-in later), curated install-and-detect recipes in the desktop app, and a Developer sidebar group.
-- **Status**: Design agreed 2026-10-06; not started.
+- **Also covers**: replacing the Home scope banner with scope-aware filters and actions (section 4 of the design doc).
+- **Status**: Built 2026-10-07 (Ask box + Compare, scope filter and guide on AI Tools, Developer group, one-click setup), awaiting review. Open items are listed in the design doc under "What was built, and what is still open".

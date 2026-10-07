@@ -5,6 +5,7 @@ import {
   Bookmark,
   Cpu,
   Code2,
+  Wrench,
   KeyRound,
   Settings,
   PanelLeftClose,
@@ -55,10 +56,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       ],
     },
     {
-      title: 'Local',
+      title: 'Developer',
       items: [
         { view: 'runtimes', label: 'Runtimes', icon: Cpu },
         { view: 'configs', label: 'Configs & Limits', icon: Code2 },
+        { view: 'setup', label: 'Setup', icon: Wrench },
       ],
     },
     {

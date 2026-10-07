@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Network, RefreshCw, CheckCircle, XCircle, ExternalLink, Copy, Check, Play, HelpCircle, Settings2 } from 'lucide-react';
+import { Network, RefreshCw, CheckCircle, XCircle, ExternalLink, Copy, Check, Play, HelpCircle, Settings2, Power } from 'lucide-react';
 import { CopyStatusIcon, useCopyFeedback } from '../lib/useCopy';
+import type { SetupDetectResult } from '../lib/backend';
 
-import { probePorts, indexProbeResults } from '../lib/backend';
+import { probePorts, indexProbeResults, detectSetupTools } from '../lib/backend';
 
 interface LocalServiceStatus {
   id: string;
@@ -12,6 +13,11 @@ interface LocalServiceStatus {
   latency?: number;
   commandToStart: string;
   docsUrl: string;
+  /** Setup recipe id, used to find out whether the tool is installed even when it is not running. */
+  recipeId: string;
+  /** Found on this computer (undefined when that could not be checked, e.g. in a browser). */
+  installed?: boolean;
+  version?: string;
 }
 
 interface OmniRouteWidgetProps {
@@ -26,6 +32,7 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
       port: 8000,
       status: 'offline',
       commandToStart: 'omniroute start --port 8000',
+      recipeId: 'omniroute',
       docsUrl: 'https://github.com/danielfrg/omniroute',
     },
     {
@@ -34,6 +41,7 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
       port: 11434,
       status: 'offline',
       commandToStart: 'ollama serve',
+      recipeId: 'ollama',
       docsUrl: 'https://ollama.com',
     },
     {
@@ -42,6 +50,7 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
       port: 1234,
       status: 'offline',
       commandToStart: 'Launch LM Studio -> Start Local Server',
+      recipeId: 'lm-studio',
       docsUrl: 'https://lmstudio.ai',
     },
     {
@@ -50,6 +59,7 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
       port: 1337,
       status: 'offline',
       commandToStart: 'jan --server',
+      recipeId: 'jan',
       docsUrl: 'https://jan.ai',
     },
   ]);
@@ -68,10 +78,21 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
     setScanError(null);
     try {
       const results = indexProbeResults(await probePorts(services.map((s) => s.port)));
+      // Which of them are installed (so "not running" can be told apart from "not set up"). Best effort:
+      // when this cannot be checked the cards simply say Offline, as before.
+      let found = new Map<string, SetupDetectResult>();
+      try {
+        found = new Map((await detectSetupTools(services.map((s) => s.recipeId))).map((d) => [d.id, d]));
+      } catch {
+        // keep whatever we knew before
+      }
       const next = services.map((s) => {
         const r = results.get(s.port);
+        const d = found.get(s.recipeId);
         return {
           ...s,
+          installed: d ? d.status === 'installed' : s.installed,
+          version: d ? d.version ?? undefined : s.version,
           status: r?.online ? ('online' as const) : ('offline' as const),
           latency: r?.online ? r.latencyMs ?? undefined : undefined,
         };
@@ -117,6 +138,7 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
 
   const omniRouteSvc = services.find((s) => s.id === 'omniroute');
   const isOmniOnline = omniRouteSvc?.status === 'online';
+  const isOmniInstalledIdle = !isOmniOnline && !!omniRouteSvc?.installed;
 
   return (
     <div
@@ -162,7 +184,7 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
                 ) : (
                   <>
                     <span className="w-1.5 h-1.5 rounded-full opacity-40" style={{ backgroundColor: 'var(--theme-text)' }}></span>
-                    OmniRoute Standby
+                    {isOmniInstalledIdle ? 'OmniRoute Installed, not running' : 'OmniRoute Standby'}
                   </>
                 )}
               </span>
@@ -278,6 +300,7 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
         {services.map((svc) => {
           const isOnline = svc.status === 'online';
+          const isInstalledIdle = !isOnline && !!svc.installed;
           return (
             <div
               key={svc.id}
@@ -297,14 +320,20 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
                   className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0 border"
                   style={{
                     backgroundColor: 'var(--theme-card)',
-                    borderColor: isOnline ? '#10b981' : 'var(--theme-border)',
-                    color: isOnline ? '#10b981' : 'var(--theme-text-muted)',
+                    borderColor: isOnline ? '#10b981' : isInstalledIdle ? '#38bdf8' : 'var(--theme-border)',
+                    color: isOnline ? '#10b981' : isInstalledIdle ? '#38bdf8' : 'var(--theme-text-muted)',
                   }}
+                  title={isInstalledIdle ? `${svc.name} is installed on this computer but nothing is listening on port ${svc.port}` : undefined}
                 >
                   {isOnline ? (
                     <>
                       <CheckCircle className="w-3 h-3 text-emerald-500" />
                       Online {svc.latency ? `(${svc.latency}ms)` : ''}
+                    </>
+                  ) : isInstalledIdle ? (
+                    <>
+                      <Power className="w-3 h-3" />
+                      Installed
                     </>
                   ) : (
                     <>
@@ -314,6 +343,12 @@ export const OmniRouteWidget: React.FC<OmniRouteWidgetProps> = ({ onStatusChange
                   )}
                 </span>
               </div>
+
+              {isInstalledIdle && (
+                <p className="text-[11px] mb-1.5" style={{ color: '#38bdf8' }}>
+                  Set up on this computer{svc.version ? ` (version ${svc.version})` : ''}, just not running. Start it with the command below.
+                </p>
+              )}
 
               <div className="text-[11px] flex items-center justify-between mb-2" style={{ color: 'var(--theme-text-muted)' }}>
                 <span className="font-mono">Port {svc.port}</span>

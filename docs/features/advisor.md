@@ -10,7 +10,7 @@ The Free Tier Advisor answers "how do I do X using only free AI tools?". It is *
 export const FEATURES = { advisor: false } as const;
 ```
 
-While `false`, these are all absent: the floating **Ask Advisor** button, the `A` shortcut (and its line in the shortcut sheet), the Ctrl+K "AI Architecture Advisor" action, and the Omnibar **Which Tool?** button. The modal isn't rendered.
+While `false`, these are all absent: the floating **Ask Advisor** button, the `A` shortcut (and its line in the shortcut sheet), the Ctrl+K "AI Architecture Advisor" action, and the Ask box **Which Tool?** button. The modal isn't rendered.
 
 **To bring it back, set `advisor: true`.** `src/App.advisor.test.tsx` covers the enabled state, and `App.test.tsx` covers the hidden state.
 

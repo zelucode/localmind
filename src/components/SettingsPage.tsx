@@ -734,10 +734,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             <div className="flex items-start justify-between gap-4 pb-4 border-b" style={{ borderColor: 'var(--theme-border)' }}>
               <div>
                 <span className="text-xs sm:text-sm font-semibold block" style={{ color: 'var(--theme-text)' }}>
-                  Show "Web vs Local Files" Scope Banner
+                  Show the scope guide on the AI Tools page
                 </span>
                 <span className="text-xs block mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>
-                  Displays the architecture banner clarifying that Web LLMs cannot touch your local project files while CLI/IDE agents can.
+                  A collapsible guide above the tool list explaining that web chatbots cannot touch your local project files while CLI and IDE agents can, with shortcuts to filter by scope.
                 </span>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">

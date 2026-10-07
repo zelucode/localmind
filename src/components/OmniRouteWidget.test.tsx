@@ -5,13 +5,16 @@ import userEvent from '@testing-library/user-event';
 vi.mock('../lib/backend', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../lib/backend')>()),
   probePorts: vi.fn(),
+  detectSetupTools: vi.fn(),
 }));
 
-import { probePorts } from '../lib/backend';
+import { detectSetupTools, probePorts } from '../lib/backend';
 import { BackendUnavailableError } from '../lib/tauri';
 import { OmniRouteWidget } from './OmniRouteWidget';
 
 const probe = vi.mocked(probePorts);
+const detect = vi.mocked(detectSetupTools);
+const det = (id: string, status: 'installed' | 'not-installed', version: string | null = null) => ({ id, status, version, location: null, missing: null });
 
 describe('OmniRouteWidget', () => {
   it('scans the four known ports on mount', async () => {
@@ -34,6 +37,44 @@ describe('OmniRouteWidget', () => {
     expect(screen.getByText('Online (3ms)')).toBeInTheDocument();
     expect(screen.getAllByText('Offline')).toHaveLength(3);
     expect(onStatusChange).toHaveBeenLastCalledWith(true);
+  });
+
+  it('tells "installed but not running" apart from "not set up"', async () => {
+    probe.mockResolvedValue([
+      { port: 8000, online: false, latencyMs: null },
+      { port: 11434, online: false, latencyMs: null },
+      { port: 1234, online: false, latencyMs: null },
+      { port: 1337, online: false, latencyMs: null },
+    ]);
+    detect.mockResolvedValue([det('omniroute', 'installed', '3.8.50'), det('ollama', 'installed', '0.32.5'), det('lm-studio', 'installed'), det('jan', 'not-installed')]);
+    render(<OmniRouteWidget />);
+
+    expect(await screen.findByText('OmniRoute Installed, not running')).toBeInTheDocument();
+    expect(screen.getAllByText('Installed')).toHaveLength(3);
+    expect(screen.getAllByText('Offline')).toHaveLength(1);
+    expect(screen.getByText(/version 0\.32\.5\), just not running/)).toBeInTheDocument();
+    expect(detect).toHaveBeenCalledWith(['omniroute', 'ollama', 'lm-studio', 'jan']);
+  });
+
+  it('shows a running service as Online, never as merely installed', async () => {
+    probe.mockResolvedValue([
+      { port: 8000, online: false, latencyMs: null },
+      { port: 11434, online: true, latencyMs: 2 },
+      { port: 1234, online: false, latencyMs: null },
+      { port: 1337, online: false, latencyMs: null },
+    ]);
+    detect.mockResolvedValue([det('ollama', 'installed', '0.32.5')]);
+    render(<OmniRouteWidget />);
+    expect(await screen.findByText('Online (2ms)')).toBeInTheDocument();
+    expect(screen.queryByText('Installed')).not.toBeInTheDocument();
+  });
+
+  it('falls back to plain Offline when installs cannot be checked', async () => {
+    probe.mockResolvedValue([]);
+    detect.mockRejectedValue(new BackendUnavailableError('Tool setup'));
+    render(<OmniRouteWidget />);
+    expect(await screen.findAllByText('Offline')).toHaveLength(4);
+    expect(screen.queryByText('Installed')).not.toBeInTheDocument();
   });
 
   it('never claims a service is online when the scan could not run', async () => {

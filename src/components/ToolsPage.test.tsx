@@ -8,7 +8,7 @@ import { AITool } from '../types';
 const rows = () => Array.from(document.querySelectorAll('[id^="row-tool-"]'));
 const cards = () => Array.from(document.querySelectorAll('[id^="card-tool-"]'));
 
-function setup(tools: AITool[] = INITIAL_AI_TOOLS.map((t) => ({ ...t, isFavorite: false }))) {
+function setup(tools: AITool[] = INITIAL_AI_TOOLS.map((t) => ({ ...t, isFavorite: false })), extra: { showScopeExplainer?: boolean } = {}) {
   const props = {
     tools,
     defaultLaunchSearch: false,
@@ -19,7 +19,7 @@ function setup(tools: AITool[] = INITIAL_AI_TOOLS.map((t) => ({ ...t, isFavorite
     onOpenRateLimitMatrix: vi.fn(),
     onOpenAddModal: vi.fn(),
   };
-  render(<ToolsPage {...props} />);
+  render(<ToolsPage {...props} {...extra} />);
   return props;
 }
 
@@ -145,5 +145,40 @@ describe('ToolsPage view toggle', () => {
     localStorage.setItem('localmind_tools_view_v1', 'carousel');
     setup();
     expect(rows()).toHaveLength(INITIAL_AI_TOOLS.length);
+  });
+});
+
+describe('ToolsPage scope', () => {
+  it('filters by scope from the rail, shows counts, and clicking again clears it', async () => {
+    setup();
+    const expected = INITIAL_AI_TOOLS.filter((t) => t.scope === 'web-only').length;
+    const chip = document.getElementById('tab-scope-web-only')!;
+    expect(chip).toHaveTextContent(String(expected));
+    await userEvent.click(chip);
+    expect(rows()).toHaveLength(expected);
+    await userEvent.click(chip);
+    expect(rows()).toHaveLength(INITIAL_AI_TOOLS.length);
+  });
+
+  it('only lists scopes that have tools', () => {
+    setup(INITIAL_AI_TOOLS.filter((t) => t.scope === 'web-only'));
+    expect(document.getElementById('tab-scope-web-only')).toBeInTheDocument();
+    expect(document.getElementById('tab-scope-local-agent')).not.toBeInTheDocument();
+  });
+
+  it('hides the scope guide unless it is enabled', () => {
+    setup(undefined, { showScopeExplainer: false });
+    expect(screen.queryByText(/Understanding AI Tool Scopes/)).not.toBeInTheDocument();
+  });
+});
+
+describe('ToolsPage scope guide', () => {
+  it('"Show local agents" filters the list to local agents', async () => {
+    setup(undefined, { showScopeExplainer: true });
+    await userEvent.click(document.getElementById('btn-toggle-scope-explainer')!);
+    await userEvent.click(screen.getByRole('button', { name: 'Show local agents' }));
+    const expected = INITIAL_AI_TOOLS.filter((t) => t.scope === 'local-agent').length;
+    expect(rows()).toHaveLength(expected);
+    expect(document.getElementById('tab-scope-local-agent')).toHaveAttribute('aria-pressed', 'true');
   });
 });

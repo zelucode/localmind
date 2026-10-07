@@ -21,8 +21,9 @@ const SHORTCUTS: ShortcutItem[] = [
   { keys: ['3'], description: 'Go to Bookmarks', category: 'navigation' },
   { keys: ['4'], description: 'Go to Runtimes (OmniRoute & local daemons)', category: 'navigation' },
   { keys: ['5'], description: 'Go to Configs & Limits', category: 'navigation' },
-  { keys: ['6'], description: 'Go to Key Vault', category: 'navigation' },
-  { keys: ['7'], description: 'Go to Settings', category: 'navigation' },
+  { keys: ['6'], description: 'Go to Setup (one-click install of free tools)', category: 'navigation' },
+  { keys: ['7'], description: 'Go to Key Vault', category: 'navigation' },
+  { keys: ['8'], description: 'Go to Settings', category: 'navigation' },
   { keys: ['/'], description: 'Quick-focus search bar on active page', category: 'navigation' },
 
   // Tools & Modals

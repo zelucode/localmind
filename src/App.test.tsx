@@ -24,7 +24,7 @@ describe('App shell navigation', () => {
   it('starts on Home', () => {
     render(<App />);
     expect(title()).toHaveTextContent('Home');
-    expect(screen.getByText(/AI Universal Omnibar/)).toBeInTheDocument();
+    expect(screen.getByText(/Ask any free AI/)).toBeInTheDocument();
   });
 
   it.each([
@@ -55,7 +55,7 @@ describe('App shell navigation', () => {
     render(<App />);
     await userEvent.keyboard('2');
     expect(title()).toHaveTextContent('AI Tools');
-    await userEvent.keyboard('6');
+    await userEvent.keyboard('7');
     expect(title()).toHaveTextContent('Key Vault');
     await userEvent.keyboard('1');
     expect(title()).toHaveTextContent('Home');

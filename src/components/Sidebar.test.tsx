@@ -20,12 +20,12 @@ function setup(activeView: ActiveView = 'home', collapsed = false) {
 }
 
 describe('Sidebar', () => {
-  it('groups pages under Discover, Local and Secure', () => {
+  it('groups pages under Discover, Developer and Secure', () => {
     const { desktop } = setup();
-    for (const group of ['Discover', 'Local', 'Secure']) {
+    for (const group of ['Discover', 'Developer', 'Secure']) {
       expect(desktop.getByText(group)).toBeInTheDocument();
     }
-    for (const label of ['Home', 'AI Tools', 'Bookmarks', 'Runtimes', 'Configs & Limits', 'Key Vault', 'Settings']) {
+    for (const label of ['Home', 'AI Tools', 'Bookmarks', 'Runtimes', 'Configs & Limits', 'Setup', 'Key Vault', 'Settings']) {
       expect(desktop.getByRole('button', { name: label })).toBeInTheDocument();
     }
   });
@@ -49,6 +49,7 @@ describe('Sidebar', () => {
     ['Bookmarks', 'bookmarks'],
     ['Runtimes', 'runtimes'],
     ['Configs & Limits', 'configs'],
+    ['Setup', 'setup'],
     ['Key Vault', 'vault'],
     ['Settings', 'settings'],
   ] as const)('"%s" navigates to %s', async (label, view) => {

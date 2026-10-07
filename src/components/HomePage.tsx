@@ -1,14 +1,12 @@
 import React from 'react';
 import { ArrowRight, Cpu, KeyRound, LayoutGrid, Bookmark, Gauge, Star } from 'lucide-react';
-import { Omnibar } from './Omnibar';
-import { ScopeExplainer } from './ScopeExplainer';
+import { AskBox } from './AskBox';
 import { ActiveView, AITool, StoredApiKey, ToolBookmark } from '../types';
 
 interface HomePageProps {
   tools: AITool[];
   bookmarks: ToolBookmark[];
   keys: StoredApiKey[];
-  showScopeExplainer: boolean;
   onNavigate: (view: ActiveView) => void;
   onOpenAdvisor?: (initialPrompt?: string) => void;
 }
@@ -41,7 +39,6 @@ export const HomePage: React.FC<HomePageProps> = ({
   tools,
   bookmarks,
   keys,
-  showScopeExplainer,
   onNavigate,
   onOpenAdvisor,
 }) => {
@@ -56,11 +53,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   return (
     <div className="space-y-6">
-      <Omnibar
-        onOpenAdvisor={onOpenAdvisor}
-        onOpenConfigExporter={() => onNavigate('configs')}
-        onOpenRateLimitMatrix={() => onNavigate('configs')}
-      />
+      <AskBox tools={tools} onOpenAdvisor={onOpenAdvisor} />
 
       <section aria-label="Status" className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatusCard
@@ -92,8 +85,6 @@ export const HomePage: React.FC<HomePageProps> = ({
           onClick={() => onNavigate('runtimes')}
         />
       </section>
-
-      {showScopeExplainer && <ScopeExplainer />}
 
       <section aria-label="Favorites" className="space-y-3">
         <div className="flex items-center justify-between">
@@ -148,7 +139,11 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       <p className="text-[11px] flex items-center gap-1.5" style={{ color: 'var(--theme-text-muted)' }}>
         <Gauge className="w-3.5 h-3.5" />
-        Free-tier limits and rotation strategy live under Configs &amp; Limits.
+        Free-tier limits, rotation strategy and IDE config exports live under{' '}
+        <button onClick={() => onNavigate('configs')} className="underline cursor-pointer" style={{ color: 'var(--theme-primary)' }}>
+          Configs &amp; Limits
+        </button>
+        .
       </p>
     </div>
   );

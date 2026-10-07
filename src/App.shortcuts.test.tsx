@@ -22,9 +22,9 @@ const title = () => screen.getByRole('heading', { level: 1 });
 
 // Each shortcut listed in the cheat-sheet must do what the cheat-sheet says.
 describe('keyboard shortcuts', () => {
-  it('3, 4, 5 and 7 open Bookmarks, Runtimes, Configs and Settings', async () => {
+  it('3, 4, 5, 6 and 8 open Bookmarks, Runtimes, Configs, Setup and Settings', async () => {
     render(<App />);
-    for (const [key, page] of [['3', 'Bookmarks'], ['4', 'Runtimes'], ['5', 'Configs & Limits'], ['7', 'Settings']] as const) {
+    for (const [key, page] of [['3', 'Bookmarks'], ['4', 'Runtimes'], ['5', 'Configs & Limits'], ['6', 'Setup'], ['8', 'Settings']] as const) {
       await userEvent.keyboard(key);
       expect(title()).toHaveTextContent(page);
     }

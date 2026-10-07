@@ -3,9 +3,15 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const invokeMock = vi.fn();
 vi.mock('@tauri-apps/api/core', () => ({ invoke: (...a: unknown[]) => invokeMock(...a) }));
 vi.mock('@tauri-apps/plugin-opener', () => ({ openUrl: vi.fn() }));
+const listenMock = vi.fn();
+vi.mock('@tauri-apps/api/event', () => ({ listen: (...a: unknown[]) => listenMock(...a) }));
 
 import {
   askAdvisor,
+  cancelSetupInstall,
+  detectSetupTools,
+  installSetupTool,
+  listSetupRecipes,
   decryptBackup,
   decryptSecrets,
   encryptBackup,
@@ -22,6 +28,7 @@ import {
 afterEach(() => {
   delete (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__;
   invokeMock.mockReset();
+  listenMock.mockReset();
 });
 
 function inTauri() {
@@ -123,5 +130,56 @@ describe('backup encryption wrappers', () => {
 
   it('refuse in a plain browser instead of writing an unprotected file', async () => {
     await expect(encryptBackup('x', 'long enough')).rejects.toThrow('needs the LocalMind desktop app');
+  });
+});
+
+describe('setup wrappers', () => {
+  it('throw the desktop-app message outside Tauri', async () => {
+    await expect(listSetupRecipes()).rejects.toThrow('Tool setup needs the LocalMind desktop app.');
+    await expect(detectSetupTools(['ollama'])).rejects.toThrow(/desktop app/);
+    await expect(installSetupTool('ollama', vi.fn())).rejects.toThrow(/desktop app/);
+    await expect(cancelSetupInstall()).rejects.toThrow(/desktop app/);
+    expect(invokeMock).not.toHaveBeenCalled();
+    expect(listenMock).not.toHaveBeenCalled();
+  });
+
+  it('list and detect call the right commands', async () => {
+    inTauri();
+    invokeMock.mockResolvedValueOnce([{ id: 'ollama' }]);
+    expect(await listSetupRecipes()).toEqual([{ id: 'ollama' }]);
+    expect(invokeMock).toHaveBeenLastCalledWith('list_setup_recipes', undefined);
+    invokeMock.mockResolvedValueOnce([]);
+    await detectSetupTools(['ollama', 'gemini-cli']);
+    expect(invokeMock).toHaveBeenLastCalledWith('detect_setup_tools', { ids: ['ollama', 'gemini-cli'] });
+  });
+
+  it("install sends only the recipe id, forwards this tool's output lines and stops listening afterwards", async () => {
+    inTauri();
+    const unlisten = vi.fn();
+    let handler: (e: { payload: { id: string; line: string } }) => void = () => {};
+    listenMock.mockImplementation(async (_name: string, h: typeof handler) => {
+      handler = h;
+      return unlisten;
+    });
+    invokeMock.mockImplementation(async () => {
+      handler({ payload: { id: 'ollama', line: 'downloading' } });
+      handler({ payload: { id: 'other', line: 'not mine' } });
+      return 'Ollama was installed.';
+    });
+    const lines: string[] = [];
+    expect(await installSetupTool('ollama', (l) => lines.push(l))).toBe('Ollama was installed.');
+    expect(listenMock.mock.calls[0][0]).toBe('setup-output');
+    expect(invokeMock).toHaveBeenCalledWith('install_setup_tool', { id: 'ollama' });
+    expect(lines).toEqual(['downloading']);
+    expect(unlisten).toHaveBeenCalledTimes(1);
+  });
+
+  it('install still stops listening when it fails', async () => {
+    inTauri();
+    const unlisten = vi.fn();
+    listenMock.mockResolvedValue(unlisten);
+    invokeMock.mockRejectedValue('Install cancelled.');
+    await expect(installSetupTool('ollama', vi.fn())).rejects.toThrow('Install cancelled.');
+    expect(unlisten).toHaveBeenCalledTimes(1);
   });
 });

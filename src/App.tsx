@@ -12,6 +12,7 @@ import { AboutModal } from './components/AboutModal';
 import { ReportProblemModal } from './components/ReportProblemModal';
 import { OmniRouteWidget } from './components/OmniRouteWidget';
 import { ToolsPage } from './components/ToolsPage';
+import { SetupPage } from './components/SetupPage';
 import { SettingsPage } from './components/SettingsPage';
 import { AddToolModal } from './components/AddToolModal';
 import { ApiKeyVaultModal } from './components/ApiKeyVaultModal';
@@ -515,8 +516,9 @@ export default function App() {
         '3': 'bookmarks',
         '4': 'runtimes',
         '5': 'configs',
-        '6': 'vault',
-        '7': 'settings',
+        '6': 'setup',
+        '7': 'vault',
+        '8': 'settings',
       };
       if (NUMBER_VIEWS[e.key]) {
         e.preventDefault();
@@ -800,6 +802,7 @@ export default function App() {
         onOpenWelcome={() => setIsStartupScreenOpen(true)}
         onOpenAbout={() => setIsAboutOpen(true)}
         onOpenReportProblem={() => setIsReportOpen(true)}
+        minimal={isLoading}
       />
 
       {/* Content area: the only scrolling region, so the scrollbar stays below the title bar */}
@@ -807,7 +810,6 @@ export default function App() {
         className="mt-11 pb-16 md:pb-0 flex-1 min-h-0 overflow-y-auto flex flex-col min-w-0 md:ml-[var(--sidebar-w)] transition-[margin] duration-150"
         style={{ ['--sidebar-w' as string]: `${sidebarCollapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH}px` }}
       >
-        minimal={isLoading}
         {/* View Switcher: Settings Page vs Bookmarks Catalog vs Dashboard Hub */}
         {activeView === 'settings' ? (
           <main className="flex-1 w-full">
@@ -860,10 +862,13 @@ export default function App() {
               tools={tools}
               bookmarks={bookmarks}
               keys={keys}
-              showScopeExplainer={showScopeExplainer}
               onNavigate={setActiveView}
               onOpenAdvisor={FEATURES.advisor ? handleOpenAdvisor : undefined}
             />
+          </main>
+        ) : activeView === 'setup' ? (
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <SetupPage />
           </main>
         ) : activeView === 'runtimes' ? (
           <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -933,6 +938,7 @@ export default function App() {
           <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <ToolsPage
               tools={tools}
+              showScopeExplainer={showScopeExplainer}
               defaultLaunchSearch={defaultLaunchSearch}
               onToggleFavorite={toggleFavorite}
               onDeleteCustom={handleDeleteCustom}

@@ -23,7 +23,6 @@ function setup(over: Partial<React.ComponentProps<typeof HomePage>> = {}) {
     tools: INITIAL_AI_TOOLS.map((t) => ({ ...t, isFavorite: false })),
     bookmarks: DEFAULT_BOOKMARKS.map((b) => ({ ...b, isFavorite: false })),
     keys: [] as StoredApiKey[],
-    showScopeExplainer: true,
     onNavigate: vi.fn(),
     onOpenAdvisor: vi.fn(),
     ...over,
@@ -86,8 +85,8 @@ describe('HomePage', () => {
     expect(screen.getByRole('link', { name: new RegExp(bookmarks[0].title) })).toHaveAttribute('href', bookmarks[0].url);
   });
 
-  it('hides the scope explainer when the setting is off', () => {
-    setup({ showScopeExplainer: false });
+  it('no longer shows the scope explainer (it lives on the AI Tools page)', () => {
+    setup();
     expect(screen.queryByText(/Understanding AI Tool Scopes/)).not.toBeInTheDocument();
   });
 });

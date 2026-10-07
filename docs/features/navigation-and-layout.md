@@ -6,15 +6,16 @@ A frameless window with a **title bar** across the top and a **sidebar** down th
 
 | # | Page | Purpose |
 |---|---|---|
-| 1 | Home | Quick launcher (Omnibar), status cards, favorites |
+| 1 | Home | Ask box (one default engine), status cards, favorites |
 | 2 | AI Tools | Compare free-tier AI tools |
 | 3 | Bookmarks | Find a free web tool |
 | 4 | Runtimes | See which local AI servers are running |
 | 5 | Configs & Limits | IDE/agent config exporter and the rate-limit matrix (two tabs) |
-| 6 | Key Vault | Store and verify API keys |
-| 7 | Settings | Themes, startup options, backup/restore, reset |
+| 6 | Setup | One-click install of free tools (Ollama, Gemini CLI, Qwen Code), desktop only |
+| 7 | Key Vault | Store and verify API keys |
+| 8 | Settings | Themes, startup options, backup/restore, reset |
 
-The sidebar groups them as **Discover** (Home, AI Tools, Bookmarks), **Local** (Runtimes, Configs & Limits) and **Secure** (Key Vault), with Collapse and Settings at the bottom. Counts show on AI Tools, Bookmarks and Key Vault. Collapsing leaves icons only (the choice is remembered). Below the `md` breakpoint a bottom bar replaces the sidebar.
+The sidebar groups them as **Discover** (Home, AI Tools, Bookmarks), **Developer** (Runtimes, Configs & Limits, Setup) and **Secure** (Key Vault), with Collapse and Settings at the bottom. Counts show on AI Tools, Bookmarks and Key Vault. Collapsing leaves icons only (the choice is remembered). Below the `md` breakpoint a bottom bar replaces the sidebar.
 
 ### Title bar (left to right)
 Logo and "LocalMind" (click for Home) · page title · search box (opens Ctrl+K) · contextual button · theme toggle · **Help menu** · minimize / maximize / close.
@@ -26,7 +27,7 @@ Logo and "LocalMind" (click for Home) · page title · search box (opens Ctrl+K)
 Keyboard Shortcuts · Welcome & Quick Start · About LocalMind · Documentation (disabled, "Soon") · Report a Problem (opens the diagnostics dialog, see [logging-and-diagnostics.md](logging-and-diagnostics.md)). Documentation is tracked in the backlog (Task 6).
 
 ### Keyboard shortcuts
-`Ctrl/Cmd+K` search palette · `1`–`7` jump to a page · `?` shortcut sheet · `/` focus the page's search · `k` Key Vault · `c` Config Exporter · `l` Rate-Limit Matrix · `b` add a bookmark · `t` toggle light/dark · `Esc` close the top dialog. Single-letter shortcuts are ignored while typing in a field.
+`Ctrl/Cmd+K` search palette · `1`–`8` jump to a page · `?` shortcut sheet · `/` focus the page's search · `k` Key Vault · `c` Config Exporter · `l` Rate-Limit Matrix · `b` add a bookmark · `t` toggle light/dark · `Esc` close the top dialog. Single-letter shortcuts are ignored while typing in a field.
 
 ## How it works
 
@@ -38,7 +39,7 @@ Keyboard Shortcuts · Welcome & Quick Start · About LocalMind · Documentation 
 - `WindowControls.tsx` provides the caption buttons and the drag region. The window is frameless (`decorations: false`), so the permissions it needs (minimize, maximize, close, drag) are listed in `src-tauri/capabilities/default.json`.
 
 ## Tests
-`Sidebar.test.tsx`, `Header.test.tsx` (titles, contextual buttons, Help menu), `HomePage.test.tsx`, and `App.test.tsx` (navigation through every page, number-key shortcuts, collapse persistence, theme toggle, Help → Shortcuts / About), `App.shortcuts.test.tsx` (every hotkey in the cheat-sheet: 1-7, k, c, l, b, t, /, Ctrl+K, and that letter hotkeys are ignored while typing), `KeyboardShortcutsModal.test.tsx`, `AboutModal.test.tsx` (real version, privacy wording, closing) and `WindowControls.test.tsx` (minimize / maximize / restore / close, drag region, no-op outside the desktop app).
+`Sidebar.test.tsx`, `Header.test.tsx` (titles, contextual buttons, Help menu), `HomePage.test.tsx`, and `App.test.tsx` (navigation through every page, number-key shortcuts, collapse persistence, theme toggle, Help → Shortcuts / About), `App.shortcuts.test.tsx` (every hotkey in the cheat-sheet: 1-8, k, c, l, b, t, /, Ctrl+K, and that letter hotkeys are ignored while typing), `KeyboardShortcutsModal.test.tsx`, `AboutModal.test.tsx` (real version, privacy wording, closing) and `WindowControls.test.tsx` (minimize / maximize / restore / close, drag region, no-op outside the desktop app).
 
 ## Limits
 - Documentation is a placeholder (backlog Task 6).

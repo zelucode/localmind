@@ -15,9 +15,10 @@ import {
   LayoutGrid,
   type LucideIcon,
 } from 'lucide-react';
-import { AITool, ToolCategory } from '../types';
+import { AITool, CapabilityScope, ToolCategory } from '../types';
 import { ToolCard, getIconComponent, getScopeBadgeConfig, canExportConfig } from './ToolCard';
 import { ConfirmDeleteButton } from './ConfirmDeleteButton';
+import { ScopeExplainer } from './ScopeExplainer';
 
 type CategoryFilter = ToolCategory | 'favorites';
 type ViewMode = 'list' | 'grid';
@@ -45,6 +46,7 @@ function savePref(key: string, value: string) {
 
 interface ToolsPageProps {
   tools: AITool[];
+  showScopeExplainer?: boolean;
   defaultLaunchSearch: boolean;
   onToggleFavorite: (id: string) => void;
   onDeleteCustom: (id: string) => void;
@@ -63,10 +65,13 @@ const CATEGORIES: { id: CategoryFilter; label: string; icon: LucideIcon }[] = [
   { id: 'favorites', label: 'Favorites', icon: Star },
 ];
 
+const SCOPES: CapabilityScope[] = ['web-only', 'local-agent', 'ide-plugin', 'local-runner', 'uniform-proxy', 'cloud-builder'];
+
 const pill = 'px-1.5 py-0.5 rounded border text-[10px] font-medium whitespace-nowrap';
 
 export const ToolsPage: React.FC<ToolsPageProps> = ({
   tools,
+  showScopeExplainer = false,
   defaultLaunchSearch,
   onToggleFavorite,
   onDeleteCustom,
@@ -77,6 +82,7 @@ export const ToolsPage: React.FC<ToolsPageProps> = ({
 }) => {
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [query, setQuery] = useState('');
+  const [scope, setScope] = useState<CapabilityScope | 'all'>('all');
   const [canEditFiles, setCanEditFiles] = useState(false);
   const [hasWebSearch, setHasWebSearch] = useState(false);
   const [noCreditCard, setNoCreditCard] = useState(false);
@@ -98,6 +104,7 @@ export const ToolsPage: React.FC<ToolsPageProps> = ({
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: tools.length, favorites: 0 };
     for (const t of tools) {
+      c[`scope:${t.scope}`] = (c[`scope:${t.scope}`] || 0) + 1;
       c[t.category] = (c[t.category] || 0) + 1;
       if (t.isFavorite) c.favorites += 1;
     }
@@ -112,6 +119,7 @@ export const ToolsPage: React.FC<ToolsPageProps> = ({
       } else if (category !== 'all' && tool.category !== category) {
         return false;
       }
+      if (scope !== 'all' && tool.scope !== scope) return false;
       if (canEditFiles && tool.scope !== 'local-agent' && tool.scope !== 'ide-plugin') return false;
       if (hasWebSearch && !tool.freeTier.hasWebSearch) return false;
       if (noCreditCard && tool.freeTier.creditCardRequired) return false;
@@ -129,12 +137,13 @@ export const ToolsPage: React.FC<ToolsPageProps> = ({
     if (sort === 'name') result.sort((a, b) => a.name.localeCompare(b.name));
     if (sort === 'stars') result.sort((a, b) => (b.stars || 0) - (a.stars || 0));
     return result;
-  }, [tools, category, query, canEditFiles, hasWebSearch, noCreditCard, freeKey, sort]);
+  }, [tools, category, query, scope, canEditFiles, hasWebSearch, noCreditCard, freeKey, sort]);
 
-  const anyFilter = canEditFiles || hasWebSearch || noCreditCard || freeKey || query !== '' || category !== 'all';
+  const anyFilter = scope !== 'all' || canEditFiles || hasWebSearch || noCreditCard || freeKey || query !== '' || category !== 'all';
   const resetAll = () => {
     setCategory('all');
     setQuery('');
+    setScope('all');
     setCanEditFiles(false);
     setHasWebSearch(false);
     setNoCreditCard(false);
@@ -202,6 +211,30 @@ export const ToolsPage: React.FC<ToolsPageProps> = ({
         ))}
 
         <h6 className="px-2.5 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>
+          Scope
+        </h6>
+        {SCOPES.filter((id) => (counts[`scope:${id}`] || 0) > 0).map((id) => {
+          const cfg = getScopeBadgeConfig(id);
+          const active = scope === id;
+          return (
+            <button
+              key={id}
+              id={`tab-scope-${id}`}
+              onClick={() => setScope(active ? 'all' : id)}
+              aria-pressed={active}
+              title={cfg.description}
+              className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-left cursor-pointer transition-colors hover:bg-[var(--theme-raised)]"
+              style={railBtn(active)}
+            >
+              <span className="flex-1 truncate">{cfg.label}</span>
+              <span className="font-mono text-[10px]" style={{ color: 'var(--theme-text-muted)' }}>
+                {counts[`scope:${id}`]}
+              </span>
+            </button>
+          );
+        })}
+
+        <h6 className="px-2.5 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--theme-text-muted)' }}>
           Filter
         </h6>
         {toggles.map((t) => (
@@ -238,6 +271,7 @@ export const ToolsPage: React.FC<ToolsPageProps> = ({
       </aside>
 
       <div className="min-w-0 space-y-3">
+        {showScopeExplainer && <ScopeExplainer onShowScope={setScope} />}
         {/* Toolbar: one search, sort, view */}
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative flex-1 min-w-[12rem]">

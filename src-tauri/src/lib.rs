@@ -5,6 +5,7 @@ mod feed;
 mod keys;
 mod probe;
 mod secrets;
+mod setup;
 
 /// Write panics to app.log before the default handler prints them.
 fn install_panic_log() {
@@ -49,6 +50,10 @@ pub fn run() {
             backupcrypto::decrypt_backup,
             secrets::encrypt_secrets,
             secrets::decrypt_secrets,
+            setup::list_setup_recipes,
+            setup::detect_setup_tools,
+            setup::install_setup_tool,
+            setup::cancel_setup_install,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

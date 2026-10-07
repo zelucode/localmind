@@ -66,6 +66,7 @@ API keys are encrypted at rest: AES-256-GCM in Rust, master key in the OS creden
 
 | Command | Module | Purpose |
 |---|---|---|
+| `list_setup_recipes` / `detect_setup_tools` / `install_setup_tool` / `cancel_setup_install` | `setup.rs` | One-click setup: curated recipes compiled into the app (the frontend sends only a recipe id), detection by running `<tool> --version`, install with output streamed on the `setup-output` event. See `docs/features/one-click-setup.md` |
 | `probe_ports` | `probe.rs` | TCP-connect to `127.0.0.1:<port>` for up to 32 ports (the webview can't do this because of CORS) |
 | `verify_api_key` | `keys.rs` | Ask a provider whether a key is accepted (key sent in a header over HTTPS) |
 | `log_event`, `log_info`, `preview_diagnostics`, `save_diagnostics` | `applog.rs` | One `app.log` shared by Rust and the frontend (rotated, keys redacted) and the Report a Problem diagnostics file |

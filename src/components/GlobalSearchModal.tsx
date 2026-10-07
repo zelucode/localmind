@@ -22,6 +22,7 @@ import {
   Zap,
   FolderInput,
   Cpu,
+  Wrench,
 } from 'lucide-react';
 import { AITool, ToolBookmark, ActiveView } from '../types';
 import { ThemePreset } from '../theme';
@@ -158,6 +159,19 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
       icon: <Cpu className="w-4 h-4 text-emerald-400" />,
       action: () => {
         onNavigate('runtimes');
+        onClose();
+      },
+    });
+
+    addItem({
+      id: 'page-setup',
+      type: 'page',
+      title: 'Setup',
+      subtitle: 'One-click install of free tools (Ollama, Gemini CLI, Qwen Code)',
+      categoryLabel: 'Navigation',
+      icon: <Wrench className="w-4 h-4 text-sky-400" />,
+      action: () => {
+        onNavigate('setup');
         onClose();
       },
     });

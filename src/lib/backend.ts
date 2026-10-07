@@ -1,4 +1,5 @@
-import { callBackend } from './tauri';
+import { listen } from '@tauri-apps/api/event';
+import { BackendUnavailableError, callBackend, isTauri } from './tauri';
 
 export interface ProbeResult {
   port: number;
@@ -83,6 +84,61 @@ export function encryptSecrets(values: string[]): Promise<string[]> {
 /** Decrypt `enc:v1:` tokens. A token that can't be decrypted comes back with `value: null`. */
 export function decryptSecrets(tokens: string[]): Promise<DecryptResult[]> {
   return callBackend<DecryptResult[]>('decrypt_secrets', { tokens }, 'Unlocking keys');
+}
+
+export interface SetupRecipe {
+  id: string;
+  name: string;
+  description: string;
+  /** The exact command the install runs on this system; null when there is no one-click install here. */
+  command: string | null;
+  /** What must already be installed, for this system. */
+  requires: string[];
+  manualUrl: string;
+}
+
+export type SetupStatus = 'installed' | 'not-installed' | 'missing-requirement';
+
+export interface SetupDetectResult {
+  id: string;
+  status: SetupStatus;
+  /** Version number, when the tool was found by running it. */
+  version: string | null;
+  /** File or folder that showed the tool is installed, when it was found that way. */
+  location: string | null;
+  /** Name of the missing requirement when status is `missing-requirement`. */
+  missing: string | null;
+}
+
+/** The curated setup recipes (compiled into the app) with the exact command each would run here. */
+export function listSetupRecipes(): Promise<SetupRecipe[]> {
+  return callBackend<SetupRecipe[]>('list_setup_recipes', undefined, 'Tool setup');
+}
+
+/** Find out which recipes are installed by running their version command. */
+export function detectSetupTools(ids: string[]): Promise<SetupDetectResult[]> {
+  return callBackend<SetupDetectResult[]>('detect_setup_tools', { ids }, 'Tool setup');
+}
+
+/**
+ * Run a recipe's install (by id only) and call `onLine` for each output line as it arrives.
+ * Resolves with a short success message; rejects with the reason when it fails or is cancelled.
+ */
+export async function installSetupTool(id: string, onLine: (line: string) => void): Promise<string> {
+  if (!isTauri()) throw new BackendUnavailableError('Tool setup');
+  const unlisten = await listen<{ id: string; line: string }>('setup-output', (event) => {
+    if (event.payload.id === id) onLine(event.payload.line);
+  });
+  try {
+    return await callBackend<string>('install_setup_tool', { id }, 'Tool setup');
+  } finally {
+    unlisten();
+  }
+}
+
+/** Ask the running install to stop. */
+export function cancelSetupInstall(): Promise<void> {
+  return callBackend<void>('cancel_setup_install', undefined, 'Tool setup');
 }
 
 /** Port-probe results keyed by port, for merging into a service list. */

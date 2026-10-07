@@ -1,6 +1,6 @@
 # Ask box, one-click setup and sidebar grouping (design)
 
-**Status: design, nothing built yet.** Agreed in discussion on 2026-10-06; the Omnibar section of the dashboard was the first one reviewed.
+**Status: built (2026-10-07).** Ask box with an engine picker and Compare (`AskBox.tsx`, `lib/askEngines.ts`), the scope filter and guide on the AI Tools page, the Developer sidebar group, and one-click setup (`setup.rs`, `SetupPage.tsx`). See the notes under each section. Agreed in discussion on 2026-10-06; the Omnibar section of the dashboard was the first one reviewed.
 
 ## Purpose
 LocalMind is one place to reach every free AI: web chatbots, IDE tools, CLIs and local runners. People should not have to remember URLs, dig through browser bookmarks or follow ten separate setup guides. The focus is what is free. The desktop app adds what a website cannot: installing and detecting tools on the user's machine.
@@ -46,6 +46,20 @@ Keep one app with progressive disclosure, not a separate developer tab.
 - Beginner path: Home, AI Tools, Bookmarks, Key Vault.
 - A **Developer** group: Runtimes, Configs & Limits, and the CLI setup flow once it exists.
 - Non-developers can ignore the group; nothing is hidden. Revisit if the group grows large.
+
+## 4. Follow-up: AI tool scope (replaces the Home banner)
+The "Understanding AI Tool Scopes" banner (`ScopeExplainer`) is info only and repeats what the scope badges and the "can edit files" filter already show. It also describes 3 buckets while the data has 6 scopes.
+- Remove it from Home; keep the component and the `showScopeExplainer` setting (hidden features are never deleted).
+- Put the explanation where the choice is made: the Tools page scope filter chips get a one-line description each (text from `getScopeBadgeConfig`), plus a "What's this?" popover with the fuller breakdown, also reachable from the Help menu.
+- Make it actionable: example tools in the breakdown link to the Tools page filtered by that scope.
+- Let scope pick the primary action on a tool: `web-only` = open / Ask, `local-agent` and `ide-plugin` = setup (install and detect), `local-runner` and `uniform-proxy` = Developer group.
+
+## What was built, and what is still open
+- **Ask box:** engines come from the web chatbots in the catalog (favorites first, then prompt-link tools). Qwen Chat, Z.ai Chat and Kimi were added to the catalog; they have no prompt link, so they use the copy-and-open path. Prompt links exist for Perplexity, ChatGPT, Claude, Le Chat and HuggingChat (the last three are not yet confirmed in the app).
+- **Compare** (shown to users as **Ask several**, because "Compare" read as if answers would be shown side by side, which is not possible for web chat): off by default; pick up to 5 AIs, the set is remembered, the button reads "Ask N AIs". Gemini (`gemini.google.com/app`) was added to the catalog with no prompt link. Engines without a prompt link get the prompt copied once and are named in a note. Several opens in a row have only been unit-tested, not tried in the packaged webview.
+- **Scope:** the banner is off Home. The AI Tools page has a Scope group in its rail (with counts and tooltips) and shows the scope guide (setting `showScopeExplainer`), whose columns have "Show ..." buttons that set the scope filter. Not done: a Help-menu entry for the guide, and making scope choose each tool's primary action.
+- **Developer group and Setup:** Runtimes, Configs & Limits and Setup. Number keys are now 1-8 (Setup is 6, Key Vault 7, Settings 8).
+- **Setup recipes:** Ollama, Gemini CLI, Qwen Code. Details in [one-click-setup.md](one-click-setup.md).
 
 ## Order of work
 1. Ask box phase 1: catalog-driven engine picker, remembered default, chips fill, Quick Query reuse, more templates, move utilities out.
