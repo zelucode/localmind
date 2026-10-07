@@ -53,6 +53,8 @@ const STORAGE_THEMES_JSON_KEY = 'ai_nexus_custom_themes_json_v1';
 const STORAGE_LAUNCH_SEARCH_KEY = 'ai_nexus_default_launch_search_v1';
 const STORAGE_SCOPE_EXPLAINER_KEY = 'ai_nexus_show_scope_explainer_v1';
 const STORAGE_BOOKMARKS_KEY = 'ai_nexus_bookmarks_v3';
+// One-time flag: older seeds shipped 75 bookmarks pre-starred; stars are cleared once so Favorites only holds the user's picks.
+const STORAGE_BOOKMARK_STARS_RESET_KEY = 'localmind_bookmark_stars_reset_v1';
 const STORAGE_SHOW_STARTUP_KEY = 'ai_nexus_show_startup_v1';
 const STORAGE_SHOW_LOADING_KEY = 'ai_nexus_show_loading_v1';
 const STORAGE_SIDEBAR_COLLAPSED_KEY = 'localmind_sidebar_collapsed_v1';
@@ -296,8 +298,13 @@ export default function App() {
               deduped.push(item);
             }
           }
-          if (deduped.length !== parsed.length) {
+          const needsStarReset = localStorage.getItem(STORAGE_BOOKMARK_STARS_RESET_KEY) !== '1';
+          if (needsStarReset) {
+            for (const item of deduped) item.isFavorite = false;
+          }
+          if (deduped.length !== parsed.length || needsStarReset) {
             try {
+              if (needsStarReset) localStorage.setItem(STORAGE_BOOKMARK_STARS_RESET_KEY, '1');
               localStorage.setItem(STORAGE_BOOKMARKS_KEY, JSON.stringify(deduped));
             } catch {
               // Ignored

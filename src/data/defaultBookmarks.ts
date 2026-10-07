@@ -26,7 +26,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "cs",
       "computer-science"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-07-09",
     "githubUrl": "https://github.com/nilbuild/developer-roadmap",
@@ -46,7 +46,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "vscode",
       "git"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-26",
     "githubUrl": "https://github.com/microsoft/vscode",
@@ -68,7 +68,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "paas",
       "saas"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-07-07",
     "githubUrl": "https://github.com/ripienaar/free-for-dev",
@@ -88,7 +88,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "sketch",
       "collaboration"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-05-07",
     "githubUrl": "https://github.com/excalidraw/excalidraw",
@@ -107,7 +107,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "game-engine",
       "game-development"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-07-26",
     "githubUrl": "https://github.com/godotengine/godot",
@@ -129,7 +129,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "ocr",
       "edit"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-14",
     "githubUrl": "https://github.com/Stirling-Tools/Stirling-PDF",
@@ -149,7 +149,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "timeline",
       "media"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-05-07",
     "githubUrl": "https://github.com/OpenCut-app/OpenCut",
@@ -169,7 +169,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "news",
       "monitor"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-15",
     "githubUrl": "https://github.com/koala73/worldmonitor?utm_source=worldmonitor&utm_medium=referral&utm_campaign=general",
@@ -189,7 +189,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "api",
       "test"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-17",
     "githubUrl": "https://github.com/hoppscotch/hoppscotch",
@@ -208,7 +208,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "knowledge-management",
       "notion-like"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-30",
     "githubUrl": "https://github.com/toeverything/AFFiNE",
@@ -227,7 +227,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "whiteboard",
       "draw"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-28",
     "githubUrl": "https://github.com/tldraw/tldraw",
@@ -249,7 +249,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "code",
       "computer-science"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-11",
     "githubUrl": "https://github.com/algorithm-visualizer/algorithm-visualizer",
@@ -269,7 +269,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "knowledge-management",
       "knowledge-platform"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-30",
     "githubUrl": "https://github.com/logseq/logseq",
@@ -289,7 +289,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "diagram",
       "visualize"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-17",
     "githubUrl": "https://github.com/AykutSarac/jsoncrack.com",
@@ -309,7 +309,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "download",
       "file"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-17",
     "githubUrl": "https://github.com/imputnet/cobalt",
@@ -328,7 +328,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "tools",
       "list"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-17",
     "githubUrl": "https://github.com/corentinth/it-tools",
@@ -348,7 +348,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "file-transfer",
       "file-share"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-08-03",
     "githubUrl": "https://github.com/schollz/croc",
@@ -370,7 +370,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "sql",
       "schema"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-05-07",
     "githubUrl": "https://github.com/drawdb-io/drawdb",
@@ -389,7 +389,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "code-picture",
       "code-image"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-28",
     "githubUrl": "https://github.com/carbon-app/carbon",
@@ -410,7 +410,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "hash",
       "data-analytics"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-11",
     "githubUrl": "https://github.com/gchq/CyberChef",
@@ -431,7 +431,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "text",
       "share"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-13",
     "githubUrl": "https://github.com/ente-io/ente",
@@ -451,7 +451,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "epub",
       "reader"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-17",
     "githubUrl": "https://github.com/koodo-reader/koodo-reader",
@@ -472,7 +472,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "editor",
       "design"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-05-07",
     "githubUrl": "https://github.com/GraphiteEditor/Graphite",
@@ -494,7 +494,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "icons-library",
       "library"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-25",
     "githubUrl": "https://github.com/feathericons/feather",
@@ -514,7 +514,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "compression",
       "picture"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-13",
     "githubUrl": "https://github.com/GoogleChromeLabs/squoosh/",
@@ -536,7 +536,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "icons-library",
       "library"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-24",
     "githubUrl": "https://github.com/simple-icons/simple-icons",
@@ -556,7 +556,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "epub-reader",
       "ebook-reader"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-07-07",
     "githubUrl": "https://github.com/readest/readest",
@@ -577,7 +577,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "editor",
       "sync"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-05-07",
     "githubUrl": "https://github.com/benweet/stackedit",
@@ -597,7 +597,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "ai",
       "chat"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-10",
     "githubUrl": "https://github.com/mlc-ai/web-llm",
@@ -617,7 +617,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "file",
       "convert"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-13",
     "githubUrl": "https://github.com/VERT-sh/VERT",
@@ -639,7 +639,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "edit",
       "list"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-20",
     "githubUrl": "https://github.com/alam00000/bentopdf/",
@@ -658,7 +658,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "media",
       "subtitle"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-11",
     "githubUrl": "https://github.com/SubtitleEdit/subtitleedit",
@@ -680,7 +680,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "animation",
       "game-dev"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-05-07",
     "githubUrl": "https://github.com/piskelapp/piskel",
@@ -702,7 +702,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "tables",
       "collaboration"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-05-07",
     "githubUrl": "https://github.com/gristlabs/grist-core",
@@ -721,7 +721,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "free-media",
       "resource-list"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-07-07",
     "githubUrl": "https://github.com/fmhy/edit",
@@ -743,7 +743,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "LAN",
       "WAN"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-10",
     "githubUrl": "https://github.com/schlagmichdoch/pairdrop",
@@ -762,7 +762,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "regex",
       "pattern-matching"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-30",
     "githubUrl": "https://github.com/gskinner/regexr/",
@@ -782,7 +782,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "canvas",
       "draw"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-13",
     "githubUrl": "https://github.com/Orama-Interactive/Pixelorama",
@@ -804,7 +804,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "preview",
       "export"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-05-07",
     "githubUrl": "https://github.com/joemccann/dillinger",
@@ -824,7 +824,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "diagrams",
       "editor"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-11",
     "githubUrl": "https://github.com/jgraph/drawio",
@@ -846,7 +846,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "encrypted",
       "office"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-05-07",
     "githubUrl": "https://github.com/cryptpad/cryptpad",
@@ -867,7 +867,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "retro",
       "editor"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-05-07",
     "githubUrl": "https://github.com/1j01/jspaint",
@@ -888,7 +888,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "graphics",
       "editor"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-05-07",
     "githubUrl": "https://github.com/SVG-Edit/svgedit",
@@ -911,7 +911,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "export",
       "high-res"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-01-15",
     "githubUrl": "https://github.com/raycast/ray-so",
@@ -932,7 +932,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "hardening",
       "automation"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-05-07",
     "githubUrl": "https://github.com/undergroundwires/privacy.sexy",
@@ -951,7 +951,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "video-editor",
       "reel-maker"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-07-07",
     "githubUrl": "https://github.com/Augani/openreel-video",
@@ -971,7 +971,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "pdf-designer",
       "pdf-template"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-07-26",
     "githubUrl": "https://github.com/pdfme/pdfme",
@@ -992,7 +992,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "3d-design",
       "3d-model"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-09-07",
     "githubUrl": "https://github.com/xiangechen/chili3d",
@@ -1013,7 +1013,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "tables",
       "office"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-05-07",
     "githubUrl": "https://github.com/audreyt/ethercalc",
@@ -1035,7 +1035,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "vector",
       "editor"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-05-07",
     "githubUrl": "https://github.com/methodofaction/Method-Draw",
@@ -1055,7 +1055,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "audio",
       "editor"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-17",
     "githubUrl": "https://github.com/pkalogiros/AudioMass",
@@ -1076,7 +1076,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "electronics",
       "schematics"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-11",
     "githubUrl": "https://github.com/pfalstad/circuitjs1",
@@ -1095,7 +1095,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
     "tags": [
       "digital-audio-workstation"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-08-03",
     "githubUrl": "https://github.com/andremichelle/openDAW",
@@ -1115,7 +1115,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "3d-design",
       "3d-model"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-09-07",
     "githubUrl": "https://github.com/HakanSeven12/OpenCADStudio",
@@ -1137,7 +1137,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "schematics",
       "electronics"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-11",
     "githubUrl": "https://github.com/theacodes/kicanvas",
@@ -1159,7 +1159,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "preview",
       "documentation"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-05-07",
     "githubUrl": "https://github.com/tanabe/markdown-live-preview",
@@ -1180,7 +1180,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "canvas",
       "mockup"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-21",
     "githubUrl": "https://github.com/KartikLabhshetwar/screenshot-studio",
@@ -1201,7 +1201,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "openstreetmap",
       "navigation"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-11",
     "githubUrl": "https://github.com/nrenner/brouter-web",
@@ -1221,7 +1221,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "documents",
       "notes"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-07-10",
     "githubUrl": "https://github.com/fileverse/fileverse-ddoc",
@@ -1243,7 +1243,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "offline",
       "writing"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-05-07",
     "githubUrl": "https://github.com/amitmerchant1990/notepad",
@@ -1265,7 +1265,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "education",
       "debugging"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-05-07",
     "githubUrl": "https://github.com/pathrise-eng/pathrise-python-tutor",
@@ -1287,7 +1287,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "p2p",
       "LAN"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-10",
     "githubUrl": "https://github.com/localsend/web",
@@ -1307,7 +1307,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "beat",
       "rythm"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-13",
     "githubUrl": "https://github.com/mxfng/drumhaus",
@@ -1329,7 +1329,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "produce",
       "compose"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-13",
     "githubUrl": "https://github.com/AppsYogi-com/ComposeYogi",
@@ -1350,7 +1350,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "retro",
       "windows"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-07-15",
     "githubUrl": "https://github.com/jenissimo/bottleship",
@@ -1368,7 +1368,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
     "tags": [
       "spreadsheet"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-11",
     "githubUrl": "https://github.com/fileverse/fileverse-dsheet",
@@ -1388,7 +1388,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "resume-builder",
       "cv-builder"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-07-15",
     "githubUrl": "https://github.com/rimzzlabs/lanjut",
@@ -1409,7 +1409,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "upload",
       "stream"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-30",
     "githubUrl": "https://github.com/webtor-io/web-ui",
@@ -1430,7 +1430,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "background",
       "generative-art"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-21",
     "githubUrl": "https://github.com/enonforetsam/fluid",
@@ -1450,7 +1450,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "music",
       "piano"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-06-26",
     "githubUrl": "https://github.com/aayushdutt/midee",
@@ -1470,7 +1470,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "gradio",
       "machine-learning"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-02-15"
   },
@@ -1488,7 +1488,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "deep-research",
       "ai"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-02-05"
   },
@@ -1506,7 +1506,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "documentation",
       "debugging"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-02-01"
   },
@@ -1524,7 +1524,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "testing",
       "pattern-matching"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-01-10"
   },
@@ -1542,7 +1542,7 @@ export const DEFAULT_BOOKMARKS: ToolBookmark[] = [
       "tailwind",
       "components"
     ],
-    "isFavorite": true,
+    "isFavorite": false,
     "clickCount": 0,
     "createdAt": "2026-02-10"
   },
