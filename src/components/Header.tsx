@@ -28,6 +28,8 @@ interface HeaderProps {
   onOpenWelcome: () => void;
   onOpenAbout: () => void;
   onOpenReportProblem: () => void;
+  /** Startup: show only the brand and the window controls. */
+  minimal?: boolean;
 }
 
 const PAGE_TITLES: Record<ActiveView, string> = {
@@ -156,6 +158,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenWelcome,
   onOpenAbout,
   onOpenReportProblem,
+  minimal = false,
 }) => {
   const isMac = useMemo(() => {
     return typeof window !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
@@ -166,8 +169,8 @@ export const Header: React.FC<HeaderProps> = ({
       id="app-top-header"
       className="fixed top-0 inset-x-0 h-11 z-50 flex items-stretch border-b select-none transition-colors"
       style={{
-        backgroundColor: 'var(--theme-card)',
-        borderColor: 'var(--theme-border)',
+        backgroundColor: minimal ? 'var(--theme-bg)' : 'var(--theme-card)',
+        borderColor: minimal ? 'transparent' : 'var(--theme-border)',
         color: 'var(--theme-text)',
       }}
     >
@@ -197,13 +200,15 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex-1 min-w-0 grid grid-cols-[1fr_auto_1fr] items-center gap-4 pl-4">
         {/* Left: current page title (drag region) */}
         <TitleBarDragRegion className="flex items-center min-w-0 h-full">
-          <h1 className="text-sm font-semibold tracking-tight truncate" style={{ color: 'var(--theme-text)' }}>
-            {PAGE_TITLES[activeView]}
-          </h1>
+          {!minimal && (
+            <h1 className="text-sm font-semibold tracking-tight truncate" style={{ color: 'var(--theme-text)' }}>
+              {PAGE_TITLES[activeView]}
+            </h1>
+          )}
         </TitleBarDragRegion>
 
         {/* Center: global search trigger */}
-        {onOpenGlobalSearch ? (
+        {onOpenGlobalSearch && !minimal ? (
           <div className="w-64 lg:w-96 justify-self-center hidden sm:block">
             <button
               id="header-btn-global-search"
@@ -239,6 +244,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Right: drag filler, contextual action, theme + help, window controls */}
         <div className="flex items-center h-full min-w-0">
           <TitleBarDragRegion className="flex-1 h-full min-w-0" />
+          {!minimal && (
           <div className="flex items-center gap-1.5 shrink-0 pr-2">
             {onOpenGlobalSearch && (
               <button
@@ -296,6 +302,7 @@ export const Header: React.FC<HeaderProps> = ({
               onOpenReportProblem={onOpenReportProblem}
             />
           </div>
+          )}
           <WindowControls />
         </div>
       </div>

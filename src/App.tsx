@@ -800,6 +800,7 @@ export default function App() {
         className="mt-11 pb-16 md:pb-0 flex-1 min-h-0 overflow-y-auto flex flex-col min-w-0 md:ml-[var(--sidebar-w)] transition-[margin] duration-150"
         style={{ ['--sidebar-w' as string]: `${sidebarCollapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH}px` }}
       >
+        minimal={isLoading}
         {/* View Switcher: Settings Page vs Bookmarks Catalog vs Dashboard Hub */}
         {activeView === 'settings' ? (
           <main className="flex-1 w-full">
