@@ -1,0 +1,1058 @@
+{
+  "sections": [
+    {
+      "name": "Free GPU & Cloud Compute",
+      "whyWorthIt": "This is one of the biggest gaps: developers often need temporary GPU/CPU capacity for model experiments without installing anything locally. Kaggle currently documents free P100 GPU and TPU access, while Lightning offers free GPU hours/credits. ([Kaggle][1])",
+      "entries": [
+        {
+          "name": "Google Colab",
+          "url": "[https://colab.research.google.com/](https://colab.research.google.com/)",
+          "type": "hosted notebooks",
+          "freeResource": "GPU/TPU access",
+          "sourceUrl": "[https://developers.google.com/colab](https://developers.google.com/colab)"
+        },
+        {
+          "name": "Kaggle Notebooks",
+          "url": "[https://www.kaggle.com/code](https://www.kaggle.com/code)",
+          "type": "hosted notebooks",
+          "freeResource": "GPU/TPU notebook compute",
+          "sourceUrl": "[https://www.kaggle.com/docs/notebooks](https://www.kaggle.com/docs/notebooks)"
+        },
+        {
+          "name": "Lightning AI",
+          "url": "[https://lightning.ai/](https://lightning.ai/)",
+          "type": "GPU/CPU cloud",
+          "freeResource": "free credits and one free Studio",
+          "sourceUrl": "[https://lightning.ai/pricing](https://lightning.ai/pricing)"
+        },
+        {
+          "name": "Modal",
+          "url": "[https://modal.com/](https://modal.com/)",
+          "type": "serverless compute",
+          "freeResource": "promotional/startup/academic credits",
+          "sourceUrl": "[https://modal.com/pricing](https://modal.com/pricing)"
+        },
+        {
+          "name": "Hugging Face ZeroGPU",
+          "url": "[https://huggingface.co/spaces](https://huggingface.co/spaces)",
+          "type": "shared GPU inference",
+          "freeResource": "ZeroGPU Spaces",
+          "sourceUrl": "[https://huggingface.co/docs/hub/spaces-overview](https://huggingface.co/docs/hub/spaces-overview)"
+        }
+      ],
+      "fields": [
+        "provider",
+        "resourceType",
+        "GPUModel",
+        "VRAM",
+        "CPU",
+        "RAM",
+        "freeCreditsOrHours",
+        "resetPeriod",
+        "sessionLimit",
+        "queueRequired",
+        "cardRequired",
+        "expiry",
+        "commercialUse",
+        "regions",
+        "sourceUrl"
+      ]
+    },
+    {
+      "name": "Free Datasets",
+      "whyWorthIt": "AI users repeatedly need usable training, evaluation, RAG and demo data. Dataset entries should expose licensing rather than simply linking to a giant catalog. Kaggle, Hugging Face, UCI and OpenML are strong foundations. ([GitHub][2])",
+      "entries": [
+        {
+          "name": "Hugging Face Datasets",
+          "url": "[https://huggingface.co/datasets](https://huggingface.co/datasets)",
+          "type": "AI dataset hub",
+          "sourceUrl": "[https://huggingface.co/docs/datasets/index](https://huggingface.co/docs/datasets/index)"
+        },
+        {
+          "name": "Kaggle Datasets",
+          "url": "[https://www.kaggle.com/datasets](https://www.kaggle.com/datasets)",
+          "type": "dataset marketplace/catalog",
+          "sourceUrl": "[https://www.kaggle.com/docs/datasets](https://www.kaggle.com/docs/datasets)"
+        },
+        {
+          "name": "UCI Machine Learning Repository",
+          "url": "[https://archive.ics.uci.edu/](https://archive.ics.uci.edu/)",
+          "type": "classic ML datasets",
+          "sourceUrl": "[https://github.com/connu/awesome-datasets](https://github.com/connu/awesome-datasets)"
+        },
+        {
+          "name": "OpenML",
+          "url": "[https://www.openml.org/](https://www.openml.org/)",
+          "type": "datasets/experiments",
+          "sourceUrl": "[https://github.com/connu/awesome-datasets](https://github.com/connu/awesome-datasets)"
+        },
+        {
+          "name": "Google Dataset Search",
+          "url": "[https://datasetsearch.research.google.com/](https://datasetsearch.research.google.com/)",
+          "type": "dataset discovery",
+          "sourceUrl": "[https://datasetsearch.research.google.com/](https://datasetsearch.research.google.com/)"
+        }
+      ],
+      "fields": [
+        "datasetName",
+        "domain",
+        "task",
+        "size",
+        "format",
+        "license",
+        "commercialUse",
+        "downloadMethod",
+        "API",
+        "language",
+        "lastUpdated",
+        "sourceUrl"
+      ]
+    },
+    {
+      "name": "Prompt Libraries",
+      "whyWorthIt": "Prompt collections are reusable knowledge assets rather than tools. They fit especially well with LocalMind because users can search, copy and export prompts offline. ([GitHub][3])",
+      "entries": [
+        {
+          "name": "Awesome ChatGPT Prompts",
+          "url": "[https://github.com/f/awesome-chatgpt-prompts](https://github.com/f/awesome-chatgpt-prompts)",
+          "type": "general prompts",
+          "sourceUrl": "[https://github.com/awesome-chatgpt-prompts](https://github.com/awesome-chatgpt-prompts)"
+        },
+        {
+          "name": "Prompt Engineering Guide",
+          "url": "[https://www.promptingguide.ai/](https://www.promptingguide.ai/)",
+          "type": "prompt techniques",
+          "sourceUrl": "[https://github.com/dair-ai/Prompt-Engineering-Guide](https://github.com/dair-ai/Prompt-Engineering-Guide)"
+        },
+        {
+          "name": "PromptHub",
+          "url": "[https://www.prompthub.us/](https://www.prompthub.us/)",
+          "type": "prompt library",
+          "sourceUrl": "[https://www.prompthub.us/](https://www.prompthub.us/)"
+        },
+        {
+          "name": "Learn Prompting",
+          "url": "[https://learnprompting.org/](https://learnprompting.org/)",
+          "type": "prompt education/library",
+          "sourceUrl": "[https://learnprompting.org/](https://learnprompting.org/)"
+        },
+        {
+          "name": "Awesome Prompting",
+          "url": "[https://github.com/ai-boost/awesome-prompts](https://github.com/ai-boost/awesome-prompts)",
+          "type": "prompt resources",
+          "sourceUrl": "[https://github.com/ai-boost/awesome-prompts](https://github.com/ai-boost/awesome-prompts)"
+        }
+      ],
+      "fields": [
+        "promptName",
+        "category",
+        "targetModel",
+        "useCase",
+        "promptText",
+        "variables",
+        "qualityRating",
+        "license",
+        "lastVerified",
+        "sourceUrl"
+      ]
+    },
+    {
+      "name": "MCP Servers",
+      "whyWorthIt": "MCP is becoming a reusable distribution layer for AI tools and data. An indexed MCP catalog is materially different from LocalMind's existing tools list because the entry is an integration/configuration rather than an end-user AI product. The official MCP repository explicitly points users toward the MCP Registry and community servers. ([GitHub][4])",
+      "entries": [
+        {
+          "name": "MCP Registry",
+          "url": "[https://registry.modelcontextprotocol.io/](https://registry.modelcontextprotocol.io/)",
+          "type": "official server registry",
+          "sourceUrl": "[https://modelcontextprotocol.io/](https://modelcontextprotocol.io/)"
+        },
+        {
+          "name": "Awesome MCP Servers",
+          "url": "[https://github.com/punkpeye/awesome-mcp-servers](https://github.com/punkpeye/awesome-mcp-servers)",
+          "type": "community catalog",
+          "sourceUrl": "[https://github.com/punkpeye/awesome-mcp-servers](https://github.com/punkpeye/awesome-mcp-servers)"
+        },
+        {
+          "name": "Official MCP Servers",
+          "url": "[https://github.com/modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers)",
+          "type": "reference servers",
+          "sourceUrl": "[https://github.com/modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers)"
+        },
+        {
+          "name": "Awesome Remote MCP Servers",
+          "url": "[https://github.com/punkpeye/awesome-remote-mcp-servers](https://github.com/punkpeye/awesome-remote-mcp-servers)",
+          "type": "remote MCP catalog",
+          "sourceUrl": "[https://github.com/punkpeye/awesome-remote-mcp-servers](https://github.com/punkpeye/awesome-remote-mcp-servers)"
+        },
+        {
+          "name": "MCP Examples",
+          "url": "[https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/docs/examples.mdx](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/docs/examples.mdx)",
+          "type": "reference implementations",
+          "sourceUrl": "[https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/docs/examples.mdx](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/docs/examples.mdx)"
+        }
+      ],
+      "fields": [
+        "serverName",
+        "category",
+        "transport",
+        "localOrRemote",
+        "installCommand",
+        "endpoint",
+        "authType",
+        "supportedClients",
+        "tools",
+        "resources",
+        "prompts",
+        "license",
+        "securityScore",
+        "lastVerified",
+        "sourceUrl"
+      ]
+    },
+    {
+      "name": "Free Vector Databases & RAG Backends",
+      "whyWorthIt": "Vector infrastructure is a major AI-builder dependency and is currently scattered across generic database bookmarks. Qdrant, Pinecone, Weaviate and Upstash expose materially different free limits. ([Qdrant][5])",
+      "entries": [
+        {
+          "name": "Qdrant Cloud",
+          "url": "[https://qdrant.tech/cloud/](https://qdrant.tech/cloud/)",
+          "freeResource": "1 GB RAM / 4 GB disk free cluster",
+          "sourceUrl": "[https://qdrant.tech/pricing/](https://qdrant.tech/pricing/)"
+        },
+        {
+          "name": "Pinecone",
+          "url": "[https://www.pinecone.io/](https://www.pinecone.io/)",
+          "freeResource": "free vector database tier",
+          "sourceUrl": "[https://www.pinecone.io/pricing/](https://www.pinecone.io/pricing/)"
+        },
+        {
+          "name": "Weaviate Cloud",
+          "url": "[https://console.weaviate.cloud/](https://console.weaviate.cloud/)",
+          "freeResource": "free sandbox",
+          "sourceUrl": "[https://weaviate.io/developers/wcs/platform/billing](https://weaviate.io/developers/wcs/platform/billing)"
+        },
+        {
+          "name": "Upstash Vector",
+          "url": "[https://upstash.com/vector](https://upstash.com/vector)",
+          "freeResource": "10K queries and updates/day",
+          "sourceUrl": "[https://upstash.com/docs/vector/overall/getstarted](https://upstash.com/docs/vector/overall/getstarted)"
+        },
+        {
+          "name": "Milvus",
+          "url": "[https://milvus.io/](https://milvus.io/)",
+          "freeResource": "open-source/self-hosted",
+          "sourceUrl": "[https://milvus.io/docs/v2.4.x/product_faq.md](https://milvus.io/docs/v2.4.x/product_faq.md)"
+        }
+      ],
+      "fields": [
+        "provider",
+        "databaseType",
+        "vectorsLimit",
+        "storage",
+        "RAM",
+        "compute",
+        "queries",
+        "updates",
+        "dimensions",
+        "embeddingIncluded",
+        "expiry",
+        "selfHosted",
+        "commercialUse",
+        "sourceUrl"
+      ]
+    },
+    {
+      "name": "Free Hosting & Deployment",
+      "whyWorthIt": "After building something, the next question is where to deploy it for $0. This deserves its own section because limits, sleep behavior and commercial restrictions matter. Cloudflare, Vercel and Firebase all currently expose meaningful free/no-cost options. ([Cloudflare][6])",
+      "entries": [
+        {
+          "name": "Cloudflare Workers",
+          "url": "[https://workers.cloudflare.com/](https://workers.cloudflare.com/)",
+          "freeResource": "100K requests/day",
+          "sourceUrl": "[https://developers.cloudflare.com/workers/platform/pricing/](https://developers.cloudflare.com/workers/platform/pricing/)"
+        },
+        {
+          "name": "Vercel Hobby",
+          "url": "[https://vercel.com/](https://vercel.com/)",
+          "freeResource": "free Hobby deployments",
+          "sourceUrl": "[https://vercel.com/legal/terms](https://vercel.com/legal/terms)"
+        },
+        {
+          "name": "Firebase Spark",
+          "url": "[https://firebase.google.com/](https://firebase.google.com/)",
+          "freeResource": "no-cost Firebase services/quota",
+          "sourceUrl": "[https://firebase.google.com/pricing](https://firebase.google.com/pricing)"
+        },
+        {
+          "name": "Hugging Face Spaces",
+          "url": "[https://huggingface.co/spaces](https://huggingface.co/spaces)",
+          "freeResource": "static Spaces and limited ZeroGPU hosting",
+          "sourceUrl": "[https://huggingface.co/docs/hub/spaces-overview](https://huggingface.co/docs/hub/spaces-overview)"
+        },
+        {
+          "name": "GitHub Pages",
+          "url": "[https://pages.github.com/](https://pages.github.com/)",
+          "freeResource": "static hosting from repositories",
+          "sourceUrl": "[https://github.com/pricing](https://github.com/pricing)"
+        }
+      ],
+      "fields": [
+        "provider",
+        "platformType",
+        "runtime",
+        "bandwidth",
+        "requests",
+        "buildMinutes",
+        "storage",
+        "sleepPolicy",
+        "customDomain",
+        "commercialRestriction",
+        "cardRequired",
+        "region",
+        "sourceUrl"
+      ]
+    },
+    {
+      "name": "Student, Startup & Open-Source Credits",
+      "whyWorthIt": "These programs can be worth hundreds or thousands of dollars but are easy to miss. They should be treated as eligibility-based free resources, not ordinary free tiers.",
+      "entries": [
+        {
+          "name": "GitHub Student Developer Pack",
+          "url": "[https://education.github.com/pack](https://education.github.com/pack)",
+          "type": "student benefits",
+          "sourceUrl": "[https://education.github.com/pack](https://education.github.com/pack)"
+        },
+        {
+          "name": "GitHub for Open Source",
+          "url": "[https://github.com/enterprise/open-source](https://github.com/enterprise/open-source)",
+          "type": "OSS resources",
+          "sourceUrl": "[https://github.com/enterprise/open-source](https://github.com/enterprise/open-source)"
+        },
+        {
+          "name": "Google for Startups Cloud Program",
+          "url": "[https://cloud.google.com/startup](https://cloud.google.com/startup)",
+          "type": "startup credits",
+          "sourceUrl": "[https://cloud.google.com/startup](https://cloud.google.com/startup)"
+        },
+        {
+          "name": "AWS Activate",
+          "url": "[https://aws.amazon.com/activate/](https://aws.amazon.com/activate/)",
+          "type": "startup credits",
+          "sourceUrl": "[https://aws.amazon.com/activate/](https://aws.amazon.com/activate/)"
+        },
+        {
+          "name": "Modal Academic Credits",
+          "url": "[https://modal.com/pricing](https://modal.com/pricing)",
+          "type": "academic compute credits",
+          "sourceUrl": "[https://modal.com/pricing](https://modal.com/pricing)"
+        }
+      ],
+      "fields": [
+        "program",
+        "eligibility",
+        "benefitValue",
+        "benefitType",
+        "duration",
+        "applicationRequired",
+        "verificationRequired",
+        "countryRestrictions",
+        "renewal",
+        "expiry",
+        "sourceUrl"
+      ]
+    },
+    {
+      "name": "Free AI Courses & Learning Paths",
+      "whyWorthIt": "The app can become a practical 'learn AI for free' launcher rather than only a resource directory. DeepLearning.AI currently lists a large catalog of AI courses, and Google's ML Crash Course is hands-on. ([DeepLearning.ai][7])",
+      "entries": [
+        {
+          "name": "Google Machine Learning Crash Course",
+          "url": "[https://developers.google.com/machine-learning/crash-course/](https://developers.google.com/machine-learning/crash-course/)",
+          "type": "ML course",
+          "sourceUrl": "[https://developers.google.com/machine-learning/crash-course/](https://developers.google.com/machine-learning/crash-course/)"
+        },
+        {
+          "name": "DeepLearning.AI Short Courses",
+          "url": "[https://www.deeplearning.ai/courses/](https://www.deeplearning.ai/courses/)",
+          "type": "AI courses",
+          "sourceUrl": "[https://www.deeplearning.ai/courses?types=short_course](https://www.deeplearning.ai/courses?types=short_course)"
+        },
+        {
+          "name": "fast.ai Practical Deep Learning",
+          "url": "[https://course.fast.ai/](https://course.fast.ai/)",
+          "type": "deep learning course",
+          "sourceUrl": "[https://course.fast.ai/](https://course.fast.ai/)"
+        },
+        {
+          "name": "Hugging Face Learn",
+          "url": "[https://huggingface.co/learn](https://huggingface.co/learn)",
+          "type": "LLM/AI courses",
+          "sourceUrl": "[https://huggingface.co/learn](https://huggingface.co/learn)"
+        },
+        {
+          "name": "Full Stack Deep Learning",
+          "url": "[https://fullstackdeeplearning.com/](https://fullstackdeeplearning.com/)",
+          "type": "production AI course",
+          "sourceUrl": "[https://fullstackdeeplearning.com/](https://fullstackdeeplearning.com/)"
+        }
+      ],
+      "fields": [
+        "course",
+        "provider",
+        "level",
+        "topic",
+        "duration",
+        "format",
+        "certificate",
+        "prerequisites",
+        "lastUpdated",
+        "sourceUrl"
+      ]
+    },
+    {
+      "name": "Local Voice, TTS & Speech Models",
+      "whyWorthIt": "Local voice models are especially valuable for privacy-sensitive desktop applications and automation. Piper is a fast local neural TTS engine; Silero provides TTS/STT models; Fish Speech/OpenAudio covers higher-end speech generation. ([GitHub][8])",
+      "entries": [
+        {
+          "name": "Piper",
+          "url": "[https://github.com/OHF-Voice/piper1-gpl](https://github.com/OHF-Voice/piper1-gpl)",
+          "type": "local TTS",
+          "sourceUrl": "[https://github.com/OHF-Voice/piper1-gpl](https://github.com/OHF-Voice/piper1-gpl)"
+        },
+        {
+          "name": "Silero Models",
+          "url": "[https://github.com/snakers4/silero-models](https://github.com/snakers4/silero-models)",
+          "type": "TTS/STT",
+          "sourceUrl": "[https://github.com/snakers4/silero-models](https://github.com/snakers4/silero-models)"
+        },
+        {
+          "name": "Fish Speech",
+          "url": "[https://github.com/fishaudio/fish-speech](https://github.com/fishaudio/fish-speech)",
+          "type": "speech synthesis",
+          "sourceUrl": "[https://github.com/fishaudio/fish-speech](https://github.com/fishaudio/fish-speech)"
+        },
+        {
+          "name": "Whisper",
+          "url": "[https://github.com/openai/whisper](https://github.com/openai/whisper)",
+          "type": "speech recognition",
+          "sourceUrl": "[https://github.com/openai/whisper](https://github.com/openai/whisper)"
+        },
+        {
+          "name": "MeloTTS",
+          "url": "[https://github.com/myshell-ai/MeloTTS](https://github.com/myshell-ai/MeloTTS)",
+          "type": "multilingual TTS",
+          "sourceUrl": "[https://github.com/myshell-ai/MeloTTS](https://github.com/myshell-ai/MeloTTS)"
+        }
+      ],
+      "fields": [
+        "model",
+        "task",
+        "languages",
+        "license",
+        "modelSize",
+        "VRAM",
+        "CPUCompatibility",
+        "GPUCompatibility",
+        "streaming",
+        "voiceCloning",
+        "quality",
+        "speed",
+        "commercialUse",
+        "sourceUrl"
+      ]
+    },
+    {
+      "name": "AI Coding Rules & System Prompts",
+      "whyWorthIt": "This directly complements LocalMind's Configs feature: users need reusable rules, agent instructions and system-prompt references, not only exported configuration files. Cursor rule repositories explicitly provide reusable .mdc rules. ([GitHub][9])",
+      "entries": [
+        {
+          "name": "Awesome Cursor Rules",
+          "url": "[https://github.com/PatrickJS/awesome-cursorrules](https://github.com/PatrickJS/awesome-cursorrules)",
+          "type": "Cursor rules",
+          "sourceUrl": "[https://github.com/PatrickJS/awesome-cursorrules](https://github.com/PatrickJS/awesome-cursorrules)"
+        },
+        {
+          "name": "Awesome Cursor Rules & MCP",
+          "url": "[https://github.com/xiaozhenyangCode/awesome-cursor-rules](https://github.com/xiaozhenyangCode/awesome-cursor-rules)",
+          "type": "rules and MCP",
+          "sourceUrl": "[https://github.com/xiaozhenyangCode/awesome-cursor-rules](https://github.com/xiaozhenyangCode/awesome-cursor-rules)"
+        },
+        {
+          "name": "AI Coding Agent System Prompts",
+          "url": "[https://github.com/ThomasVuNguyen/ai-system-prompts](https://github.com/ThomasVuNguyen/ai-system-prompts)",
+          "type": "coding-agent system prompts",
+          "sourceUrl": "[https://github.com/ThomasVuNguyen/ai-system-prompts](https://github.com/ThomasVuNguyen/ai-system-prompts)"
+        },
+        {
+          "name": "LLM System Prompts",
+          "url": "[https://github.com/guy915/System-Prompts](https://github.com/guy915/System-Prompts)",
+          "type": "system prompts",
+          "sourceUrl": "[https://github.com/guy915/System-Prompts](https://github.com/guy915/System-Prompts)"
+        },
+        {
+          "name": "System Prompt Generation Configurations",
+          "url": "[https://github.com/danielrosehill/System-Prompt-Generation-Configurations](https://github.com/danielrosehill/System-Prompt-Generation-Configurations)",
+          "type": "prompt templates",
+          "sourceUrl": "[https://github.com/danielrosehill/System-Prompt-Generation-Configurations](https://github.com/danielrosehill/System-Prompt-Generation-Configurations)"
+        }
+      ],
+      "fields": [
+        "name",
+        "agentOrModel",
+        "format",
+        "language",
+        "framework",
+        "scope",
+        "ruleContent",
+        "compatibleTools",
+        "license",
+        "lastUpdated",
+        "sourceUrl"
+      ]
+    },
+    {
+      "name": "LLM Benchmarks & Evaluation",
+      "whyWorthIt": "A power user needs to answer 'which model is actually better for my task?' rather than relying on marketing claims. Current benchmark collections include coding, agentic, reasoning and multimodal evaluations. ([GitHub][10])",
+      "entries": [
+        {
+          "name": "LMArena",
+          "url": "[https://lmarena.ai/](https://lmarena.ai/)",
+          "type": "human preference leaderboard",
+          "sourceUrl": "[https://github.com/x-tahosin/awesome-llm-benchmarks](https://github.com/x-tahosin/awesome-llm-benchmarks)"
+        },
+        {
+          "name": "SWE-bench",
+          "url": "[https://www.swebench.com/](https://www.swebench.com/)",
+          "type": "software engineering benchmark",
+          "sourceUrl": "[https://github.com/x-tahosin/awesome-llm-benchmarks](https://github.com/x-tahosin/awesome-llm-benchmarks)"
+        },
+        {
+          "name": "LiveBench",
+          "url": "[https://livebench.ai/](https://livebench.ai/)",
+          "type": "contamination-resistant benchmark",
+          "sourceUrl": "[https://github.com/x-tahosin/awesome-llm-benchmarks](https://github.com/x-tahosin/awesome-llm-benchmarks)"
+        },
+        {
+          "name": "Aider Polyglot",
+          "url": "[https://aider.chat/docs/leaderboards/](https://aider.chat/docs/leaderboards/)",
+          "type": "coding benchmark",
+          "sourceUrl": "[https://github.com/x-tahosin/awesome-llm-benchmarks](https://github.com/x-tahosin/awesome-llm-benchmarks)"
+        },
+        {
+          "name": "Artificial Analysis",
+          "url": "[https://artificialanalysis.ai/](https://artificialanalysis.ai/)",
+          "type": "model quality/price/latency comparison",
+          "sourceUrl": "[https://github.com/x-tahosin/awesome-llm-benchmarks](https://github.com/x-tahosin/awesome-llm-benchmarks)"
+        }
+      ],
+      "fields": [
+        "benchmark",
+        "task",
+        "models",
+        "score",
+        "hardware",
+        "methodology",
+        "dataset",
+        "date",
+        "leaderboardUrl",
+        "sourceUrl"
+      ]
+    },
+    {
+      "name": "AI News, Changelogs & Release Feeds",
+      "whyWorthIt": "This should be a feed rather than a static bookmark list. LocalMind's entire value proposition depends on detecting when free resources change. Provider changelogs are the primary signal.",
+      "entries": [
+        {
+          "name": "Hugging Face Blog",
+          "url": "[https://huggingface.co/blog](https://huggingface.co/blog)",
+          "type": "AI releases/news",
+          "sourceUrl": "[https://huggingface.co/blog](https://huggingface.co/blog)"
+        },
+        {
+          "name": "Cloudflare Changelog",
+          "url": "[https://developers.cloudflare.com/changelog/](https://developers.cloudflare.com/changelog/)",
+          "type": "infrastructure changelog",
+          "sourceUrl": "[https://developers.cloudflare.com/changelog/](https://developers.cloudflare.com/changelog/)"
+        },
+        {
+          "name": "Vercel Changelog",
+          "url": "[https://vercel.com/changelog](https://vercel.com/changelog)",
+          "type": "deployment changelog",
+          "sourceUrl": "[https://vercel.com/changelog](https://vercel.com/changelog)"
+        },
+        {
+          "name": "GitHub Changelog",
+          "url": "[https://github.blog/changelog/](https://github.blog/changelog/)",
+          "type": "developer-platform changelog",
+          "sourceUrl": "[https://github.blog/changelog/](https://github.blog/changelog/)"
+        },
+        {
+          "name": "Upstash Blog",
+          "url": "[https://upstash.com/blog](https://upstash.com/blog)",
+          "type": "AI/serverless news",
+          "sourceUrl": "[https://upstash.com/blog](https://upstash.com/blog)"
+        }
+      ],
+      "fields": [
+        "provider",
+        "feedUrl",
+        "topic",
+        "releaseDate",
+        "changeType",
+        "freeTierImpact",
+        "summary",
+        "severity",
+        "affectedEntries",
+        "sourceUrl"
+      ]
+    },
+    {
+      "name": "Developer Browser Extensions",
+      "whyWorthIt": "Extensions are lightweight productivity capabilities that users can install immediately and are different from web utilities already in Bookmarks.",
+      "entries": [
+        {
+          "name": "uBlock Origin",
+          "url": "[https://github.com/gorhill/uBlock](https://github.com/gorhill/uBlock)",
+          "type": "content blocker",
+          "sourceUrl": "[https://github.com/gorhill/uBlock](https://github.com/gorhill/uBlock)"
+        },
+        {
+          "name": "Refined GitHub",
+          "url": "[https://github.com/refined-github/refined-github](https://github.com/refined-github/refined-github)",
+          "type": "GitHub productivity",
+          "sourceUrl": "[https://github.com/refined-github/refined-github](https://github.com/refined-github/refined-github)"
+        },
+        {
+          "name": "Octotree",
+          "url": "[https://www.octotree.io/](https://www.octotree.io/)",
+          "type": "GitHub code navigation",
+          "sourceUrl": "[https://www.octotree.io/](https://www.octotree.io/)"
+        },
+        {
+          "name": "Wappalyzer",
+          "url": "[https://www.wappalyzer.com/](https://www.wappalyzer.com/)",
+          "type": "technology detection",
+          "sourceUrl": "[https://www.wappalyzer.com/](https://www.wappalyzer.com/)"
+        },
+        {
+          "name": "JSON Viewer",
+          "url": "[https://github.com/tulios/json-viewer](https://github.com/tulios/json-viewer)",
+          "type": "JSON inspection",
+          "sourceUrl": "[https://github.com/tulios/json-viewer](https://github.com/tulios/json-viewer)"
+        }
+      ],
+      "fields": [
+        "extension",
+        "browser",
+        "platform",
+        "purpose",
+        "permissions",
+        "openSource",
+        "license",
+        "storeUrl",
+        "repositoryUrl",
+        "lastVerified",
+        "sourceUrl"
+      ]
+    },
+    {
+      "name": "Worthwhile Hugging Face Spaces",
+      "whyWorthIt": "Instead of treating Hugging Face Spaces as one giant bookmark, LocalMind can curate high-value demos by task, hardware, model and current availability. Spaces currently expose categories including image/video generation, TTS, code generation, OCR, benchmarking and more. ([Hugging Face][11])",
+      "entries": [
+        {
+          "name": "Qwen3-TTS Demo",
+          "url": "[https://huggingface.co/spaces/Qwen/Qwen3-TTS](https://huggingface.co/spaces/Qwen/Qwen3-TTS)",
+          "type": "TTS",
+          "sourceUrl": "[https://huggingface.co/spaces?sort=trending](https://huggingface.co/spaces?sort=trending)"
+        },
+        {
+          "name": "Whisper",
+          "url": "[https://huggingface.co/spaces/openai/whisper](https://huggingface.co/spaces/openai/whisper)",
+          "type": "speech transcription",
+          "sourceUrl": "[https://huggingface.co/spaces?category=text-generation&sort=trending](https://huggingface.co/spaces?category=text-generation&sort=trending)"
+        },
+        {
+          "name": "Inference Playground",
+          "url": "[https://huggingface.co/spaces/huggingface/inference-playground](https://huggingface.co/spaces/huggingface/inference-playground)",
+          "type": "model experimentation",
+          "sourceUrl": "[https://huggingface.co/spaces?category=text-generation&sort=trending](https://huggingface.co/spaces?category=text-generation&sort=trending)"
+        },
+        {
+          "name": "Screenshot to HTML",
+          "url": "[https://huggingface.co/spaces/HuggingFaceM4/screenshot2html](https://huggingface.co/spaces/HuggingFaceM4/screenshot2html)",
+          "type": "code generation",
+          "sourceUrl": "[https://huggingface.co/spaces?category=text-generation&sort=trending](https://huggingface.co/spaces?category=text-generation&sort=trending)"
+        },
+        {
+          "name": "Granite WebGPU",
+          "url": "[https://huggingface.co/spaces/ibm-granite/granite-4.0-micro-webgpu](https://huggingface.co/spaces/ibm-granite/granite-4.0-micro-webgpu)",
+          "type": "browser-local LLM",
+          "sourceUrl": "[https://huggingface.co/spaces?category=text-generation&sort=trending](https://huggingface.co/spaces?category=text-generation&sort=trending)"
+        }
+      ],
+      "fields": [
+        "spaceName",
+        "task",
+        "model",
+        "hardware",
+        "zeroGPU",
+        "status",
+        "likes",
+        "runtime",
+        "demoUrl",
+        "repositoryUrl",
+        "lastVerified",
+        "sourceUrl"
+      ]
+    },
+    {
+      "name": "Free CI/CD & Remote Development",
+      "whyWorthIt": "CI is a major missing infrastructure primitive. GitHub explicitly provides free Actions for public repositories, and its free plan includes CI/CD minutes. ([GitHub][12])",
+      "entries": [
+        {
+          "name": "GitHub Actions",
+          "url": "[https://github.com/features/actions](https://github.com/features/actions)",
+          "type": "CI/CD",
+          "freeResource": "free for public repositories",
+          "sourceUrl": "[https://github.com/features/actions](https://github.com/features/actions)"
+        },
+        {
+          "name": "GitHub Codespaces",
+          "url": "[https://github.com/features/codespaces](https://github.com/features/codespaces)",
+          "type": "cloud development environment",
+          "sourceUrl": "[https://github.com/pricing](https://github.com/pricing)"
+        },
+        {
+          "name": "GitLab CI/CD",
+          "url": "[https://docs.gitlab.com/ee/ci/](https://docs.gitlab.com/ee/ci/)",
+          "type": "CI/CD",
+          "sourceUrl": "[https://docs.gitlab.com/ee/ci/](https://docs.gitlab.com/ee/ci/)"
+        },
+        {
+          "name": "CircleCI",
+          "url": "[https://circleci.com/pricing/](https://circleci.com/pricing/)",
+          "type": "CI/CD",
+          "sourceUrl": "[https://circleci.com/pricing/](https://circleci.com/pricing/)"
+        },
+        {
+          "name": "Dagger",
+          "url": "[https://dagger.io/](https://dagger.io/)",
+          "type": "programmable CI engine",
+          "sourceUrl": "[https://dagger.io/](https://dagger.io/)"
+        }
+      ],
+      "fields": [
+        "provider",
+        "CIType",
+        "freeMinutes",
+        "concurrency",
+        "artifactStorage",
+        "cacheStorage",
+        "runnerOS",
+        "publicRepoPolicy",
+        "privateRepoQuota",
+        "expiry",
+        "sourceUrl"
+      ]
+    }
+  ],
+  "newToolCategories": [
+    {
+      "name": "Free AI APIs & Inference Endpoints",
+      "justification": "The current Tools categories appear focused on end-user AI products; programmatic APIs deserve a first-class category because LocalMind already has Key Vault and a rate-limit matrix.",
+      "items": [
+        {
+          "name": "Google Gemini API",
+          "url": "[https://ai.google.dev/](https://ai.google.dev/)",
+          "sourceUrl": "[https://ai.google.dev/gemini-api/docs/rate-limits](https://ai.google.dev/gemini-api/docs/rate-limits)"
+        },
+        {
+          "name": "Groq",
+          "url": "[https://groq.com/](https://groq.com/)",
+          "sourceUrl": "[https://console.groq.com/docs/](https://console.groq.com/docs/)"
+        },
+        {
+          "name": "OpenRouter",
+          "url": "[https://openrouter.ai/](https://openrouter.ai/)",
+          "sourceUrl": "[https://openrouter.ai/docs](https://openrouter.ai/docs)"
+        },
+        {
+          "name": "Cloudflare Workers AI",
+          "url": "[https://developers.cloudflare.com/workers-ai/](https://developers.cloudflare.com/workers-ai/)",
+          "sourceUrl": "[https://developers.cloudflare.com/workers-ai/platform/pricing/](https://developers.cloudflare.com/workers-ai/platform/pricing/)"
+        },
+        {
+          "name": "Cerebras Inference",
+          "url": "[https://www.cerebras.ai/inference](https://www.cerebras.ai/inference)",
+          "sourceUrl": "[https://www.cerebras.ai/pricing](https://www.cerebras.ai/pricing)"
+        }
+      ]
+    },
+    {
+      "name": "Agent Sandboxes & Remote Workspaces",
+      "justification": "AI coding agents increasingly need isolated execution environments, which is a distinct capability from ordinary AI chat/coding tools.",
+      "items": [
+        {
+          "name": "E2B",
+          "url": "[https://e2b.dev/](https://e2b.dev/)",
+          "sourceUrl": "[https://e2b.dev/](https://e2b.dev/)"
+        },
+        {
+          "name": "Modal Sandboxes",
+          "url": "[https://modal.com/sandboxes](https://modal.com/sandboxes)",
+          "sourceUrl": "[https://modal.com/pricing](https://modal.com/pricing)"
+        },
+        {
+          "name": "Daytona",
+          "url": "[https://www.daytona.io/](https://www.daytona.io/)",
+          "sourceUrl": "[https://www.daytona.io/](https://www.daytona.io/)"
+        },
+        {
+          "name": "Railway Sandboxes",
+          "url": "[https://railway.com/](https://railway.com/)",
+          "sourceUrl": "[https://railway.com/changelog](https://railway.com/changelog)"
+        },
+        {
+          "name": "Hugging Face Spaces",
+          "url": "[https://huggingface.co/spaces](https://huggingface.co/spaces)",
+          "sourceUrl": "[https://huggingface.co/docs/hub/spaces-overview](https://huggingface.co/docs/hub/spaces-overview)"
+        }
+      ]
+    },
+    {
+      "name": "AI Evaluation & Testing",
+      "justification": "This closes the gap between 'free model discovery' and actually determining whether an AI model or agent is good enough for a user's workload.",
+      "items": [
+        {
+          "name": "SWE-bench",
+          "url": "[https://www.swebench.com/](https://www.swebench.com/)",
+          "sourceUrl": "[https://github.com/x-tahosin/awesome-llm-benchmarks](https://github.com/x-tahosin/awesome-llm-benchmarks)"
+        },
+        {
+          "name": "LMArena",
+          "url": "[https://lmarena.ai/](https://lmarena.ai/)",
+          "sourceUrl": "[https://github.com/x-tahosin/awesome-llm-benchmarks](https://github.com/x-tahosin/awesome-llm-benchmarks)"
+        },
+        {
+          "name": "LiveBench",
+          "url": "[https://livebench.ai/](https://livebench.ai/)",
+          "sourceUrl": "[https://github.com/x-tahosin/awesome-llm-benchmarks](https://github.com/x-tahosin/awesome-llm-benchmarks)"
+        },
+        {
+          "name": "Aider Leaderboards",
+          "url": "[https://aider.chat/docs/leaderboards/](https://aider.chat/docs/leaderboards/)",
+          "sourceUrl": "[https://github.com/x-tahosin/awesome-llm-benchmarks](https://github.com/x-tahosin/awesome-llm-benchmarks)"
+        },
+        {
+          "name": "Artificial Analysis",
+          "url": "[https://artificialanalysis.ai/](https://artificialanalysis.ai/)",
+          "sourceUrl": "[https://github.com/x-tahosin/awesome-llm-benchmarks](https://github.com/x-tahosin/awesome-llm-benchmarks)"
+        }
+      ]
+    },
+    {
+      "name": "Free Backend Building Blocks",
+      "justification": "Auth, Postgres, object storage, KV and vector infrastructure are the actual components needed to turn an AI experiment into an application.",
+      "items": [
+        {
+          "name": "Supabase",
+          "url": "[https://supabase.com/](https://supabase.com/)",
+          "sourceUrl": "[https://supabase.com/docs/guides/platform/billing-on-supabase](https://supabase.com/docs/guides/platform/billing-on-supabase)"
+        },
+        {
+          "name": "Neon",
+          "url": "[https://neon.com/](https://neon.com/)",
+          "sourceUrl": "[https://neon.com/blog/neon-free-plan-1-gb-per-project](https://neon.com/blog/neon-free-plan-1-gb-per-project)"
+        },
+        {
+          "name": "Clerk",
+          "url": "[https://clerk.com/](https://clerk.com/)",
+          "sourceUrl": "[https://clerk.com/pricing](https://clerk.com/pricing)"
+        },
+        {
+          "name": "Qdrant Cloud",
+          "url": "[https://qdrant.tech/cloud/](https://qdrant.tech/cloud/)",
+          "sourceUrl": "[https://qdrant.tech/pricing/](https://qdrant.tech/pricing/)"
+        },
+        {
+          "name": "Cloudflare Workers/KV",
+          "url": "[https://developers.cloudflare.com/workers/](https://developers.cloudflare.com/workers/)",
+          "sourceUrl": "[https://developers.cloudflare.com/workers/platform/pricing/](https://developers.cloudflare.com/workers/platform/pricing/)"
+        }
+      ]
+    }
+  ],
+  "newBookmarkCategories": [
+    {
+      "name": "Compute & GPU",
+      "items": [
+        "Google Colab",
+        "Kaggle",
+        "Lightning AI",
+        "Modal",
+        "Hugging Face ZeroGPU"
+      ],
+      "sourceUrl": "[https://developers.google.com/colab](https://developers.google.com/colab)"
+    },
+    {
+      "name": "Datasets",
+      "items": [
+        "Hugging Face Datasets",
+        "Kaggle Datasets",
+        "UCI ML Repository",
+        "OpenML",
+        "Google Dataset Search"
+      ],
+      "sourceUrl": "[https://huggingface.co/datasets](https://huggingface.co/datasets)"
+    },
+    {
+      "name": "Prompts & AI Instructions",
+      "items": [
+        "Awesome ChatGPT Prompts",
+        "Prompt Engineering Guide",
+        "Learn Prompting",
+        "Awesome Cursor Rules",
+        "AI Coding Agent System Prompts"
+      ],
+      "sourceUrl": "[https://github.com/awesome-chatgpt-prompts](https://github.com/awesome-chatgpt-prompts)"
+    },
+    {
+      "name": "MCP & Agent Integrations",
+      "items": [
+        "MCP Registry",
+        "Awesome MCP Servers",
+        "Awesome Remote MCP Servers",
+        "Official MCP Servers",
+        "MCP Examples"
+      ],
+      "sourceUrl": "[https://github.com/punkpeye/awesome-mcp-servers](https://github.com/punkpeye/awesome-mcp-servers)"
+    },
+    {
+      "name": "AI Learning",
+      "items": [
+        "Google ML Crash Course",
+        "DeepLearning.AI",
+        "fast.ai",
+        "Hugging Face Learn",
+        "Full Stack Deep Learning"
+      ],
+      "sourceUrl": "[https://developers.google.com/machine-learning/crash-course/](https://developers.google.com/machine-learning/crash-course/)"
+    },
+    {
+      "name": "Benchmarks & Evals",
+      "items": [
+        "LMArena",
+        "SWE-bench",
+        "LiveBench",
+        "Aider Leaderboards",
+        "Artificial Analysis"
+      ],
+      "sourceUrl": "[https://github.com/x-tahosin/awesome-llm-benchmarks](https://github.com/x-tahosin/awesome-llm-benchmarks)"
+    },
+    {
+      "name": "Free Backend Infrastructure",
+      "items": [
+        "Supabase",
+        "Neon",
+        "Qdrant Cloud",
+        "Clerk",
+        "Cloudflare Workers"
+      ],
+      "sourceUrl": "[https://supabase.com/docs/guides/platform/billing-on-supabase](https://supabase.com/docs/guides/platform/billing-on-supabase)"
+    },
+    {
+      "name": "Local Voice & Speech",
+      "items": [
+        "Piper",
+        "Silero",
+        "Fish Speech",
+        "Whisper",
+        "MeloTTS"
+      ],
+      "sourceUrl": "[https://github.com/OHF-Voice/piper1-gpl](https://github.com/OHF-Voice/piper1-gpl)"
+    },
+    {
+      "name": "Developer Extensions",
+      "items": [
+        "uBlock Origin",
+        "Refined GitHub",
+        "Octotree",
+        "Wappalyzer",
+        "JSON Viewer"
+      ],
+      "sourceUrl": "[https://github.com/gorhill/uBlock](https://github.com/gorhill/uBlock)"
+    }
+  ],
+  "recentFreeTierChanges": [
+    {
+      "date": "2026-10-02",
+      "provider": "Neon",
+      "change": "Free plan Postgres storage increased from 0.5 GB to 1 GB per project; free projects increased to 100.",
+      "impact": "EXPANDED",
+      "sourceUrl": "[https://neon.com/blog/neon-free-plan-1-gb-per-project](https://neon.com/blog/neon-free-plan-1-gb-per-project)"
+    },
+    {
+      "date": "2026-09-29",
+      "provider": "Upstash",
+      "change": "Upstash Blob PAYG now includes 1 TB of free monthly egress; the actual Free plan remains 1 GB storage and 10 GB egress.",
+      "impact": "EXPANDED",
+      "sourceUrl": "[https://upstash.com/blog/upstash-blob-now-includes-1-tb-of-free-egress-every-month](https://upstash.com/blog/upstash-blob-now-includes-1-tb-of-free-egress-every-month)"
+    },
+    {
+      "date": "2026-09-23",
+      "provider": "Vercel",
+      "change": "Vercel Blob store creation became unlimited on every plan, including Hobby; usage still counts toward operation allowances.",
+      "impact": "EXPANDED",
+      "sourceUrl": "[https://vercel.com/changelog/unlimited-vercel-blob-stores-on-every-plan](https://vercel.com/changelog/unlimited-vercel-blob-stores-on-every-plan)"
+    },
+    {
+      "date": "2026-09-09",
+      "provider": "Vercel",
+      "change": "Deployment Protection can protect production deployments for free on every plan; previously production protection required a paid Advanced Deployment Protection add-on.",
+      "impact": "EXPANDED",
+      "sourceUrl": "[https://vercel.com/changelog/protect-production-deployments-for-free-on-every-plan](https://vercel.com/changelog/protect-production-deployments-for-free-on-every-plan)"
+    },
+    {
+      "date": "2026-09-2026",
+      "provider": "Fly.io",
+      "change": "The previously documented free Postgres allowance was removed; new accounts receive a free trial instead.",
+      "impact": "CUT",
+      "sourceUrl": "[https://fly.io/blog/](https://fly.io/blog/)"
+    },
+    {
+      "date": "2026-08-28",
+      "provider": "Cloudflare Workers AI",
+      "change": "Workers AI pricing became more granular while retaining 10,000 free Neurons/day on Workers Free.",
+      "impact": "CHANGED",
+      "sourceUrl": "[https://developers.cloudflare.com/workers-ai/platform/pricing/](https://developers.cloudflare.com/workers-ai/platform/pricing/)"
+    },
+    {
+      "date": "2026-07-28",
+      "provider": "Cloudflare Workers AI",
+      "change": "Several resource-intensive models, including Kimi K2.6/K2.7-code and GLM-5.2, were removed from Workers Free and now require Workers Paid.",
+      "impact": "CUT",
+      "sourceUrl": "[https://developers.cloudflare.com/changelog/post/2026-07-28-models-require-workers-paid/](https://developers.cloudflare.com/changelog/post/2026-07-28-models-require-workers-paid/)"
+    },
+    {
+      "date": "2026-09-2026",
+      "provider": "Railway",
+      "change": "Railway introduced free VMs without an account as part of its September product changes; this is a notable new free-resource workflow rather than a conventional monthly quota increase.",
+      "impact": "EXPANDED",
+      "sourceUrl": "[https://railway.com/changelog](https://railway.com/changelog)"
+    },
+    {
+      "date": "2026-08-2026",
+      "provider": "Lightning AI",
+      "change": "Current free tier provides up to 30 free credits / roughly 80 GPU hours on interruptible machines, with one free Studio; this is a materially useful current free-compute offer to track.",
+      "impact": "CURRENT_TIER_CHANGE_SIGNAL",
+      "sourceUrl": "[https://lightning.ai/pricing](https://lightning.ai/pricing)"
+    },
+    {
+      "date": "2026-06-16",
+      "provider": "GitHub Models",
+      "change": "GitHub retired GitHub Models for new customers; new organizations and enterprises could no longer start using it, affecting both free and paid plans.",
+      "impact": "CUT",
+      "sourceUrl": "[https://github.blog/changelog/2026-06-16-github-models-is-no-longer-available-to-new-customers/](https://github.blog/changelog/2026-06-16-github-models-is-no-longer-available-to-new-customers/)"
+    }
+  ]
+}

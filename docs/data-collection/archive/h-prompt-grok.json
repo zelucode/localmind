@@ -1,0 +1,426 @@
+{
+  "sections": [
+    {
+      "name": "Free GPU / Notebook Compute",
+      "whatEntriesLookLike": "Platform cards with GPU type, weekly/monthly quota, session limits, signup requirements, and direct notebook URL",
+      "examples": [
+        {"name": "Google Colab Free", "url": "https://colab.research.google.com"},
+        {"name": "Kaggle Notebooks", "url": "https://www.kaggle.com/code"},
+        {"name": "Lightning AI Free", "url": "https://lightning.ai"},
+        {"name": "Modal Starter ($30 credits/mo)", "url": "https://modal.com"},
+        {"name": "Hugging Face Spaces ZeroGPU", "url": "https://huggingface.co/spaces"}
+      ],
+      "whyWorthSection": "Core need for training/fine-tuning without local hardware; quotas change frequently and stacking multiple is standard practice among LocalLLaMA/selfhosted users",
+      "fields": ["name", "url", "gpuType", "quotaHours", "sessionLimit", "signupReqs", "lastVerified", "sourceUrl"],
+      "sourceUrl": "https://dusoma.com/dusoma-foundation-search-for-free-compute-the-field-guide/"
+    },
+    {
+      "name": "Free Datasets",
+      "whatEntriesLookLike": "Dataset cards with size, license, modality (text/image/tabular), download count, and direct HF/Kaggle link",
+      "examples": [
+        {"name": "Hugging Face Datasets Hub", "url": "https://huggingface.co/datasets"},
+        {"name": "Kaggle Datasets", "url": "https://www.kaggle.com/datasets"},
+        {"name": "Awesome Open Data", "url": "https://github.com/okhosting/awesome-open-data"},
+        {"name": "Brain Tumor MRI Dataset", "url": "https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset"},
+        {"name": "OpenAssistant Conversations", "url": "https://huggingface.co/datasets/OpenAssistant/oasst1"}
+      ],
+      "whyWorthSection": "Essential for local training, RAG, and evaluation; power users constantly need high-quality free sources beyond built-in bookmarks",
+      "fields": ["name", "url", "size", "license", "modality", "downloads", "lastUpdated", "sourceUrl"],
+      "sourceUrl": "https://huggingface.co/datasets"
+    },
+    {
+      "name": "Free Prompt Libraries & System Prompts",
+      "whatEntriesLookLike": "Repo or collection cards with prompt count, target tools (Cursor/Claude/etc), license, and GitHub URL",
+      "examples": [
+        {"name": "TheBigPromptLibrary", "url": "https://github.com/0xeb/TheBigPromptLibrary"},
+        {"name": "system-prompts-and-models-of-ai-tools", "url": "https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools"},
+        {"name": "instructa/ai-prompts (Cursor rules)", "url": "https://github.com/instructa/ai-prompts"},
+        {"name": "awesome-system-prompts", "url": "https://github.com/Vatsalmodi11/awesome-system-prompts"},
+        {"name": "TheBigPromptLibrary SystemPrompts", "url": "https://github.com/0xeb/TheBigPromptLibrary/tree/main/SystemPrompts"}
+      ],
+      "whyWorthSection": "Cursor rules, agent system prompts, and custom instructions are high-value for AI coding workflows and missing from current categories",
+      "fields": ["name", "url", "promptCount", "targetTools", "license", "stars", "lastCommit", "sourceUrl"],
+      "sourceUrl": "https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools"
+    },
+    {
+      "name": "Free MCP Servers",
+      "whatEntriesLookLike": "Server cards with install command (npx/uvx), category (filesystem/browser/db), transport, and GitHub URL",
+      "examples": [
+        {"name": "Filesystem MCP", "url": "https://github.com/modelcontextprotocol/servers"},
+        {"name": "Playwright MCP", "url": "https://github.com/microsoft/playwright-mcp"},
+        {"name": "GitHub MCP", "url": "https://github.com/modelcontextprotocol/servers"},
+        {"name": "Context7", "url": "https://github.com/upstash/context7"},
+        {"name": "100 Free MCP Servers list", "url": "https://github.com/MustafaYamin/100-free-mcp-servers"}
+      ],
+      "whyWorthSection": "MCP is the emerging standard for agent tool use; free/local servers are heavily discussed on r/LocalLLaMA and missing from Tools/Bookmarks",
+      "fields": ["name", "url", "installCmd", "category", "transport", "stars", "requiresKey", "sourceUrl"],
+      "sourceUrl": "https://toolradar.com/blog/free-mcp-servers"
+    },
+    {
+      "name": "Free Vector Databases",
+      "whatEntriesLookLike": "DB cards with free storage/objects limit, self-host option, hybrid search support, and pricing page URL",
+      "examples": [
+        {"name": "Qdrant Free Cluster", "url": "https://qdrant.tech"},
+        {"name": "Weaviate Cloud Free", "url": "https://weaviate.io"},
+        {"name": "Pinecone Starter", "url": "https://www.pinecone.io"},
+        {"name": "Chroma (self-host)", "url": "https://www.trychroma.com"},
+        {"name": "Cloudflare Vectorize", "url": "https://developers.cloudflare.com/vectorize/"}
+      ],
+      "whyWorthSection": "RAG and local agent memory require vector stores; free hosted + self-host options are a frequent pain point",
+      "fields": ["name", "url", "freeLimit", "selfHost", "hybridSearch", "lastVerified", "sourceUrl"],
+      "sourceUrl": "https://klymentiev.com/blog/free-vector-database-credits"
+    },
+    {
+      "name": "Free Hosting & Deploy Tiers",
+      "whatEntriesLookLike": "Platform cards with bandwidth, build minutes, cold-start behavior, commercial-use flag, and pricing URL",
+      "examples": [
+        {"name": "Cloudflare Pages + Workers", "url": "https://pages.cloudflare.com"},
+        {"name": "Vercel Hobby", "url": "https://vercel.com/pricing"},
+        {"name": "Netlify Free", "url": "https://www.netlify.com/pricing/"},
+        {"name": "Render Free", "url": "https://render.com/pricing"},
+        {"name": "Oracle Cloud Always Free", "url": "https://www.oracle.com/cloud/free/"}
+      ],
+      "whyWorthSection": "Deploying demos, agents, and frontends is core; free-for.dev style lists are heavily referenced",
+      "fields": ["name", "url", "bandwidth", "buildMinutes", "coldStart", "commercialOk", "lastVerified", "sourceUrl"],
+      "sourceUrl": "https://www.thetechbasket.com/free-for-developers/"
+    },
+    {
+      "name": "Student / OSS Credit Programs",
+      "whatEntriesLookLike": "Program cards with eligibility, credit amount/value, duration, and application URL",
+      "examples": [
+        {"name": "GitHub Student Developer Pack", "url": "https://education.github.com/pack"},
+        {"name": "Azure for Students", "url": "https://azure.microsoft.com/free/students/"},
+        {"name": "DigitalOcean Student Pack", "url": "https://www.digitalocean.com/"},
+        {"name": "JetBrains Student License", "url": "https://www.jetbrains.com/community/education/"},
+        {"name": "MongoDB Atlas Student Credits", "url": "https://www.mongodb.com/students"}
+      ],
+      "whyWorthSection": "One verification unlocks hundreds of dollars in credits; high ROI for the target audience",
+      "fields": ["name", "url", "eligibility", "creditValue", "duration", "partners", "sourceUrl"],
+      "sourceUrl": "https://perkstack.co/blog/github-student-pack-guide"
+    },
+    {
+      "name": "Free AI Courses",
+      "whatEntriesLookLike": "Course cards with provider, length, certificate flag, level, and direct start URL",
+      "examples": [
+        {"name": "Hugging Face LLM Course", "url": "https://huggingface.co/learn/llm-course"},
+        {"name": "fast.ai Practical Deep Learning", "url": "https://course.fast.ai"},
+        {"name": "Anthropic Academy", "url": "https://www.anthropic.com/learn"},
+        {"name": "Elements of AI", "url": "https://www.elementsofai.com"},
+        {"name": "Kaggle Learn", "url": "https://www.kaggle.com/learn"}
+      ],
+      "whyWorthSection": "Structured learning paths are frequently requested; free certificates and practical courses fill a gap",
+      "fields": ["name", "url", "provider", "length", "certificate", "level", "sourceUrl"],
+      "sourceUrl": "https://aiweekly.co/learning-ai/artificial-intelligence/best-free-ai-courses-2026"
+    },
+    {
+      "name": "Free Voice / TTS Models",
+      "whatEntriesLookLike": "Model cards with size, license (commercial?), languages, VRAM/CPU needs, and HF/GitHub URL",
+      "examples": [
+        {"name": "Piper", "url": "https://github.com/OHF-Voice/piper1-gpl"},
+        {"name": "Kokoro-82M", "url": "https://huggingface.co/hexgrad/Kokoro-82M"},
+        {"name": "XTTS-v2", "url": "https://github.com/idiap/coqui-ai-TTS"},
+        {"name": "Bark", "url": "https://github.com/suno-ai/bark"},
+        {"name": "F5-TTS", "url": "https://github.com/SWivid/F5-TTS"}
+      ],
+      "whyWorthSection": "Local voice agents and offline TTS are popular in selfhosted/LocalLLaMA; licensing and size matter",
+      "fields": ["name", "url", "size", "license", "languages", "hardware", "voiceClone", "sourceUrl"],
+      "sourceUrl": "https://www.bestfreewebresources.com/best-local-text-to-speech-2026"
+    },
+    {
+      "name": "Benchmark Leaderboards",
+      "whatEntriesLookLike": "Leaderboard cards with ranking method, update frequency, open-weight filter, and live URL",
+      "examples": [
+        {"name": "LMArena (Chatbot Arena)", "url": "https://lmarena.ai"},
+        {"name": "BenchLeader", "url": "https://www.benchleader.com"},
+        {"name": "Open LLM Leaderboard (HF)", "url": "https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard"},
+        {"name": "BenchLM Open-Source", "url": "https://benchlm.ai/best/open-source"},
+        {"name": "Artificial Analysis", "url": "https://artificialanalysis.ai"}
+      ],
+      "whyWorthSection": "Choosing which free/local model to run requires current rankings; leaderboards change weekly",
+      "fields": ["name", "url", "method", "updateFreq", "openWeight", "lastSnapshot", "sourceUrl"],
+      "sourceUrl": "https://www.benchleader.com/"
+    },
+    {
+      "name": "Free Auth / DB / Storage Tiers",
+      "whatEntriesLookLike": "Service cards with free limits (MAU, storage, bandwidth), pause behavior, and pricing URL",
+      "examples": [
+        {"name": "Supabase Free", "url": "https://supabase.com/pricing"},
+        {"name": "Neon Free", "url": "https://neon.tech/pricing"},
+        {"name": "Clerk Free", "url": "https://clerk.com/pricing"},
+        {"name": "Cloudflare D1 + R2", "url": "https://developers.cloudflare.com/d1/"},
+        {"name": "Turso Free", "url": "https://turso.tech/pricing"}
+      ],
+      "whyWorthSection": "Backend building blocks for AI apps; free tiers with auth+DB+storage are heavily used",
+      "fields": ["name", "url", "dbLimit", "authMAU", "storage", "pauseBehavior", "commercialOk", "sourceUrl"],
+      "sourceUrl": "https://freetier.co/articles/best-free-database-free-tiers-2026"
+    },
+    {
+      "name": "Free CI / Build Minutes",
+      "whatEntriesLookLike": "CI cards with monthly minutes, concurrent jobs, and pricing/docs URL",
+      "examples": [
+        {"name": "GitHub Actions Free", "url": "https://docs.github.com/en/billing/managing-billing-for-github-actions"},
+        {"name": "GitLab CI Free", "url": "https://about.gitlab.com/pricing/"},
+        {"name": "CircleCI Free", "url": "https://circleci.com/pricing/"},
+        {"name": "Cloudflare Builds", "url": "https://developers.cloudflare.com/pages/configuration/build-configuration/"},
+        {"name": "Netlify Build Minutes", "url": "https://www.netlify.com/pricing/"}
+      ],
+      "whyWorthSection": "CI for open-source and personal projects is a daily need; free minutes are limited and tracked",
+      "fields": ["name", "url", "minutes", "concurrent", "osSupport", "lastVerified", "sourceUrl"],
+      "sourceUrl": "https://raw.githubusercontent.com/ripienaar/free-for-dev/master/README.md"
+    },
+    {
+      "name": "Hugging Face Spaces Worth Bookmarking",
+      "whatEntriesLookLike": "Space cards with likes, ZeroGPU flag, category (image/video/agent), and direct Space URL",
+      "examples": [
+        {"name": "Wan2.2 14B Fast", "url": "https://huggingface.co/spaces"},
+        {"name": "Qwen Image Edit LoRAs", "url": "https://huggingface.co/spaces"},
+        {"name": "TRELLIS 3D", "url": "https://huggingface.co/spaces"},
+        {"name": "TabArena", "url": "https://huggingface.co/spaces"},
+        {"name": "Open LLM Leaderboard", "url": "https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard"}
+      ],
+      "whyWorthSection": "ZeroGPU Spaces give free inference demos; trending Spaces are high-signal discovery",
+      "fields": ["name", "url", "likes", "zeroGPU", "category", "lastActive", "sourceUrl"],
+      "sourceUrl": "https://huggingface.co/spaces"
+    },
+    {
+      "name": "Free AI Newsletters & Changelogs",
+      "whatEntriesLookLike": "Newsletter cards with frequency, focus (models/tools/papers), and subscribe URL",
+      "examples": [
+        {"name": "The Batch (DeepLearning.AI)", "url": "https://www.deeplearning.ai/the-batch/"},
+        {"name": "Import AI", "url": "https://jack-clark.net/"},
+        {"name": "Hugging Face Daily Papers", "url": "https://huggingface.co/papers"},
+        {"name": "AI Weekly", "url": "https://aiweekly.co"},
+        {"name": "LMArena Blog / Updates", "url": "https://lmarena.ai"}
+      ],
+      "whyWorthSection": "Staying current on free-tier changes and new models requires curated feeds",
+      "fields": ["name", "url", "frequency", "focus", "free", "sourceUrl"],
+      "sourceUrl": "https://aiweekly.co/learning-ai/artificial-intelligence/best-free-ai-courses-2026"
+    },
+    {
+      "name": "Browser Extensions for AI Power Users",
+      "whatEntriesLookLike": "Extension cards with store link, permissions, free flag, and primary use case",
+      "examples": [
+        {"name": "uBlock Origin", "url": "https://github.com/gorhill/uBlock"},
+        {"name": "Violentmonkey / Tampermonkey", "url": "https://violentmonkey.github.io/"},
+        {"name": "Web Scraper", "url": "https://chrome.google.com/webstore"},
+        {"name": "JSON Viewer / Formatter", "url": "https://chrome.google.com/webstore"},
+        {"name": "Hugging Face Chrome Extension (community)", "url": "https://huggingface.co"}
+      ],
+      "whyWorthSection": "Browser tooling for scraping, prompt injection testing, and API inspection complements local AI workflows",
+      "fields": ["name", "url", "store", "permissions", "free", "useCase", "sourceUrl"],
+      "sourceUrl": "https://raw.githubusercontent.com/ripienaar/free-for-dev/master/README.md"
+    }
+  ],
+  "newToolCategories": [
+    {
+      "name": "Local TTS / Voice Agents",
+      "justify": "Complements existing design/media tools; users want offline voice for agents",
+      "items": [
+        {"name": "Piper", "url": "https://github.com/OHF-Voice/piper1-gpl"},
+        {"name": "Kokoro", "url": "https://huggingface.co/hexgrad/Kokoro-82M"},
+        {"name": "XTTS-v2 via Coqui", "url": "https://github.com/idiap/coqui-ai-TTS"},
+        {"name": "Bark", "url": "https://github.com/suno-ai/bark"},
+        {"name": "F5-TTS", "url": "https://github.com/SWivid/F5-TTS"}
+      ],
+      "sourceUrl": "https://www.bestfreewebresources.com/best-local-text-to-speech-2026"
+    },
+    {
+      "name": "MCP / Agent Tool Servers",
+      "justify": "MCP is the new standard for tool use; free local servers are exploding in popularity",
+      "items": [
+        {"name": "Official MCP Servers", "url": "https://github.com/modelcontextprotocol/servers"},
+        {"name": "Playwright MCP", "url": "https://github.com/microsoft/playwright-mcp"},
+        {"name": "Context7", "url": "https://github.com/upstash/context7"},
+        {"name": "Filesystem MCP", "url": "https://github.com/modelcontextprotocol/servers"},
+        {"name": "100 Free MCP Servers", "url": "https://github.com/MustafaYamin/100-free-mcp-servers"}
+      ],
+      "sourceUrl": "https://toolradar.com/blog/free-mcp-servers"
+    },
+    {
+      "name": "Vector / Embedding Stores (Local)",
+      "justify": "RAG is table-stakes; local vector DBs pair with Ollama/LM Studio",
+      "items": [
+        {"name": "Chroma", "url": "https://www.trychroma.com"},
+        {"name": "Qdrant (self-host)", "url": "https://qdrant.tech"},
+        {"name": "Weaviate (self-host)", "url": "https://weaviate.io"},
+        {"name": "LanceDB", "url": "https://lancedb.com"},
+        {"name": "pgvector", "url": "https://github.com/pgvector/pgvector"}
+      ],
+      "sourceUrl": "https://klymentiev.com/blog/free-vector-database-credits"
+    },
+    {
+      "name": "Free Inference / Router APIs",
+      "justify": "Extends existing routers; many free OpenAI-compatible endpoints exist",
+      "items": [
+        {"name": "OpenRouter Free Models", "url": "https://openrouter.ai"},
+        {"name": "Groq Free", "url": "https://groq.com"},
+        {"name": "Cloudflare Workers AI", "url": "https://developers.cloudflare.com/workers-ai/"},
+        {"name": "Google AI Studio / Gemini Free", "url": "https://aistudio.google.com"},
+        {"name": "Hugging Face Inference (limited)", "url": "https://huggingface.co/inference-api"}
+      ],
+      "sourceUrl": "https://www.thetechbasket.com/free-for-developers/"
+    },
+    {
+      "name": "Prompt / Rules Managers",
+      "justify": "Cursor rules and system prompts are first-class for coding agents",
+      "items": [
+        {"name": "instructa/ai-prompts", "url": "https://github.com/instructa/ai-prompts"},
+        {"name": "TheBigPromptLibrary", "url": "https://github.com/0xeb/TheBigPromptLibrary"},
+        {"name": "system-prompts-and-models-of-ai-tools", "url": "https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools"},
+        {"name": "awesome-system-prompts", "url": "https://github.com/Vatsalmodi11/awesome-system-prompts"},
+        {"name": "Cursor Rules examples", "url": "https://github.com/instructa/ai-prompts"}
+      ],
+      "sourceUrl": "https://github.com/instructa/ai-prompts"
+    }
+  ],
+  "newBookmarkCategories": [
+    {
+      "name": "Free Compute Notebooks",
+      "justify": "Distinct from general utilities; quotas and session rules need dedicated tracking",
+      "items": [
+        {"name": "Google Colab", "url": "https://colab.research.google.com"},
+        {"name": "Kaggle Notebooks", "url": "https://www.kaggle.com/code"},
+        {"name": "Lightning AI", "url": "https://lightning.ai"},
+        {"name": "Modal", "url": "https://modal.com"},
+        {"name": "Hugging Face Spaces", "url": "https://huggingface.co/spaces"}
+      ],
+      "sourceUrl": "https://dusoma.com/dusoma-foundation-search-for-free-compute-the-field-guide/"
+    },
+    {
+      "name": "Datasets & Evaluation",
+      "justify": "Large surface area; better as its own category than buried under education",
+      "items": [
+        {"name": "Hugging Face Datasets", "url": "https://huggingface.co/datasets"},
+        {"name": "Kaggle Datasets", "url": "https://www.kaggle.com/datasets"},
+        {"name": "Open LLM Leaderboard", "url": "https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard"},
+        {"name": "LMArena", "url": "https://lmarena.ai"},
+        {"name": "Awesome Public Datasets", "url": "https://github.com/awesomedata/awesome-public-datasets"}
+      ],
+      "sourceUrl": "https://huggingface.co/datasets"
+    },
+    {
+      "name": "MCP Servers Directory",
+      "justify": "Rapidly growing ecosystem; needs discovery separate from general AI utilities",
+      "items": [
+        {"name": "Official MCP Servers", "url": "https://github.com/modelcontextprotocol/servers"},
+        {"name": "Awesome MCP", "url": "https://github.com/AlexMili/Awesome-MCP"},
+        {"name": "FreeMCPLab", "url": "https://www.freemcplab.com"},
+        {"name": "MCP Registry (kiprio)", "url": "https://kiprio.com/mcp-registry/"},
+        {"name": "100 Free MCP Servers", "url": "https://github.com/MustafaYamin/100-free-mcp-servers"}
+      ],
+      "sourceUrl": "https://www.freemcplab.com/"
+    },
+    {
+      "name": "Student & Startup Credits",
+      "justify": "High-value one-time claims; not utilities but opportunity trackers",
+      "items": [
+        {"name": "GitHub Student Pack", "url": "https://education.github.com/pack"},
+        {"name": "Azure for Students", "url": "https://azure.microsoft.com/free/students/"},
+        {"name": "DigitalOcean Credits", "url": "https://www.digitalocean.com/"},
+        {"name": "JetBrains Education", "url": "https://www.jetbrains.com/community/education/"},
+        {"name": "StudentPerks Directory", "url": "https://www.getstudentperks.com/"}
+      ],
+      "sourceUrl": "https://perkstack.co/blog/github-student-pack-guide"
+    },
+    {
+      "name": "Free Backend Stacks",
+      "justify": "Auth + DB + storage + hosting combos are a distinct developer need",
+      "items": [
+        {"name": "Supabase", "url": "https://supabase.com"},
+        {"name": "Neon", "url": "https://neon.tech"},
+        {"name": "Cloudflare (D1/R2/Workers)", "url": "https://developers.cloudflare.com"},
+        {"name": "Clerk", "url": "https://clerk.com"},
+        {"name": "Turso", "url": "https://turso.tech"}
+      ],
+      "sourceUrl": "https://www.thetechbasket.com/free-for-developers/"
+    }
+  ],
+  "offlineFirstLaunchData": {
+    "description": "Snapshot data that remains useful without internet or on first launch before any sync",
+    "items": [
+      "Cached rate-limit matrix (last known free quotas for 50+ APIs with rotation strategy)",
+      "Static bookmark list of pure-client utilities (converters, formatters, calculators that work offline once loaded)",
+      "Local runtime detection results (Ollama/LM Studio/Jan presence and model list)",
+      "Pre-seeded Key Vault schema + empty encrypted store (so user can add keys immediately)",
+      "IDE/agent config templates (Cursor rules, Continue.dev, Aider, etc.) as local files",
+      "Offline-capable prompt/system-prompt snippets (top 20 Cursor rules and system prompts)",
+      "Last-known free-tier change log (stale warnings for entries older than 30 days)",
+      "Local model recommendation matrix (GGUF sizes vs VRAM for popular models)",
+      "MCP server install commands and minimal configs that can be copied offline",
+      "GitHub Student Pack partner list (static) with application URLs for later claim"
+    ],
+    "sourceUrl": "https://raw.githubusercontent.com/ripienaar/free-for-dev/master/README.md"
+  },
+  "recentFreeTierChanges": [
+    {
+      "event": "AWS SageMaker Studio Lab closed to new signups",
+      "date": "2026-07-30",
+      "type": "cut",
+      "detail": "No longer accepting new free users; existing accounts may continue",
+      "sourceUrl": "https://dusoma.com/dusoma-foundation-search-for-free-compute-the-field-guide/"
+    },
+    {
+      "event": "Hugging Face free Inference API reduced to $0.10/month taster",
+      "date": "2026-07 (approx)",
+      "type": "cut",
+      "detail": "Previously more generous free allowance cut sharply",
+      "sourceUrl": "https://dusoma.com/dusoma-foundation-search-for-free-compute-the-field-guide/"
+    },
+    {
+      "event": "Colab Pro for Education closed to new signups",
+      "date": "2026-07 (approx)",
+      "type": "cut",
+      "detail": "Education-specific paid tier closed; free tier remains",
+      "sourceUrl": "https://dusoma.com/dusoma-foundation-search-for-free-compute-the-field-guide/"
+    },
+    {
+      "event": "Weaviate introduced permanent free managed Cloud tier",
+      "date": "2026-06",
+      "type": "expanded",
+      "detail": "Always-free cluster: 100k objects, 1 GB memory, 10 GB disk, no credit card",
+      "sourceUrl": "https://ipsnews.net/business/2026/10/04/a-look-at-free-forever-vector-database-cloud-plans-in-2026/"
+    },
+    {
+      "event": "Neon Free plan updated to 1 GB storage and 100 projects",
+      "date": "2026-08",
+      "type": "expanded",
+      "detail": "Previously lower storage; now more projects and 1 GB per project",
+      "sourceUrl": "https://neon.com/guides/neon-vs-supabase-free-plan"
+    },
+    {
+      "event": "Google Colab premium benefits rolled into Google AI subscriptions",
+      "date": "2026-09-22",
+      "type": "expanded",
+      "detail": "Google AI subscribers gain priority GPUs, longer runtimes, background execution",
+      "sourceUrl": "https://developers.googleblog.com/colab-is-now-part-of-your-google-ai-plan/"
+    },
+    {
+      "event": "Oracle Always Free Arm servers halved",
+      "date": "2026-06-15",
+      "type": "cut",
+      "detail": "Capacity of free Ampere A1 instances reduced",
+      "sourceUrl": "https://dusoma.com/dusoma-foundation-search-for-free-compute-the-field-guide/"
+    },
+    {
+      "event": "Aiven free Postgres storage reduced from 5 GB to 1 GB",
+      "date": "2025 (noted in 2026 guides)",
+      "type": "cut",
+      "detail": "Free tier storage cut; still available but smaller",
+      "sourceUrl": "https://perkstack.co/blog/free-postgres-hosting"
+    },
+    {
+      "event": "Railway free plan reduced to $5 trial + $1/mo credit",
+      "date": "2026 (ongoing)",
+      "type": "cut",
+      "detail": "No longer a true permanent free tier; trial then minimal credit",
+      "sourceUrl": "https://www.thetechbasket.com/free-for-developers/"
+    },
+    {
+      "event": "Fly.io free allowance removed (card required, no free allowance)",
+      "date": "2026 (noted Sep 2026)",
+      "type": "cut",
+      "detail": "Previous free tier gone; now requires payment method",
+      "sourceUrl": "https://www.thetechbasket.com/free-for-developers/"
+    }
+  ]
+}

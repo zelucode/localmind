@@ -1,0 +1,343 @@
+{
+  "sections": [
+    {
+      "name": "Free GPU & Notebook Compute",
+      "whatEntriesLookLike": "Platform name, hardware specs, weekly/monthly free limits, and sign-up requirements.",
+      "exampleEntries": [
+        {"name": "Google Colab", "url": "https://colab.research.google.com/"},
+        {"name": "Kaggle Notebooks", "url": "https://www.kaggle.com/code"},
+        {"name": "Lightning AI Studio", "url": "https://lightning.ai/"},
+        {"name": "Modal", "url": "https://modal.com/"},
+        {"name": "GitHub Codespaces", "url": "https://github.com/features/codespaces"}
+      ],
+      "whyWorthSection": "Developers need accessible compute for testing LLMs and ML models without upfront hardware costs.",
+      "requiredFields": ["platform_name", "hardware_type", "free_quota", "credit_card_required", "url"]
+    },
+    {
+      "name": "Free Vector Databases",
+      "whatEntriesLookLike": "Database name, free tier storage limits, concurrency limits, and managed vs self-hosted status.",
+      "exampleEntries": [
+        {"name": "Qdrant Cloud", "url": "https://qdrant.tech/"},
+        {"name": "Pinecone", "url": "https://www.pinecone.io/"},
+        {"name": "Weaviate Cloud", "url": "https://weaviate.io/"},
+        {"name": "Milvus", "url": "https://milvus.io/"},
+        {"name": "Chroma", "url": "https://www.trychroma.com/"}
+      ],
+      "whyWorthSection": "Essential for RAG applications, and free tiers allow prototyping without infrastructure overhead.",
+      "requiredFields": ["name", "free_storage_limit", "free_requests_limit", "managed_or_self_hosted", "url"]
+    },
+    {
+      "name": "Free MCP Servers Directory",
+      "whatEntriesLookLike": "Server name, supported AI clients (Cursor, Claude), functionality, and GitHub repository link.",
+      "exampleEntries": [
+        {"name": "GitHub MCP Registry", "url": "https://github.com/modelcontextprotocol/servers"},
+        {"name": "MCP Servers Org", "url": "https://mcpservers.org/"},
+        {"name": "Awesome MCP Servers", "url": "https://github.com/patriksimek/awesome-mcp-servers-2"},
+        {"name": "PulseMCP Directory", "url": "https://www.pulsemcp.com/servers"},
+        {"name": "Awesome Remote MCP Servers", "url": "https://github.com/jaw9c/awesome-remote-mcp-servers/"}
+      ],
+      "whyWorthSection": "MCP is the new standard for connecting AI agents to external tools; a curated directory saves hours of discovery.",
+      "requiredFields": ["server_name", "description", "supported_clients", "github_url", "setup_complexity"]
+    },
+    {
+      "name": "Free Hosting & Deployment Tiers",
+      "whatEntriesLookLike": "Platform name, free tier limits (build minutes, bandwidth, sleep rules), and ideal use cases.",
+      "exampleEntries": [
+        {"name": "Vercel", "url": "https://vercel.com/"},
+        {"name": "Render", "url": "https://render.com/"},
+        {"name": "Railway", "url": "https://railway.app/"},
+        {"name": "Fly.io", "url": "https://fly.io/"},
+        {"name": "Hugging Face Spaces", "url": "https://huggingface.co/spaces"}
+      ],
+      "whyWorthSection": "Developers need to deploy AI wrappers, bots, and APIs for free before committing to paid infrastructure.",
+      "requiredFields": ["platform_name", "free_compute_limit", "free_bandwidth_limit", "sleep_policy", "url"]
+    },
+    {
+      "name": "Free Student & OSS Credit Programs",
+      "whatEntriesLookLike": "Program name, eligibility criteria, credit amount, and covered services.",
+      "exampleEntries": [
+        {"name": "GitHub Student Developer Pack", "url": "https://education.github.com/pack"},
+        {"name": "AWS Educate", "url": "https://aws.amazon.com/education/awseducate/"},
+        {"name": "Google Cloud for Students", "url": "https://cloud.google.com/edu/students"},
+        {"name": "Azure for Students", "url": "https://azure.microsoft.com/en-us/free/students/"},
+        {"name": "Oracle for Students", "url": "https://www.oracle.com/education/students/"}
+      ],
+      "whyWorthSection": "Students and OSS maintainers often lack funding; these programs provide thousands of dollars in cloud credits.",
+      "requiredFields": ["program_name", "eligibility", "credit_value", "covered_services", "application_url"]
+    },
+    {
+      "name": "Free AI Courses & Learning Paths",
+      "whatEntriesLookLike": "Course title, provider, duration, and certification availability.",
+      "exampleEntries": [
+        {"name": "Fast.ai Practical Deep Learning", "url": "https://course.fast.ai/"},
+        {"name": "Hugging Face LLM Course", "url": "https://huggingface.co/learn"},
+        {"name": "DeepLearning.AI Open Source Models", "url": "https://www.deeplearning.ai/courses/open-source-models-hugging-face"},
+        {"name": "Google Generative AI Learning Path", "url": "https://www.cloudskillsboost.google/"},
+        {"name": "Elements of AI", "url": "https://www.elementsofai.com/"}
+      ],
+      "whyWorthSection": "Continuous learning is critical in AI; curated free courses help users upskill without financial barriers.",
+      "requiredFields": ["course_name", "provider", "duration", "certification_offered", "url"]
+    },
+    {
+      "name": "Free Voice & TTS Models",
+      "whatEntriesLookLike": "Model or platform name, free tier limits (characters/month), and local vs cloud execution.",
+      "exampleEntries": [
+        {"name": "ElevenLabs Free Tier", "url": "https://elevenlabs.io/"},
+        {"name": "Coqui TTS", "url": "https://github.com/coqui-ai/TTS"},
+        {"name": "OpenVoice", "url": "https://github.com/myshell-ai/OpenVoice"},
+        {"name": "Bark", "url": "https://github.com/suno-ai/bark"},
+        {"name": "Kokoro", "url": "https://github.com/hexgrad/kokoro"}
+      ],
+      "whyWorthSection": "Voice AI is booming, and developers need to know which tools offer viable free tiers or open-source local alternatives.",
+      "requiredFields": ["model_name", "free_tier_limit", "local_executable", "commercial_use_allowed", "url"]
+    },
+    {
+      "name": "System Prompt & Cursor Rules Collections",
+      "whatEntriesLookLike": "Collection name, target IDE (Cursor, Windsurf), and specific use case (e.g., React, Security).",
+      "exampleEntries": [
+        {"name": "Awesome Cursor Rules", "url": "https://github.com/PatrickJS/awesome-cursorrules"},
+        {"name": "Cursor Directory", "url": "https://cursor.directory/"},
+        {"name": "System Prompts of AI Tools", "url": "https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools"},
+        {"name": "Cursor Rules & Prompts", "url": "https://github.com/thehimel/cursor-rules-and-prompts"},
+        {"name": "Awesome OSINT MCP Servers", "url": "https://github.com/soxoj/awesome-osint-mcp-servers"}
+      ],
+      "whyWorthSection": "High-quality prompts and IDE rules dramatically improve AI coding agent output; sharing them accelerates developer workflows.",
+      "requiredFields": ["collection_name", "target_ide", "use_case", "github_url", "stars_count"]
+    },
+    {
+      "name": "AI Benchmark Leaderboards",
+      "whatEntriesLookLike": "Leaderboard name, ranking methodology (Elo, static datasets), and tracked modalities.",
+      "exampleEntries": [
+        {"name": "LMSYS Chatbot Arena", "url": "https://openlm.ai/chatbot-arena/"},
+        {"name": "Hugging Face Open LLM Leaderboard", "url": "https://huggingface.co/spaces/lmarena-ai/chatbot-arena"},
+        {"name": "Artificial Analysis", "url": "https://artificialanalysis.ai/"},
+        {"name": "Stanford HELM", "url": "https://crfm.stanford.edu/helm/"},
+        {"name": "OpenRouter Leaderboard", "url": "https://openrouter.ai/models"}
+      ],
+      "whyWorthSection": "Model performance changes weekly; centralized leaderboards help developers choose the best model for their specific task.",
+      "requiredFields": ["leaderboard_name", "methodology", "modalities_tracked", "update_frequency", "url"]
+    },
+    {
+      "name": "Free AI Newsletters & Changelogs",
+      "whatEntriesLookLike": "Newsletter name, frequency, subscriber count, and primary focus (e.g., research, tools).",
+      "exampleEntries": [
+        {"name": "The Rundown AI", "url": "https://www.therundown.ai/"},
+        {"name": "Ben's Bites", "url": "https://bensbites.beehiiv.com/"},
+        {"name": "TLDR AI", "url": "https://tldr.tech/ai"},
+        {"name": "Superhuman AI", "url": "https://superhuman.ai/"},
+        {"name": "Hacker News AI", "url": "https://news.ycombinator.com/"}
+      ],
+      "whyWorthSection": "The AI landscape moves too fast for manual tracking; curated newsletters are the most efficient way to stay updated.",
+      "requiredFields": ["newsletter_name", "frequency", "focus_area", "subscription_url", "estimated_subscribers"]
+    },
+    {
+      "name": "Free CI / CD Tiers",
+      "whatEntriesLookLike": "Platform name, free build minutes per month, concurrency limits, and runner types.",
+      "exampleEntries": [
+        {"name": "GitHub Actions", "url": "https://github.com/features/actions"},
+        {"name": "GitLab CI", "url": "https://about.gitlab.com/"},
+        {"name": "CircleCI", "url": "https://circleci.com/"},
+        {"name": "Buildkite", "url": "https://buildkite.com/"},
+        {"name": "Bitrise", "url": "https://www.bitrise.io/"}
+      ],
+      "whyWorthSection": "Automated testing and deployment are essential, and free CI tiers enable hobbyists and startups to maintain quality without cost.",
+      "requiredFields": ["platform_name", "free_minutes_per_month", "concurrent_jobs", "self_hosted_runner_support", "url"]
+    },
+    {
+      "name": "Free Auth, DB & Storage Tiers",
+      "whatEntriesLookLike": "Service name, free tier limits (MAU, storage GB, bandwidth), and core features included.",
+      "exampleEntries": [
+        {"name": "Supabase", "url": "https://supabase.com/"},
+        {"name": "Firebase", "url": "https://firebase.google.com/"},
+        {"name": "Clerk", "url": "https://clerk.com/"},
+        {"name": "Neon", "url": "https://neon.tech/"},
+        {"name": "Turso", "url": "https://turso.tech/"}
+      ],
+      "whyWorthSection": "Modern apps require backend services; these free tiers provide production-ready auth, database, and storage for early-stage projects.",
+      "requiredFields": ["service_name", "free_mau_limit", "free_storage_limit", "core_features", "url"]
+    },
+    {
+      "name": "Free AI Datasets",
+      "whatEntriesLookLike": "Dataset repository name, size, modalities supported, and licensing.",
+      "exampleEntries": [
+        {"name": "Hugging Face Datasets", "url": "https://huggingface.co/datasets"},
+        {"name": "Kaggle Datasets", "url": "https://www.kaggle.com/datasets"},
+        {"name": "UCI Machine Learning Repository", "url": "https://archive.ics.uci.edu/"},
+        {"name": "Google Dataset Search", "url": "https://datasetsearch.research.google.com/"},
+        {"name": "Common Crawl", "url": "https://commoncrawl.org/"}
+      ],
+      "whyWorthSection": "Data is the fuel for AI; direct links to high-quality, free datasets accelerate fine-tuning and RAG development.",
+      "requiredFields": ["repository_name", "dataset_count", "modalities", "license_type", "url"]
+    },
+    {
+      "name": "Free AI Browser Extensions",
+      "whatEntriesLookLike": "Extension name, browser compatibility, core functionality, and privacy model.",
+      "exampleEntries": [
+        {"name": "WebLLM", "url": "https://webllm.mlc.ai/"},
+        {"name": "Merlin", "url": "https://getmerlin.in/"},
+        {"name": "Harpa AI", "url": "https://harpa.ai/"},
+        {"name": "ChatGPT Writer", "url": "https://chatgptwriter.ai/"},
+        {"name": "Glarity", "url": "https://glarity.app/"}
+      ],
+      "whyWorthSection": "Browser extensions bring AI directly into the user's daily workflow without requiring app switches.",
+      "requiredFields": ["extension_name", "supported_browsers", "core_functionality", "privacy_model", "url"]
+    },
+    {
+      "name": "Free AI Image & Video Generation APIs",
+      "whatEntriesLookLike": "API provider name, free credit amount, supported models, and rate limits.",
+      "exampleEntries": [
+        {"name": "Stability AI", "url": "https://platform.stability.ai/"},
+        {"name": "Leonardo.ai", "url": "https://leonardo.ai/"},
+        {"name": "Replicate", "url": "https://replicate.com/"},
+        {"name": "Fal.ai", "url": "https://fal.ai/"},
+        {"name": "Together AI", "url": "https://www.together.ai/"}
+      ],
+      "whyWorthSection": "Multimodal AI is increasingly relevant; free API credits allow developers to prototype image and video features easily.",
+      "requiredFields": ["provider_name", "free_credit_value", "supported_models", "rate_limit", "url"]
+    }
+  ],
+  "newToolCategories": [
+    {
+      "name": "Local AI Model Managers",
+      "justification": "Users need dedicated desktop tools to download, manage, and chat with local LLMs offline.",
+      "items": [
+        {"name": "Ollama", "url": "https://ollama.com/"},
+        {"name": "LM Studio", "url": "https://lmstudio.ai/"},
+        {"name": "Jan", "url": "https://jan.ai/"},
+        {"name": "GPT4All", "url": "https://gpt4all.io/"},
+        {"name": "AnythingLLM", "url": "https://useanything.com/"}
+      ]
+    },
+    {
+      "name": "Prompt Engineering & Management",
+      "justification": "As AI workflows mature, developers need tools to version, test, and optimize prompts systematically.",
+      "items": [
+        {"name": "PromptLayer", "url": "https://www.promptlayer.com/"},
+        {"name": "Langfuse", "url": "https://langfuse.com/"},
+        {"name": "OpenPrompt", "url": "https://openprompt.co/"},
+        {"name": "PromptHub", "url": "https://prompthub.us/"},
+        {"name": "Flowise", "url": "https://flowiseai.com/"}
+      ]
+    },
+    {
+      "name": "AI Agent Frameworks",
+      "justification": "Power users building autonomous workflows need lightweight, local-friendly frameworks to orchestrate multi-agent tasks.",
+      "items": [
+        {"name": "LangChain", "url": "https://www.langchain.com/"},
+        {"name": "LlamaIndex", "url": "https://www.llamaindex.ai/"},
+        {"name": "AutoGen", "url": "https://microsoft.github.io/autogen/"},
+        {"name": "CrewAI", "url": "https://www.crewai.com/"},
+        {"name": "Semantic Kernel", "url": "https://github.com/microsoft/semantic-kernel"}
+      ]
+    }
+  ],
+  "newBookmarkCategories": [
+    {
+      "name": "Free Cloud Compute & Notebooks",
+      "justification": "Developers frequently need ephemeral, free GPU environments for testing models without local hardware.",
+      "items": [
+        {"name": "Google Colab", "url": "https://colab.research.google.com/"},
+        {"name": "Kaggle Notebooks", "url": "https://www.kaggle.com/code"},
+        {"name": "Lightning AI Studio", "url": "https://lightning.ai/"},
+        {"name": "Modal", "url": "https://modal.com/"},
+        {"name": "GitHub Codespaces", "url": "https://github.com/features/codespaces"}
+      ]
+    },
+    {
+      "name": "Serverless Backend & Database",
+      "justification": "Modern AI apps require fast, scalable backends; these free tiers provide production-ready foundations.",
+      "items": [
+        {"name": "Supabase", "url": "https://supabase.com/"},
+        {"name": "Neon", "url": "https://neon.tech/"},
+        {"name": "Turso", "url": "https://turso.tech/"},
+        {"name": "Firebase", "url": "https://firebase.google.com/"},
+        {"name": "Clerk", "url": "https://clerk.com/"}
+      ]
+    },
+    {
+      "name": "AI Benchmark & Leaderboards",
+      "justification": "Model performance shifts rapidly; bookmarking authoritative leaderboards helps users make data-driven model choices.",
+      "items": [
+        {"name": "LMSYS Chatbot Arena", "url": "https://openlm.ai/chatbot-arena/"},
+        {"name": "Hugging Face Open LLM Leaderboard", "url": "https://huggingface.co/spaces/lmarena-ai/chatbot-arena"},
+        {"name": "Artificial Analysis", "url": "https://artificialanalysis.ai/"},
+        {"name": "Stanford HELM", "url": "https://crfm.stanford.edu/helm/"},
+        {"name": "OpenRouter Leaderboard", "url": "https://openrouter.ai/models"}
+      ]
+    }
+  ],
+  "recentFreeTierChanges": [
+    {
+      "event": "Hugging Face Inference API free tier changed to focus on CPU inference with a strict $0.10/mo credit limit for free users.",
+      "changeType": "cut/changed",
+      "sourceUrl": "https://huggingface.co/docs/inference-providers/en/pricing"
+    },
+    {
+      "event": "OpenRouter updated free tier limits, now allowing up to 1,000 requests per day for free models if the user has purchased at least 10 credits.",
+      "changeType": "changed",
+      "sourceUrl": "https://openrouter.ai/docs/faq"
+    },
+    {
+      "event": "Groq adjusted free tier rate limits to 30 requests per minute, 1,000 requests per day, and 8,000 tokens per minute.",
+      "changeType": "changed",
+      "sourceUrl": "https://klymentiev.com/blog/groq-pricing"
+    },
+    {
+      "event": "Anthropic expanded its free tier to include Projects, Artifacts, and app connectors for non-paying users.",
+      "changeType": "expanded",
+      "sourceUrl": "https://www.zemith.com/en/contents/free-vs-paid-ai-tools-2026"
+    },
+    {
+      "event": "Gemini CLI launched a new free tier offering 1,000 requests per day, making AI coding more accessible.",
+      "changeType": "expanded",
+      "sourceUrl": "https://www.the-ai-corner.com/p/ai-coding-tools-complete-guide-2026"
+    },
+    {
+      "event": "Vercel tightened its pricing and free tier limits for serverless functions and bandwidth, marking another adjustment in its ongoing revisions.",
+      "changeType": "cut",
+      "sourceUrl": "https://www.birjob.com/blog/paas-comparison-railway-render-fly-vercel-2026"
+    },
+    {
+      "event": "Fly.io removed its permanent free tier and introduced new billing line items in early 2026, impacting small hobby projects.",
+      "changeType": "cut",
+      "sourceUrl": "https://www.birjob.com/blog/paas-comparison-railway-render-fly-vercel-2026"
+    },
+    {
+      "event": "GitHub expanded free access to Copilot and 1TB of cloud storage for verified students via the GitHub Student Developer Pack.",
+      "changeType": "expanded",
+      "sourceUrl": "https://education.github.com/pack"
+    },
+    {
+      "event": "Cloudflare expanded its Workers AI inference at the edge, offering one of the strongest free tiers for small AI projects in 2026.",
+      "changeType": "expanded",
+      "sourceUrl": "https://blog.blazingcdn.com/en-us/70-powerful-cto-optimization-tools-right-now"
+    },
+    {
+      "event": "Codeium (Windsurf) maintains a generous free tier with unlimited autocomplete and chat with codebase context for individual developers.",
+      "changeType": "expanded",
+      "sourceUrl": "https://builderai.tools/blog/best-free-ai-tools-for-developers"
+    }
+  ],
+  "offlineFirstLaunchData": [
+    {
+      "dataType": "Embedded Rate-Limit Matrix",
+      "reason": "Provides immediate visibility into top 20 free API quotas and rotation strategies without requiring an internet connection."
+    },
+    {
+      "dataType": "Local Fallback Tool List",
+      "reason": "A pre-loaded list of 50 essential open-source local AI tools (Ollama models, LM Studio configs) ensures the app is useful even if the user has no network access."
+    },
+    {
+      "dataType": "Pre-loaded Cursor Rules & System Prompts",
+      "reason": "Common stack templates (React, Python, Rust) are available instantly for copy-pasting, providing immediate value on first launch."
+    },
+    {
+      "dataType": "Cached Bookmark Metadata",
+      "reason": "Titles, descriptions, and URLs of the top 100 bookmarks are stored locally, allowing search and discovery before the first sync."
+    },
+    {
+      "dataType": "Local Daemon Setup Guides",
+      "reason": "Step-by-step offline instructions for installing and configuring local AI runtimes (Ollama, Jan, LM Studio) reduce first-time friction."
+    }
+  ]
+}
