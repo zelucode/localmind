@@ -2,7 +2,7 @@
 //! "Report a Problem" saves.
 //!
 //! Nothing here is sent anywhere. The file lives in the app's log directory, is capped (one
-//! rotation, about 2 MB in total), and every line is scrubbed of anything that looks like an API
+//! rotation, about 30 MB in total), and every line is scrubbed of anything that looks like an API
 //! key before it is written, so a log or diagnostics file can be shared without leaking secrets.
 
 use std::fs::{self, OpenOptions};
@@ -12,9 +12,10 @@ use std::sync::{Mutex, OnceLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub const LOG_FILE: &str = "app.log";
-const ROTATED_FILE: &str = "app.log.1";
+/// How many rotated files are kept (`app.log.1` is the newest, `app.log.5` the oldest).
+const KEPT_FILES: usize = 5;
 /// The file is rotated to `app.log.1` once it passes this size.
-const MAX_LOG_BYTES: u64 = 1024 * 1024;
+const MAX_LOG_BYTES: u64 = 5 * 1024 * 1024;
 const MAX_MESSAGE_CHARS: usize = 2000;
 /// Lines of log included in a diagnostics file.
 const DIAGNOSTIC_LINES: usize = 400;
@@ -194,21 +195,30 @@ fn looks_secret(token: &str) -> bool {
 
 // ---- File handling ----
 
-/// Append `line` to `dir/app.log`, rotating to `app.log.1` first when the file is over `max_bytes`.
+fn rotated_name(n: usize) -> String {
+    format!("{LOG_FILE}.{n}")
+}
+
+/// Append `line` to `dir/app.log`. When the file is over `max_bytes` it is shifted to `app.log.1`
+/// first (older ones move up, the oldest of `KEPT_FILES` is dropped).
 pub fn append(dir: &Path, line: &str, max_bytes: u64) -> std::io::Result<()> {
     let path = dir.join(LOG_FILE);
     if fs::metadata(&path).map(|m| m.len() >= max_bytes).unwrap_or(false) {
-        let _ = fs::remove_file(dir.join(ROTATED_FILE));
-        fs::rename(&path, dir.join(ROTATED_FILE))?;
+        let _ = fs::remove_file(dir.join(rotated_name(KEPT_FILES)));
+        for n in (1..KEPT_FILES).rev() {
+            let _ = fs::rename(dir.join(rotated_name(n)), dir.join(rotated_name(n + 1)));
+        }
+        fs::rename(&path, dir.join(rotated_name(1)))?;
     }
     let mut file = OpenOptions::new().create(true).append(true).open(path)?;
     writeln!(file, "{line}")
 }
 
-/// The last `max_lines` log lines (older rotated file first), oldest to newest.
+/// The last `max_lines` log lines (oldest rotated file first), oldest to newest.
 pub fn tail(dir: &Path, max_lines: usize) -> Vec<String> {
     let mut lines: Vec<String> = Vec::new();
-    for name in [ROTATED_FILE, LOG_FILE] {
+    let names = (1..=KEPT_FILES).rev().map(rotated_name).chain([LOG_FILE.to_string()]);
+    for name in names {
         if let Ok(text) = fs::read_to_string(dir.join(name)) {
             lines.extend(text.lines().map(str::to_string));
         }
@@ -372,18 +382,19 @@ mod tests {
     }
 
     #[test]
-    fn rotates_once_the_file_is_too_big_and_keeps_only_one_old_file() {
+    fn rotates_when_too_big_and_keeps_only_the_newest_old_files() {
         let dir = temp_dir("rotate");
-        for i in 0..30 {
+        for i in 0..100 {
             append(&dir, &format!("entry number {i:02}"), 100).unwrap();
         }
-        assert!(dir.join(ROTATED_FILE).exists());
+        assert!(dir.join(rotated_name(1)).exists());
         assert!(fs::metadata(dir.join(LOG_FILE)).unwrap().len() < 200);
         let all = tail(&dir, 1000);
-        assert_eq!(all.last().unwrap(), "entry number 29");
-        assert!(all.len() < 30, "older entries are dropped, not kept forever");
+        assert_eq!(all.last().unwrap(), "entry number 99");
+        assert!(all.len() < 100, "older entries are dropped, not kept forever");
         let files = fs::read_dir(&dir).unwrap().count();
-        assert_eq!(files, 2);
+        assert_eq!(files, KEPT_FILES + 1, "app.log plus the newest {KEPT_FILES} rotated files");
+        assert!(!dir.join(rotated_name(KEPT_FILES + 1)).exists());
         let _ = fs::remove_dir_all(&dir);
     }
 

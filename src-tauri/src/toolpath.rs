@@ -93,11 +93,26 @@ fn login_shell_path() -> Option<String> {
 }
 
 fn build_tool_path() -> Option<OsString> {
+    let started = Instant::now();
     let current: Vec<PathBuf> = std::env::var_os("PATH").map(|p| std::env::split_paths(&p).collect()).unwrap_or_default();
-    let from_shell: Vec<PathBuf> = login_shell_path().map(|p| std::env::split_paths(&p).collect()).unwrap_or_default();
+    let shell_path = login_shell_path();
+    let from_shell: Vec<PathBuf> = shell_path.as_deref().map(|p| std::env::split_paths(p).collect()).unwrap_or_default();
     let home = std::env::var("HOME").ok();
     let extras: Vec<PathBuf> = well_known_dirs(home.as_deref()).into_iter().filter(|d| d.is_dir()).collect();
-    std::env::join_paths(merge_paths(vec![current, from_shell, extras])).ok()
+    let (app_count, shell_count, extra_count) = (current.len(), from_shell.len(), extras.len());
+    let merged = merge_paths(vec![current, from_shell, extras]);
+    // Counts only, no folder names: the diagnostics file promises to contain no file paths.
+    let summary = format!(
+        "tool PATH built in {} ms: app PATH {app_count} folders, login shell {shell_count}, well-known {extra_count}, merged {}",
+        started.elapsed().as_millis(),
+        merged.len()
+    );
+    if shell_path.is_some() {
+        crate::applog::info("toolpath", &summary);
+    } else {
+        crate::applog::warn("toolpath", &format!("login shell PATH unavailable (failed, timed out or no markers); {summary}"));
+    }
+    std::env::join_paths(merged).ok()
 }
 
 /// The PATH to give setup commands, or `None` to leave the app's PATH alone (always on Windows).
