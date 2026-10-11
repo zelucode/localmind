@@ -6,6 +6,7 @@ mod keys;
 mod probe;
 mod secrets;
 mod setup;
+mod toolpath;
 
 /// Write panics to app.log before the default handler prints them.
 fn install_panic_log() {
@@ -26,6 +27,7 @@ pub fn run() {
                 applog::init(dir);
             }
             install_panic_log();
+            toolpath::warm_up();
             applog::info(
                 "backend",
                 &format!(

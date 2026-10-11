@@ -9,7 +9,7 @@ First public beta. Everything below is new compared with the internal 0.1.0 buil
 ### Added
 - **AI Tools:** catalog of free-tier AI tools with a filter rail, search, sorting, list or grid view, favorites, custom tools and Quick Query (open a tool with your prompt, prefilled where the site allows it).
 - **Ask box (Home):** send a prompt to one default engine from the catalog, or opt in to Compare across several.
-- **Setup:** detect and one-click install of Ollama, Gemini CLI and Qwen Code. Recipes are compiled into the app and you confirm the exact command before it runs.
+- **Setup:** detect and one-click install of Ollama, Gemini CLI and Qwen Code. Recipes are compiled into the app and you confirm the exact command before it runs. On macOS and Linux, tools installed with Homebrew, nvm or npm are found even when the app is opened from Finder or the Dock.
 - **Runtimes:** detect local AI servers (Ollama, OmniRoute, LM Studio, Jan) by probing localhost ports from the Rust side.
 - **Key Vault:** API keys encrypted with AES-256-GCM before they reach disk, master key in the OS credential store; test a key with Gemini, OpenRouter, Groq, OpenAI, DeepSeek, Mistral or Anthropic.
 - **Config Exporter:** config snippets for 8 targets (editors, agents, SDKs, cURL), with keys masked on screen.
