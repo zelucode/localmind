@@ -26,6 +26,8 @@ LocalMind (`/LOH-kul-MYND/`) is a cross-platform desktop app that catalogs free-
 6. [Tech stack](#tech-stack)
 7. [Current status & known limitations](#current-status--known-limitations)
 8. [Documentation](#documentation)
+9. [Contributing](#contributing)
+10. [License](#license)
 
 ---
 
@@ -245,3 +247,17 @@ Planned work is tracked in [docs/BACKLOG.md](docs/BACKLOG.md).
 - [Backlog & roadmap](docs/BACKLOG.md): completed and planned features
 - [Handoff](docs/HANDOFF.md): current state and next steps for whoever continues the work
 - [CLAUDE.md](CLAUDE.md): guidance for AI coding sessions
+
+---
+
+## Contributing
+
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) (commits need a DCO sign-off, `git commit -s`). Report security problems privately as described in [SECURITY.md](SECURITY.md).
+
+---
+
+## License
+
+LocalMind is open source under the [Apache License 2.0](LICENSE). Copyright 2026 Haroon Abbasi; see [NOTICE](NOTICE).
+
+The LocalMind name and logo are not covered by the code license. See [TRADEMARKS.md](TRADEMARKS.md) before shipping a fork.
