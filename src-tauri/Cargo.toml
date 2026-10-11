@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "LocalMind: your private AI hub, always nearby."
 authors = ["Haroon Abbasi"]
 edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/zelucode/localmind"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

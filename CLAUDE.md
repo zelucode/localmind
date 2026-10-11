@@ -6,6 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - Do NOT add a `Co-Authored-By` line (or any other Claude attribution) to git commit messages.
 
+## Licensing and editions
+
+- This is the **public, open-source** repo (Apache-2.0, see `LICENSE`, `NOTICE`, `TRADEMARKS.md`). A private repo, `zelucode/localmind-pro`, is a superset of this one that adds paid features under `pro/`.
+- Never add pro code, license-key checks, or references to private code here. Changes flow one way: this repo into localmind-pro, never back.
+- Contributions need a DCO sign-off (`CONTRIBUTING.md`).
+
 ## What this is
 
 LocalMind: a Tauri 2 desktop app (Rust shell + React 19 / Vite 6 / Tailwind 4 frontend) that catalogs free-tier AI tools, tracks local AI daemons (Ollama, OmniRoute, ...), and stores API keys. The frontend was generated in Google AI Studio and then wrapped in Tauri; the repo root is the Tauri project (frontend at `src/`, Rust at `src-tauri/`).
