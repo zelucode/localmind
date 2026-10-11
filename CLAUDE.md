@@ -11,6 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - This is the **public, open-source** repo (Apache-2.0, see `LICENSE`, `NOTICE`, `TRADEMARKS.md`). A private repo, `zelucode/localmind-pro`, is a superset of this one that adds paid features under `pro/`.
 - Never add pro code, license-key checks, or references to private code here. Changes flow one way: this repo into localmind-pro, never back.
 - Contributions need a DCO sign-off (`CONTRIBUTING.md`).
+- If a `pro/` folder exists, you are in localmind-pro, not this repo: read `pro/CLAUDE.md` first; its rules override the two above.
 
 ## What this is
 
