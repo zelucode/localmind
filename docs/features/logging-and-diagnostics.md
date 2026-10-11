@@ -17,7 +17,7 @@ One line per event: `2026-10-07T09:30:00Z WARN  [feed] message`. Frontend lines 
 
 ## Safety of the log
 - **Keys are scrubbed.** Every line passes `redact()` before it is written: words after `Bearer`, `key=`, `token=`, `x-api-key:`, `enc:v1:` are blanked, as are words with a known key prefix (`sk-`, `gsk_`, `AIza`, `ghp_`, `hf_` ...) and any 24+ character word mixing letters and digits. The diagnostics text is scrubbed again when it is built. Callers also avoid passing secrets in the first place.
-- **Bounded size.** `app.log` rotates to `app.log.1` at 1 MB, and only one old file is kept (about 2 MB maximum). Messages are cut at 2,000 characters and flattened to one line.
+- **Bounded size.** `app.log` rotates to `app.log.1` at 5 MB, and the newest 5 old files are kept (`app.log.1` to `app.log.5`, about 30 MB maximum). Messages are cut at 2,000 characters and flattened to one line.
 - **Bounded noise.** The frontend repeats of an identical message within 5 seconds are dropped, and at most 300 events per session are forwarded, so an error loop cannot fill the log.
 - **Never breaks the app.** A failed log write is ignored.
 - The diagnostics file holds the app version, OS, and the last 400 log lines. It contains no file paths, keys, tools, bookmarks or settings.

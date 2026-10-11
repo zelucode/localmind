@@ -212,6 +212,10 @@ fn build_process(cmd: &Cmd) -> Command {
     {
         let mut c = Command::new(cmd.program);
         c.args(cmd.args);
+        // Apps opened from Finder have a bare PATH; see toolpath.rs.
+        if let Some(path) = crate::toolpath::tool_path() {
+            c.env("PATH", path);
+        }
         c
     }
 }
