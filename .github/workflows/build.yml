@@ -1,0 +1,136 @@
+name: Build installers
+
+# Manual only for now: Actions tab > "Build installers" > Run workflow.
+# Builds Windows, macOS (universal: Apple Silicon + Intel) and Linux installers.
+# Installers are not code-signed yet (see docs/BUILD.md).
+on:
+  workflow_dispatch:
+    inputs:
+      run_tests:
+        description: Run lint, frontend tests and Rust tests before building
+        type: boolean
+        default: true
+      draft_release:
+        description: Also create a draft GitHub Release (tag v<version>) with the installers attached
+        type: boolean
+        default: false
+      prerelease:
+        description: Mark the draft release as a pre-release (only used with draft_release)
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  LINUX_DEPS: >-
+    libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf build-essential libssl-dev
+
+jobs:
+  verify:
+    name: Lint and tests
+    if: ${{ inputs.run_tests }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y $LINUX_DEPS
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm test:rust
+
+  build:
+    name: Build ${{ matrix.name }}
+    needs: verify
+    # Run when verify passed, or when it was skipped on purpose. Never run if it failed.
+    if: ${{ !cancelled() && (needs.verify.result == 'success' || needs.verify.result == 'skipped') }}
+    permissions:
+      contents: write # only used to create the draft release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+            # NSIS only: the WiX .msi cannot carry a pre-release version like 1.0.0-beta.1.
+            args: --bundles nsis
+            artifact: localmind-windows
+            paths: |
+              src-tauri/target/release/bundle/nsis/*.exe
+          - name: macOS
+            os: macos-latest
+            args: --target universal-apple-darwin --bundles dmg
+            rust_targets: aarch64-apple-darwin,x86_64-apple-darwin
+            artifact: localmind-macos
+            paths: |
+              src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
+          - name: Linux
+            os: ubuntu-22.04
+            args: --bundles deb,rpm,appimage
+            artifact: localmind-linux
+            paths: |
+              src-tauri/target/release/bundle/deb/*.deb
+              src-tauri/target/release/bundle/rpm/*.rpm
+              src-tauri/target/release/bundle/appimage/*.AppImage
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_targets }}
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y $LINUX_DEPS
+      - run: pnpm install --frozen-lockfile
+      - name: Build with Tauri
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tauriScript: pnpm tauri
+          args: ${{ matrix.args }}
+          # An empty tagName means "build only"; with draft_release the installers are attached to a draft release.
+          tagName: ${{ inputs.draft_release && 'v__VERSION__' || '' }}
+          releaseName: ${{ inputs.draft_release && 'LocalMind v__VERSION__' || '' }}
+          releaseBody: See CHANGELOG.md for what changed. Installers are not code-signed yet, so Windows SmartScreen and macOS Gatekeeper will warn.
+          releaseDraft: true
+          prerelease: ${{ inputs.prerelease }}
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.paths }}
+          if-no-files-found: error
+          retention-days: 14

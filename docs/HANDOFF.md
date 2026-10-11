@@ -1,4 +1,6 @@
-# Handoff: where we stopped (2026-10-06)
+# Handoff: where we stopped (2026-10-11)
+
+> **Update 2026-10-11:** the app is open source (Apache-2.0) and version `1.0.0-beta.1` is prepared: `CHANGELOG.md`, About > What's New (`src/data/releases.ts`), and a manual cross-platform build workflow (`.github/workflows/build.yml`, see [BUILD.md](BUILD.md)). `pnpm test` now runs **551 tests in 54 files**. The path to a stable `1.0.0` is backlog Task 24. A private paid edition lives in a separate repo (`localmind-pro`); never put pro code here (see `../CLAUDE.md`). The rest of this file is the 2026-10-06 state and still applies; Task 23 (Ask box, Setup) was built on 2026-10-07.
 
 Read this first in a new session, then [BACKLOG.md](BACKLOG.md) and `git log --oneline -15`. Everything below was true at the end of the last session. The last code commit was `dc30f5b` ("Document the add/quick-query/copy audit and close Task 9"). This file and `docs/data-collection/` were left uncommitted on purpose (see "Not committed").
 

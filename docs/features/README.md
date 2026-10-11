@@ -18,6 +18,7 @@ One page per feature: what it does for the user, how it works, where the code li
 | [Advisor](advisor.md) | The Free Tier Advisor (built, currently hidden) |
 | [Logging and Report a Problem](logging-and-diagnostics.md) | One app.log for frontend and backend, key redaction, the diagnostics file |
 | [Startup and window](startup-and-window.md) | Boot splash, loading screen, frameless window and window controls |
+| [About and What's New](about-and-releases.md) | The About dialog, the in-app release list and how it stays in step with the changelog and version files |
 | [Testing](testing.md) | Running and writing the Vitest and Rust tests |
 
 ## Conventions that apply to every feature
