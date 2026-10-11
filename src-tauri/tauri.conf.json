@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "LocalMind",
-  "version": "0.1.0",
+  "version": "1.0.0-beta.1",
   "identifier": "com.localmind.app",
   "build": {
     "beforeDevCommand": "pnpm dev",
@@ -29,6 +29,13 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "publisher": "Haroon Abbasi",
+    "copyright": "Copyright 2026 Haroon Abbasi",
+    "category": "DeveloperTool",
+    "shortDescription": "Your private AI hub, always nearby.",
+    "longDescription": "A desktop command center for free-tier AI tools, local AI servers and a local API key vault.",
+    "license": "Apache-2.0",
+    "licenseFile": "../LICENSE",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

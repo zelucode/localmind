@@ -230,7 +230,8 @@ No configuration is required to run. `.env.example` is a leftover from the AI St
 The frontend was generated in Google AI Studio and then wrapped in Tauri. The original Express backend was replaced by Rust commands (port probing, key verification, key encryption, Advisor). What is still open:
 
 - **Advisor** is built but hidden until we choose which providers it supports.
-- **Documentation** and **Report a Problem** in the Help menu are placeholders; **Check for Updates** doesn't exist yet.
+- **Documentation** in the Help menu is a placeholder and **Check for Updates** doesn't exist yet (new versions are installed by hand).
+- **Platforms:** tested on Windows. macOS and Linux installers are built by the release workflow but have not been run on real machines. Installers are not code-signed, so expect an OS warning on first launch (see [docs/BUILD.md](docs/BUILD.md)).
 - **Backups** contain API keys in plaintext (the encryption key is per device). Treat backup files as secrets.
 - Remaining features (config exporter output, rate-limit data, export/import, settings) still need an audit pass.
 - No system tray yet; tray icon assets are ready in the brand kit.
@@ -243,7 +244,8 @@ Planned work is tracked in [docs/BACKLOG.md](docs/BACKLOG.md).
 
 - [Architecture](docs/ARCHITECTURE.md): state, data model, storage, theming, Rust/Tauri notes
 - [Feature docs](docs/features/README.md): one page per feature (navigation, AI Tools, Bookmarks, Runtimes, Key Vault, Advisor, startup, testing)
-- [Build & release](docs/BUILD.md): producing installers, versioning, icons, signing
+- [Changelog](CHANGELOG.md): what changed in each version
+- [Build & release](docs/BUILD.md): producing installers (local and GitHub Actions), versioning, release checklist, icons, signing
 - [Backlog & roadmap](docs/BACKLOG.md): completed and planned features
 - [Handoff](docs/HANDOFF.md): current state and next steps for whoever continues the work
 - [CLAUDE.md](CLAUDE.md): guidance for AI coding sessions

@@ -1,6 +1,6 @@
 [package]
 name = "localmind"
-version = "0.1.0"
+version = "1.0.0-beta.1"
 description = "LocalMind: your private AI hub, always nearby."
 authors = ["Haroon Abbasi"]
 edition = "2021"

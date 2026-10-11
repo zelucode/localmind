@@ -48,7 +48,7 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 ### [ ] Task 6: Help menu: Documentation link
 - **Problem**: The Help menu has a disabled "Documentation" item; the repo has no remote or docs site URL yet.
 - **Solution**: Decide the docs location (hosted site, GitHub README, or bundled docs), then open it with the Tauri opener plugin.
-- **Status**: Blocked on a URL.
+- **Status**: Unblocked. The repo is public now (`https://github.com/zelucode/localmind`), so the item can open the README or `docs/` there with the opener plugin. Not wired up yet.
 
 ### [x] Task 7: Help menu: Report a Problem
 - **Problem**: Disabled "Report a Problem" item. Needs a diagnostic bundle design.
@@ -158,3 +158,37 @@ Everything useful from the four LLM replies is kept in [research/gap-finder-find
 - **Solution**: see [features/ask-box-and-setup-design.md](features/ask-box-and-setup-design.md): catalog-driven single-engine Ask box (Compare opt-in later), curated install-and-detect recipes in the desktop app, and a Developer sidebar group.
 - **Also covers**: replacing the Home scope banner with scope-aware filters and actions (section 4 of the design doc).
 - **Status**: Built 2026-10-07 (Ask box + Compare, scope filter and guide on AI Tools, Developer group, one-click setup), awaiting review. Open items are listed in the design doc under "What was built, and what is still open".
+
+## 🚀 Road to stable 1.0.0
+
+Current version: `1.0.0-beta.1` (2026-10-11). Windows used, macOS and Linux built by CI but never run. Everything that stands between the beta and `1.0.0` is listed here so it is not lost. Release steps are in [BUILD.md](BUILD.md).
+
+### [ ] Task 24: Ship 1.0.0 (stable) after the beta
+
+**Must (blocks 1.0.0)**
+- Task 19: the manual pass in the real window (downloads, file picker, `window.confirm` spots, Quick Query prefill for Perplexity and ChatGPT, a real key round-trip: add, test, restart, still there encrypted). Fix whatever fails.
+- Run each installer from the workflow on real macOS and Linux machines: credential store, downloads, window behavior, AppImage start-up. Drop or caveat any platform that fails.
+- Run `.github/workflows/build.yml` for the first time and fix what breaks (action versions, missing system libraries). It has only been YAML-checked. Write the fixes into `docs/BUILD.md`.
+- Run the Rust tests: they were not run during the beta prep (the repo drive had 4.4 GB free). The workflow's `verify` job runs them on Linux; also run `pnpm test:rust` on Windows with `CARGO_TARGET_DIR` on another drive.
+- Wire Help > Documentation (Task 6, unblocked: the repo is public) and give the in-app copy a last review.
+- Decide the backup file format and stored-data promise. A stable 1.0 implies old backups and localStorage data keep working, so add migration tests for them.
+
+**Should**
+- Task 8: updater (`tauri-plugin-updater`, signing keys, an update endpoint) so testers do not reinstall by hand.
+- Code signing: Windows certificate and Apple Developer ID with notarization, to remove the SmartScreen and Gatekeeper warnings. The workflow needs the certificates as repository secrets.
+- Task 18 (smoke tests against the real app), Task 20 (small gaps), Task 14 (decide the Advisor).
+- Look at About > What's New in the running app (it is only covered by unit tests so far).
+
+**Nice**
+- Publish the provider feed and set `DEFAULT_FEED_URL` (Task 21); re-check the unverified provider model IDs in `src/data/providers.ts`.
+- Vitest runs one jsdom per file and one test (the 8 s loading screen) can time out in the full run. Try `isolate: false` or `pool: 'vmThreads'`, or fix the slow test.
+- Decide whether the Windows installer should keep showing the Apache license page (`bundle.licenseFile` in `tauri.conf.json`); it satisfies shipping the license but adds a click.
+
+**Switch-over steps when releasing `1.0.0`**
+1. Bump the four version places, add the `CHANGELOG.md` and `src/data/releases.ts` entries (a test checks they agree).
+2. Windows can build `.msi` again once the version has no suffix: change the workflow's Windows `--bundles nsis` to `--bundles nsis,msi` (or remove it). A name like `1.0.0-beta.1` cannot be an `.msi`.
+3. Remove or update the "Known limits" notes that no longer apply, and update the README "Current status" section.
+4. Run **Build installers** with `draft_release` on and `prerelease` off; install on each OS; publish.
+5. In `localmind-pro`: `git fetch upstream && git merge upstream/main`.
+
+- **Status**: Planned.

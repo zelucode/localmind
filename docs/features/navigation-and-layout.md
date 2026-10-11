@@ -24,7 +24,7 @@ Logo and "LocalMind" (click for Home) · page title · search box (opens Ctrl+K)
 - Empty title-bar space drags the window; double-click toggles maximize.
 
 ### Help menu (the `?` icon)
-Keyboard Shortcuts · Welcome & Quick Start · About LocalMind · Documentation (disabled, "Soon") · Report a Problem (opens the diagnostics dialog, see [logging-and-diagnostics.md](logging-and-diagnostics.md)). Documentation is tracked in the backlog (Task 6).
+Keyboard Shortcuts · Welcome & Quick Start · About LocalMind (version and What's New, see [about-and-releases.md](about-and-releases.md)) · Documentation (disabled, "Soon") · Report a Problem (opens the diagnostics dialog, see [logging-and-diagnostics.md](logging-and-diagnostics.md)). Documentation is tracked in the backlog (Task 6).
 
 ### Keyboard shortcuts
 `Ctrl/Cmd+K` search palette · `1`–`8` jump to a page · `?` shortcut sheet · `/` focus the page's search · `k` Key Vault · `c` Config Exporter · `l` Rate-Limit Matrix · `b` add a bookmark · `t` toggle light/dark · `Esc` close the top dialog. Single-letter shortcuts are ignored while typing in a field.

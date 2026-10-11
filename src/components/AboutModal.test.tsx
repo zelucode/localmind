@@ -3,6 +3,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AboutModal } from './AboutModal';
 import pkg from '../../package.json';
+import { RELEASES } from '../data/releases';
+
+const currentRow = `v${pkg.version}`;
 
 describe('AboutModal', () => {
   it('renders nothing when closed', () => {
@@ -20,6 +23,25 @@ describe('AboutModal', () => {
     render(<AboutModal isOpen onClose={() => {}} />);
     expect(screen.getByText(/no account and no usage tracking/)).toBeInTheDocument();
     expect(screen.queryByText(/100% private|zero-cost|verified/i)).not.toBeInTheDocument();
+  });
+
+  it("lists the releases, with this version open and marked", () => {
+    render(<AboutModal isOpen onClose={() => {}} />);
+    expect(screen.getByText("What's New")).toBeInTheDocument();
+    const current = screen.getByRole('button', { name: new RegExp(currentRow.replace(/\W/g, '.')) });
+    expect(current).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('This version')).toBeInTheDocument();
+    expect(screen.getByText(RELEASES[0].highlights[0])).toBeInTheDocument();
+  });
+
+  it('collapses and expands a release', async () => {
+    render(<AboutModal isOpen onClose={() => {}} />);
+    const row = screen.getByRole('button', { name: new RegExp(currentRow.replace(/\W/g, '.')) });
+    await userEvent.click(row);
+    expect(row).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByText(RELEASES[0].highlights[0])).not.toBeInTheDocument();
+    await userEvent.click(row);
+    expect(screen.getByText(RELEASES[0].highlights[0])).toBeInTheDocument();
   });
 
   it('closes from the X and from the backdrop, not from a click inside', async () => {
