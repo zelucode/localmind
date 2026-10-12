@@ -1,0 +1,38 @@
+/* LocalMind brand colors (see src/theme.ts: Pastel Dusk, and the brand tokens for the light-mode variant). */
+:root {
+  --vp-c-brand-1: #a8497f;
+  --vp-c-brand-2: #b95a8e;
+  --vp-c-brand-3: #a8497f;
+  --vp-c-brand-soft: rgba(224, 168, 197, 0.2);
+  --vp-button-brand-bg: #a8497f;
+  --vp-button-brand-hover-bg: #b95a8e;
+  --vp-button-brand-active-bg: #8f3c6b;
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(120deg, #a8497f 30%, #c97bab);
+}
+
+.dark {
+  --vp-c-brand-1: #e0a8c5;
+  --vp-c-brand-2: #d493b6;
+  --vp-c-brand-3: #e0a8c5;
+  --vp-c-brand-soft: rgba(224, 168, 197, 0.16);
+  --vp-button-brand-bg: #e0a8c5;
+  --vp-button-brand-text: #1e1e2e;
+  --vp-button-brand-hover-bg: #ebbcd3;
+  --vp-button-brand-hover-text: #1e1e2e;
+  --vp-button-brand-active-bg: #d493b6;
+  --vp-button-brand-active-text: #1e1e2e;
+  --vp-home-hero-name-background: linear-gradient(120deg, #e0a8c5 30%, #f3d2e3);
+  --vp-c-bg: #1e1e2e;
+  --vp-c-bg-alt: #181826;
+  --vp-c-bg-elv: #282838;
+  --vp-c-bg-soft: #282838;
+}
+
+.VPImage.image-src { max-height: 280px; }
+
+/* Screenshots */
+.vp-doc img.screenshot {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+}

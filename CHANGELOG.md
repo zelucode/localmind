@@ -2,6 +2,14 @@
 
 All notable changes to LocalMind are listed here, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow [Semantic Versioning](https://semver.org/). The same highlights are shown in the app under About > What's New (`src/data/releases.ts`).
 
+## [Unreleased]
+
+### Added
+- **Documentation site:** a user guide and contributor docs, published with VitePress on GitHub Pages. Help > Documentation now opens it.
+
+### Changed
+- The app identifier is now `com.zelucode.localmind`, so the app data folder moves with it. Data saved by a build that used `com.localmind.app` is not picked up automatically; use Settings > Data & Backups to carry it over.
+
 ## [1.0.0-beta.1] - 2026-10-11
 
 First public beta. Everything below is new compared with the internal 0.1.0 build.
@@ -27,6 +35,5 @@ First public beta. Everything below is new compared with the internal 0.1.0 buil
 - Installers are not code-signed, so Windows SmartScreen and macOS Gatekeeper will warn.
 - No in-app update check yet; install new versions by hand.
 - The Advisor is built but hidden until its provider choice is made.
-- Help > Documentation is not wired up yet.
 
 [1.0.0-beta.1]: https://github.com/zelucode/localmind/releases/tag/v1.0.0-beta.1

@@ -2,7 +2,7 @@ name: Build installers
 
 # Manual only for now: Actions tab > "Build installers" > Run workflow.
 # Builds Windows, macOS (universal: Apple Silicon + Intel) and Linux installers.
-# Installers are not code-signed yet (see docs/BUILD.md).
+# Installers are not code-signed yet (see docs/development/building.md).
 on:
   workflow_dispatch:
     inputs:

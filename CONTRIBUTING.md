@@ -9,17 +9,17 @@ Thanks for helping. Bug reports, fixes, provider data updates, and docs improvem
 
 ## Development
 
-Setup, commands, and project structure are in the [README](README.md#getting-started) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Before opening a pull request, run:
+Setup, commands, the project layout and the architecture are in the [development docs](https://zelucode.github.io/localmind/development/). Before opening a pull request, run:
 
 ```sh
 pnpm test:all   # tsc, Vitest, and Rust unit tests
 ```
 
-If you edited `src/data/providers.ts`, also run `pnpm feed:build`.
+If you edited `src/data/providers.ts`, also run `pnpm feed:build`. If you changed something a user would notice, update the matching page in `docs/guide/` and add a line under *Unreleased* in `CHANGELOG.md`. Preview the docs with `pnpm docs:dev`.
 
 ## Rules worth knowing
 
-- Never log, display, or store a secret in plain text (see `docs/features/logging-and-diagnostics.md`).
+- Never log, display, or store a secret in plain text (see [Logging and diagnostics](https://zelucode.github.io/localmind/development/logging)).
 - Outside Tauri, backend calls must fail visibly; never fake a result.
 - Don't add a way to run a command that comes from the frontend or the remote feed.
 - External links go through `openExternal`.
