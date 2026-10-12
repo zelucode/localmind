@@ -146,10 +146,10 @@ Tracked here so nothing from the restructure (sidebar pages, title bar, Help men
 - **Status**: Provider data done; rest planned.
 
 ### [ ] Task 22: New sections suggested by the gap-finder
-Everything useful from the four LLM replies is kept in [research/gap-finder-findings.md](research/gap-finder-findings.md): section ideas with entries, proposed categories, offline-data ideas and free-tier change leads. The raw reply files are no longer needed. The prompt itself listed most of the ideas, so treat that page as a to-do list of areas, not as verified data.
+Ideas gathered from four LLM replies: section ideas with entries, proposed categories, offline-data ideas and free-tier change leads. Treat them as a to-do list of areas, not as verified data.
 - **Cheapest first step**: most sections are bookmark categories, not pages. Add the categories (compute, datasets, benchmarks, MCP, prompts and rules, learning, backend tiers, voice) and fill them with prompt B runs.
 - **Needs a decision**: whether a separate "free dev services" page (hosting, DB, auth, CI, vector DB) with quota fields is worth building, given Task 21 (these quotas change often).
-- **Check first** (provider data the app shows today): Groq retiring `llama-3.3-70b-versatile`, Cerebras and OpenRouter free limits, Hugging Face Inference credit, Cloudflare Workers AI model changes. See section 4 of the findings page.
+- **Check first** (provider data the app shows today): Groq retiring `llama-3.3-70b-versatile`, Cerebras and OpenRouter free limits, Hugging Face Inference credit, Cloudflare Workers AI model changes.
 - **Not done**: prompts A, B and C have not been run yet.
 - **Status**: Planned.
 

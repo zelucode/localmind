@@ -121,7 +121,7 @@ Applied in the app:
 - Favicon, touch icon and web manifest: [public/](public/), linked from [index.html](index.html)
 - In-app mark: [BrandMark.tsx](src/components/BrandMark.tsx), used in the sidebar, header and loading screen
 - Boot splash in `index.html`, recolored to the brand palette
-- Cargo and `metadata.json` descriptions
+- Cargo description
 
 Not yet applied: tray icons (`tray/`; the app has no tray yet) and the wordmark/stacked logos (no in-app spot uses them yet).
 
@@ -247,8 +247,6 @@ Planned work is tracked in [docs/BACKLOG.md](docs/BACKLOG.md).
 - [Changelog](CHANGELOG.md): what changed in each version
 - [Build & release](docs/BUILD.md): producing installers (local and GitHub Actions), versioning, release checklist, icons, signing
 - [Backlog & roadmap](docs/BACKLOG.md): completed and planned features
-- [Handoff](docs/HANDOFF.md): current state and next steps for whoever continues the work
-- [CLAUDE.md](CLAUDE.md): guidance for AI coding sessions
 
 ---
 
