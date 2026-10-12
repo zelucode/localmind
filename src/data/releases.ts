@@ -27,7 +27,7 @@ export const RELEASES: Release[] = [
       'Backups: workspace backup and restore, optionally protected with a passphrase (Argon2id + AES-256-GCM).',
       'Themes: 10 presets plus your own custom themes and accent color.',
       'Report a Problem: saves a diagnostics file with keys redacted. Nothing is sent automatically.',
-      'Beta notes: tested on Windows. macOS and Linux builds exist but have not been tested yet, and installers are not code-signed.',
+      'Beta notes: run on Windows and macOS, though not every feature has been checked on each. Linux builds exist but have not been tested yet, and installers are not code-signed.',
     ],
   },
 ];

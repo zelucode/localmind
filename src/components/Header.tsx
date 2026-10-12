@@ -13,6 +13,8 @@ import {
   Bug,
 } from 'lucide-react';
 import { ActiveView } from '../types';
+import { DOCS_URL } from '../config/links';
+import { openExternal } from '../lib/tauri';
 import { TitleBarDragRegion, WindowControls } from './WindowControls';
 
 interface HeaderProps {
@@ -137,7 +139,11 @@ const HelpMenu: React.FC<{
           />
           <div className="h-px my-1" style={{ backgroundColor: 'var(--theme-border)' }} />
           <MenuItem icon={<Info className="w-3.5 h-3.5" />} label="About LocalMind" onSelect={pick(onOpenAbout)} />
-          <MenuItem icon={<BookOpen className="w-3.5 h-3.5" />} label="Documentation" hint="Soon" disabled />
+          <MenuItem
+            icon={<BookOpen className="w-3.5 h-3.5" />}
+            label="Documentation"
+            onSelect={pick(() => void openExternal(DOCS_URL))}
+          />
           <div className="h-px my-1" style={{ backgroundColor: 'var(--theme-border)' }} />
           <MenuItem icon={<Bug className="w-3.5 h-3.5" />} label="Report a Problem" onSelect={pick(onOpenReportProblem)} />
         </div>

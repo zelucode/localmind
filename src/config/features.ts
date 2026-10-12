@@ -6,7 +6,7 @@
 export const FEATURES = {
   /**
    * The Free Tier Advisor (floating button, "A" shortcut, Ctrl+K action, Ask box "Which Tool?").
-   * Hidden until we decide which providers it should run on (see docs/BACKLOG.md, Task 14).
+   * Hidden until we decide which providers it should run on.
    */
   advisor: false,
 } as const;

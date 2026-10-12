@@ -17,6 +17,9 @@
     "test:watch": "vitest",
     "test:rust": "cargo test --manifest-path src-tauri/Cargo.toml",
     "test:all": "pnpm lint && pnpm test && pnpm test:rust",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
     "feed:build": "node --experimental-strip-types scripts/build-feed.mjs",
     "tauri": "tauri"
   },
@@ -42,6 +45,7 @@
     "tailwindcss": "^4.1.14",
     "typescript": "~5.8.2",
     "vite": "^6.2.3",
+    "vitepress": "^1.6.4",
     "vitest": "^5.0.3"
   }
 }

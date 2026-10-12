@@ -2,7 +2,7 @@
 
 The LocalMind source code is licensed under the [Apache License 2.0](LICENSE). That license covers the code. It does **not** grant rights to the LocalMind name, logo, icon, or other brand assets (the "Marks"). Section 6 of the Apache License says the same.
 
-The Marks belong to Haroon Abbasi.
+The Marks belong to Zelucode.
 
 ## What you can do without asking
 
@@ -22,4 +22,4 @@ Give your fork a different name and icon, and update the product name and identi
 
 ## Questions
 
-Open an issue on [GitHub](https://github.com/zelucode/localmind/issues) to ask for permission or clarification.
+Open an issue on [GitHub](https://github.com/zelucode/localmind/issues) or write to [hello@zelucode.com](mailto:hello@zelucode.com) to ask for permission or clarification.

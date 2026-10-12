@@ -91,7 +91,7 @@ const getDomainFromUrl = (urlStr: string) => {
 
 const formatStars = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n));
 
-/** Letter avatar with a stable hue per domain. Real favicons are tracked in the backlog (they need local caching to stay private). */
+/** Letter avatar with a stable hue per domain. Real favicons would need local caching to stay private. */
 const Avatar: React.FC<{ title: string; url: string; size?: number }> = ({ title, url, size = 32 }) => {
   const domain = getDomainFromUrl(url);
   let hash = 0;

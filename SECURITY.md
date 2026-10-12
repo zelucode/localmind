@@ -6,7 +6,7 @@ LocalMind stores API keys on your machine, so security reports are taken serious
 
 Please **do not** open a public issue for security problems.
 
-Report privately through GitHub: go to the [Security tab](https://github.com/zelucode/localmind/security) of this repository and click **Report a vulnerability**. Include:
+Report privately through GitHub, or by email to [hello@zelucode.com](mailto:hello@zelucode.com) if you cannot use GitHub: go to the [Security tab](https://github.com/zelucode/localmind/security) of this repository and click **Report a vulnerability**. Include:
 
 - what is affected (version, OS),
 - steps to reproduce,
