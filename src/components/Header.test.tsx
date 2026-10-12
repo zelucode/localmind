@@ -2,7 +2,14 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Header } from './Header';
+import { DOCS_URL } from '../config/links';
+import { openExternal } from '../lib/tauri';
 import { ActiveView } from '../types';
+
+vi.mock('../lib/tauri', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../lib/tauri')>()),
+  openExternal: vi.fn(),
+}));
 
 function setup(activeView: ActiveView = 'home', overrides: Partial<React.ComponentProps<typeof Header>> = {}) {
   const props = {
@@ -86,14 +93,22 @@ describe('Header controls', () => {
 describe('Help menu', () => {
   const open = async () => userEvent.click(screen.getByRole('button', { name: 'Help' }));
 
-  it('lists the available items and marks unfinished ones as disabled', async () => {
+  it('lists the available items', async () => {
     setup();
     await open();
     expect(screen.getByRole('menuitem', { name: /Keyboard Shortcuts/ })).toBeEnabled();
     expect(screen.getByRole('menuitem', { name: /Welcome & Quick Start/ })).toBeEnabled();
     expect(screen.getByRole('menuitem', { name: /About LocalMind/ })).toBeEnabled();
-    expect(screen.getByRole('menuitem', { name: /Documentation/ })).toBeDisabled();
+    expect(screen.getByRole('menuitem', { name: /Documentation/ })).toBeEnabled();
     expect(screen.getByRole('menuitem', { name: /Report a Problem/ })).toBeEnabled();
+  });
+
+  it('"Documentation" opens the docs site in the browser and closes the menu', async () => {
+    setup();
+    await open();
+    await userEvent.click(screen.getByRole('menuitem', { name: /Documentation/ }));
+    expect(openExternal).toHaveBeenCalledWith(DOCS_URL);
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
   });
 
   it.each([
