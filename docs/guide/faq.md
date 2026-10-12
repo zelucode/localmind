@@ -26,7 +26,7 @@ Providers change their plans often, and the data is reviewed by hand. Each rate-
 
 ## Which systems does it support?
 
-Windows, macOS and Linux installers are built. It has been tested on Windows. The macOS and Linux builds have not been run on real machines yet, so those are the least proven.
+Windows, macOS and Linux installers are built. The app has been run on Windows and macOS, though not every feature has been checked on each. The Linux builds have not been run on a real machine yet, so those are the least proven.
 
 ## Why does my system warn me about the installer?
 
@@ -47,6 +47,10 @@ Use [backup and restore](/guide/settings-and-backups#backup). Protect the backup
 ## How do I contribute?
 
 Bug reports, fixes, provider-data updates and documentation improvements are all welcome. Start with the [development overview](/development/).
+
+## How do I contact the maintainers?
+
+Open an [issue](https://github.com/zelucode/localmind/issues) for bugs and ideas, or write to [hello@zelucode.com](mailto:hello@zelucode.com). Security problems should go through [private reporting](/guide/privacy-and-security#reporting-a-security-problem).
 
 ## Can I use the name or logo for my own fork?
 

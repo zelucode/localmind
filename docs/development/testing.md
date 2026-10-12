@@ -47,4 +47,4 @@ Unit tests live in each module under `#[cfg(test)]`. Pure logic (validation, req
 ## What is not covered
 
 - The real boundary between the webview and Rust (command names, argument shapes and permissions) is covered only by mocks. A smoke suite against the running app would close that gap.
-- Anything that needs a real machine: file downloads and the file picker in the packaged window, the OS credential store on macOS and Linux, real installs in Setup, and how long the backup key derivation takes on a slow computer.
+- Anything that needs a real machine. The packaged app has been run by hand on Windows and macOS, including Setup, but not every feature on each. Linux has not been run. Still worth checking on each system: file downloads and the file picker in the packaged window, the OS credential store, and how long the backup key derivation takes on a slow computer.

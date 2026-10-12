@@ -31,7 +31,7 @@ First public beta. Everything below is new compared with the internal 0.1.0 buil
 - **Open source:** Apache-2.0 license, trademark policy, security policy and contributing guide.
 
 ### Known limits
-- Tested on Windows only. macOS and Linux bundles are built by the release workflow but have not been run on real machines (credential-store backends, file downloads and window behavior are unchecked there).
+- Run on Windows and macOS, including Setup, though not every feature has been checked on each. Linux bundles are built by the release workflow but have not been run on a real machine.
 - Installers are not code-signed, so Windows SmartScreen and macOS Gatekeeper will warn.
 - No in-app update check yet; install new versions by hand.
 - The Advisor is built but hidden until its provider choice is made.

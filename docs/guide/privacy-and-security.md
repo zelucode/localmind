@@ -54,4 +54,4 @@ LocalMind writes a log file to help with problems. Every line is scrubbed before
 
 ## Reporting a security problem
 
-Please report vulnerabilities privately, not in a public issue. See the [security policy](https://github.com/zelucode/localmind/blob/main/SECURITY.md).
+Please report vulnerabilities privately, not in a public issue. See the [security policy](https://github.com/zelucode/localmind/blob/main/SECURITY.md), or write to [hello@zelucode.com](mailto:hello@zelucode.com).

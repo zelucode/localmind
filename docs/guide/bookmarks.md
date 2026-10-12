@@ -2,6 +2,8 @@
 
 A library of 270 free web tools: developer utilities, design, converters, productivity, privacy and security, media, learning, and free AI helpers. You can add your own.
 
+![The Bookmarks page in grid view](/screenshots/bookmarks-grid.png){.screenshot}
+
 ## Finding a tool
 
 - **Category rail** on the left shows each category with a count. Empty categories are hidden.

@@ -26,5 +26,5 @@ Anyone who wants to use AI without paying for it, from someone who just wants to
 - Read [Privacy and security](/guide/privacy-and-security) to see exactly what is stored and what leaves your computer.
 
 ::: tip Status
-LocalMind is in beta. It has been tested on Windows. The macOS and Linux installers are built automatically but have not been run on real machines yet, so expect rough edges there and please [report them](/guide/troubleshooting#report-a-problem).
+LocalMind is in beta. It has been run on Windows and macOS, including the Setup page, though not every feature has been checked on each. The Linux installers are built automatically but have not been run on a real machine yet. Expect rough edges and please [report them](/guide/troubleshooting#report-a-problem).
 :::

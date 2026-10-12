@@ -32,7 +32,7 @@ LocalMind keeps its data in the app's data folder, not in the installer. A norma
 
 ## Setup says a tool is not installed right after I installed it
 
-A running app does not always see changes to the system's program search path. Restart LocalMind. On macOS and Linux, LocalMind asks your login shell for its search path, so tools installed with Homebrew, nvm or npm should be found, but this is not yet confirmed on every setup. Please report it if not.
+A running app does not always see changes to the system's program search path. Restart LocalMind. On macOS and Linux, LocalMind asks your login shell for its search path, so tools installed with Homebrew, nvm or npm should be found. If one is not, please report it.
 
 ## Copy buttons do nothing
 

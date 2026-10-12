@@ -11,7 +11,7 @@ LocalMind (`/LOH-kul-MYND/`) is a free, open-source desktop app that catalogs fr
 | | |
 |---|---|
 | **Version** | 1.0.0-beta.1 |
-| **Platforms** | Windows, macOS, Linux (tested on Windows; see [status](#status)) |
+| **Platforms** | Windows, macOS, Linux (checked on Windows and macOS; see [status](#status)) |
 | **Built with** | Tauri 2 (Rust) · React 19 · TypeScript · Vite · Tailwind CSS 4 |
 | **License** | [Apache 2.0](LICENSE) |
 
@@ -60,7 +60,7 @@ Run `pnpm test:all` (type check, frontend tests and Rust tests) before opening a
 
 LocalMind is in beta.
 
-- **Platforms:** tested on Windows. macOS and Linux installers are built by the release workflow but have not been run on real machines.
+- **Platforms:** the app, including Setup, has been run on Windows and macOS, though not every feature has been checked on each. The Linux installers are built by the release workflow but have not been run on a real machine.
 - **Signing:** installers are not code-signed.
 - **Updates:** there is no automatic update check. Install new versions by hand.
 - **Advisor:** a free-tier advisor is built and tested, but hidden until its provider choice is settled.
@@ -71,10 +71,10 @@ Your tools, bookmarks, settings and keys are stored on your computer only. Local
 
 ## Contributing
 
-Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md); commits need a DCO sign-off (`git commit -s`). Report security problems privately as described in [SECURITY.md](SECURITY.md).
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md); commits need a DCO sign-off (`git commit -s`). Report security problems privately as described in [SECURITY.md](SECURITY.md). For anything else, write to [hello@zelucode.com](mailto:hello@zelucode.com).
 
 ## License
 
-LocalMind is open source under the [Apache License 2.0](LICENSE). Copyright 2026 Haroon Abbasi; see [NOTICE](NOTICE).
+LocalMind is open source under the [Apache License 2.0](LICENSE). Copyright 2026 Zelucode; see [NOTICE](NOTICE).
 
 The LocalMind name and logo are not covered by the code license. See [TRADEMARKS.md](TRADEMARKS.md) before shipping a fork.

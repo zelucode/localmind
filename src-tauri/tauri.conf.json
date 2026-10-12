@@ -29,8 +29,8 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "publisher": "Haroon Abbasi",
-    "copyright": "Copyright 2026 Haroon Abbasi",
+    "publisher": "Zelucode",
+    "copyright": "Copyright 2026 Zelucode",
     "category": "DeveloperTool",
     "shortDescription": "Your private AI hub, always nearby.",
     "longDescription": "A desktop command center for free-tier AI tools, local AI servers and a local API key vault.",

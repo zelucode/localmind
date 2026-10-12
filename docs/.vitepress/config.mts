@@ -118,7 +118,7 @@ export default defineConfig({
 
     footer: {
       message: 'Released under the Apache License 2.0. The LocalMind name and logo are trademarks; see the trademark policy.',
-      copyright: 'Copyright 2026 Haroon Abbasi',
+      copyright: 'Copyright 2026 Zelucode',
     },
   },
 });

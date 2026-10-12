@@ -38,5 +38,5 @@ If you would rather run the command yourself, use the **Copy** button next to it
 - On macOS and Linux, apps opened from the Dock or Finder see a very short program search path. LocalMind looks up the one your login shell uses, so tools installed with Homebrew, nvm or npm are found.
 
 ::: warning Beta
-Automated tests cover the recipes and the detection, but they do not run real installs, so the install step is the least proven part of the app. On macOS and Linux the program-search-path handling has not been confirmed end to end either. If an install or detection fails, please [report it](/guide/troubleshooting#report-a-problem).
+Setup has been run on Windows and macOS. It has not been run on Linux, and each tool's install still depends on your system, for example on `winget`, Homebrew or Node.js being present. If an install or detection fails, please [report it](/guide/troubleshooting#report-a-problem).
 :::

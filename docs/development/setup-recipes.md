@@ -56,6 +56,6 @@ Apps opened from the Dock or Finder inherit a bare `PATH` without Homebrew, nvm 
 
 ## Not verified yet
 
-Tests do not run real installs, because that would install software. Try **Install** for one tool in `pnpm tauri dev` before relying on it, and check that the Windows `cmd /C` path finds `npm` and `winget`.
+Automated tests do not run real installs, because that would install software. Setup has been run by hand on Windows and macOS. It has not been run on Linux, so a Linux contributor checking detection and a real install would help.
 
-On macOS and Linux the `PATH` fix is covered by unit tests but has not been confirmed end to end. On a Mac, install the `.dmg` build, open it from Finder (not from a terminal, which would hide the problem), and check that Ollama, Node and Homebrew show as installed when they are.
+When you test the macOS path yourself, install the `.dmg` build and open it from Finder (not from a terminal, which would hide the `PATH` problem), then check that Ollama, Node and Homebrew show as installed when they are.
