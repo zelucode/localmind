@@ -6,7 +6,7 @@ LocalMind writes one log file, `app.log`, with events from both the interface (R
 There is no public issue tracker linked yet (the repo has no remote), so the dialog says "attach it when you report the problem" and does not name a place.
 
 ## Where the log is
-The app's log directory, from Tauri's `app_log_dir()` (on Windows `%LOCALAPPDATA%\com.localmind.app\logs`). The dialog's **Open log folder** button shows `app.log` in the file manager.
+The app's log directory, from Tauri's `app_log_dir()` (on Windows `%LOCALAPPDATA%\com.zelucode.localmind\logs`). The dialog's **Open log folder** button shows `app.log` in the file manager.
 
 One line per event: `2026-10-07T09:30:00Z WARN  [feed] message`. Frontend lines have a `ui:` source, for example `[ui:window]`.
 

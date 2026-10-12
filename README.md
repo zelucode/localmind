@@ -8,7 +8,7 @@ LocalMind (`/LOH-kul-MYND/`) is a cross-platform desktop app that catalogs free-
 |---|---|
 | **Version** | 0.1.0 (early development) |
 | **Platforms** | Windows, macOS (Tauri bundles for Linux as well) |
-| **App identifier** | `com.localmind.app` |
+| **App identifier** | `com.zelucode.localmind` |
 | **Stack** | Tauri 2 · React 19 · TypeScript · Vite 6 · Tailwind CSS 4 |
 | **Data** | Local only — everything is stored on-device; no account, no telemetry |
 
